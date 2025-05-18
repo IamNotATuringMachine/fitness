@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import ThemeSwitcher from '../components/ui/ThemeSwitcher';
 import ViewCustomizer from '../components/ui/ViewCustomizer';
@@ -28,6 +29,32 @@ const SettingsHeader = styled.h1`
 
 const SettingSection = styled(Card)`
   height: fit-content;
+  padding: ${props => props.theme.spacing.lg};
+`;
+
+const SectionHeader = styled.h2`
+  font-size: ${props => props.theme.typography.fontSizes.lg};
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
+const SectionDescription = styled.p`
+  color: ${props => props.theme.colors.textLight};
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
+const AdminLink = styled(Link)`
+  display: inline-block;
+  margin-top: ${props => props.theme.spacing.sm};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  background-color: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.white};
+  text-decoration: none;
+  border-radius: ${props => props.theme.borderRadius.default};
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.primaryDark};
+  }
 `;
 
 const Settings = () => {
@@ -44,6 +71,14 @@ const Settings = () => {
         
         <SettingSection>
           <ViewCustomizer />
+        </SettingSection>
+        
+        <SettingSection>
+          <SectionHeader>Administration</SectionHeader>
+          <SectionDescription>
+            Zugriff auf administrative Funktionen für Systemverwalter.
+          </SectionDescription>
+          <AdminLink to="/feedback-management">Feedback-Management</AdminLink>
         </SettingSection>
       </SettingsContainer>
     </div>

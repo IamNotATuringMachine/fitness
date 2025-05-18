@@ -212,6 +212,11 @@ const Sidebar = () => {
               {collapsed ? '🍎' : <span>🍎 Ernährung</span>}
             </NavLink>
           </NavItem>
+          <NavItem>
+            <NavLink to="/gamification" active={isActive('/gamification')} collapsed={collapsed}>
+              {collapsed ? '🏆' : <span>🏆 Erfolge & Belohnungen</span>}
+            </NavLink>
+          </NavItem>
         </NavSection>
         
         <NavSection>
@@ -228,6 +233,16 @@ const Sidebar = () => {
           <NavItem>
             <NavLink to="/settings" active={isActive('/settings')} collapsed={collapsed}>
               {collapsed ? '⚙️' : <span>⚙️ Einstellungen</span>}
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/data-import-export" active={isActive('/data-import-export')} collapsed={collapsed}>
+              {collapsed ? '📤' : <span>📤 Datenimport/-export</span>}
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/feedback" active={isActive('/feedback')} collapsed={collapsed}>
+              {collapsed ? '💬' : <span>💬 Feedback geben</span>}
             </NavLink>
           </NavItem>
         </NavSection>

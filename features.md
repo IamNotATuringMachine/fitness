@@ -127,13 +127,13 @@ Funktionen, die über die reine Trainingsplanung hinausgehen oder die Plattform 
 * **Tracking (Basis)**: ✓
     * Optionales Kalorien- und Nährstofftracking. ✓
 
-### 5.2. Gamification
-* **Motivations-Elemente**:
-    * Einführung von spielerischen Elementen wie Abzeichen, Punktesystemen oder Herausforderungen zur Steigerung der Motivation.
+### 5.2. Gamification ✓
+* **Motivations-Elemente**: ✓
+    * Einführung von spielerischen Elementen wie Abzeichen, Punktesystemen oder Herausforderungen zur Steigerung der Motivation. ✓
 
-### 5.3. Import/Export von Daten (erweitert)
-* **Datenportabilität**:
-    * Möglichkeit, Trainingsdaten oder Pläne in gängigen Formaten (z.B. CSV, JSON) zu importieren oder zu exportieren für Nutzung in anderen Tools oder zur Archivierung.
+### 5.3. Import/Export von Daten (erweitert) ✓
+* **Datenportabilität**: ✓
+    * Möglichkeit, Trainingsdaten oder Pläne in gängigen Formaten (z.B. CSV, JSON) zu importieren oder zu exportieren für Nutzung in anderen Tools oder zur Archivierung. ✓
 
 ## Übergreifende Aspekte (Kontinuierlich zu berücksichtigen)
 
@@ -147,5 +147,5 @@ Diese Punkte sind während des gesamten Entwicklungszyklus relevant.
     * Schnelle Ladezeiten und eine flüssige Bedienung sind essenziell für eine gute User Experience.
 * **Monetarisierung (falls geplant)**:
     * Frühzeitige Überlegungen, ob und wie die App monetarisiert werden soll (z.B. Freemium-Modell, Abonnements, einmaliger Kauf für bestimmte Features).
-* **Nutzerfeedback**:
-    * Kontinuierliches Sammeln und Auswerten von Nutzerfeedback zur Priorisierung und Verbesserung von Funktionen. Der MVP-Ansatz sollte iterativ weitergeführt werden.
+* **Nutzerfeedback**: ✓
+    * Kontinuierliches Sammeln und Auswerten von Nutzerfeedback zur Priorisierung und Verbesserung von Funktionen. Der MVP-Ansatz sollte iterativ weitergeführt werden. ✓

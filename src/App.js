@@ -17,6 +17,10 @@ import PeriodizationTools from './pages/PeriodizationTools';
 import AITrainingAssistant from './pages/AITrainingAssistant';
 import Settings from './pages/Settings';
 import Nutrition from './pages/Nutrition';
+import Gamification from './pages/Gamification';
+import DataImportExport from './pages/DataImportExport';
+import Feedback from './pages/Feedback';
+import FeedbackManagement from './pages/FeedbackManagement';
 import { WorkoutProvider } from './context/WorkoutContext';
 import ThemeProvider from './theme/ThemeProvider';
 
@@ -69,6 +73,10 @@ function App() {
                   <Route path="/periodization" element={<PeriodizationTools />} />
                   <Route path="/ai-assistant" element={<AITrainingAssistant />} />
                   <Route path="/nutrition" element={<Nutrition />} />
+                  <Route path="/gamification" element={<Gamification />} />
+                  <Route path="/data-import-export" element={<DataImportExport />} />
+                  <Route path="/feedback" element={<Feedback />} />
+                  <Route path="/feedback-management" element={<FeedbackManagement />} />
                   <Route path="/settings" element={<Settings />} />
                 </Routes>
               </ContentContainer>
