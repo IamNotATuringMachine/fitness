@@ -6,54 +6,56 @@ import { useWorkout } from '../context/WorkoutContext';
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  padding: ${props => props.theme.spacing.lg};
 `;
 
 const Title = styled.h1`
-  margin-bottom: 1.5rem;
-  color: #333;
+  margin-bottom: ${props => props.theme.spacing.lg};
+  color: ${props => props.theme.colors.text};
 `;
 
 const Section = styled.section`
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  background-color: ${props => props.theme.colors.cardBackground};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.small};
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.xl};
 `;
 
 const SectionTitle = styled.h2`
-  margin-bottom: 1rem;
-  color: #444;
+  margin-bottom: ${props => props.theme.spacing.md};
+  color: ${props => props.theme.colors.text};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const Label = styled.label`
   display: block;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+  font-weight: ${props => props.theme.typography.fontWeights.bold};
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const RadioGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: ${props => props.theme.spacing.sm};
 `;
 
 const RadioOption = styled.label`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${props => props.theme.spacing.sm};
   cursor: pointer;
 `;
 
@@ -62,52 +64,55 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
-  background-color: #007bff;
-  color: white;
+  background-color: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.white};
   border: none;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  border-radius: ${props => props.theme.borderRadius.small};
+  padding: ${props => props.theme.typography.fontSizes.xs} ${props => props.theme.spacing.lg};
+  font-size: ${props => props.theme.typography.fontSizes.md};
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color ${props => props.theme.transitions.short};
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
   
   &:hover {
-    background-color: #0069d9;
+    background-color: ${props => props.theme.colors.primaryDark};
   }
 `;
 
 const PlanCard = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.md};
+  transition: transform ${props => props.theme.transitions.short}, box-shadow ${props => props.theme.transitions.short};
+  background-color: ${props => props.theme.colors.cardBackground};
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: ${props => props.theme.shadows.medium};
   }
 `;
 
 const PlanTitle = styled.h3`
-  margin-bottom: 0.5rem;
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const PlanDescription = styled.p`
-  margin-bottom: 1rem;
-  color: #666;
+  margin-bottom: ${props => props.theme.spacing.md};
+  color: ${props => props.theme.colors.textLight};
+  font-size: ${props => props.theme.typography.fontSizes.sm};
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: ${props => props.theme.spacing.md};
 `;
 
 const SecondaryButton = styled(Button)`
-  background-color: #6c757d;
+  background-color: ${props => props.theme.colors.gray};
   
   &:hover {
-    background-color: #5a6268;
+    background-color: ${props => props.theme.colors.grayDark};
   }
 `;
 

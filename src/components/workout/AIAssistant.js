@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -66,63 +66,8 @@ const NoSuggestionsMessage = styled.p`
 
 const AIAssistant = ({ workoutHistory, currentPlan, onApplySuggestion }) => {
   const [suggestions, setSuggestions] = useState([]);
-
-  useEffect(() => {
-    if (workoutHistory && currentPlan) {
-      // Generate suggestions based on workout history and current plan
-      const generatedSuggestions = generateSuggestions(workoutHistory, currentPlan);
-      setSuggestions(generatedSuggestions);
-    }
-  }, [workoutHistory, currentPlan]);
-
-  const generateSuggestions = (history, plan) => {
-    const suggestions = [];
-    
-    // Check for plateaus in major lifts
-    const plateaus = detectPlateaus(history);
-    if (plateaus.length > 0) {
-      plateaus.forEach(plateau => {
-        suggestions.push({
-          id: `plateau-${plateau.exercise}`,
-          title: `Plateau bei ${plateau.exercise}`,
-          description: `Du machst seit ${plateau.weeks} Wochen keine Fortschritte bei ${plateau.exercise}. Probiere eine der folgenden Strategien: Ändere das Volumen, variiere die Intensität oder füge eine alternative Übung hinzu.`,
-          type: 'plateau',
-          data: plateau
-        });
-      });
-    }
-    
-    // Check for overtraining risk
-    const overtrainingRisks = detectOvertrainingRisks(history, plan);
-    if (overtrainingRisks.length > 0) {
-      overtrainingRisks.forEach(risk => {
-        suggestions.push({
-          id: `overtraining-${risk.muscleGroup}`,
-          title: `Übertrainingsrisiko: ${risk.muscleGroup}`,
-          description: `Du trainierst die ${risk.muscleGroup} möglicherweise zu häufig (${risk.frequency}x pro Woche). Erwäge, mehr Ruhetage zwischen den Trainingseinheiten für diese Muskelgruppe einzuplanen.`,
-          type: 'overtraining',
-          data: risk
-        });
-      });
-    }
-    
-    // Suggest progression opportunities
-    const progressionOpportunities = identifyProgressionOpportunities(history, plan);
-    if (progressionOpportunities.length > 0) {
-      progressionOpportunities.forEach(opportunity => {
-        suggestions.push({
-          id: `progression-${opportunity.exercise}`,
-          title: `Progressionsmöglichkeit: ${opportunity.exercise}`,
-          description: `Du hast das Ziel für ${opportunity.exercise} konsistent erreicht. Zeit für eine Steigerung um ${opportunity.suggestedIncrease} ${opportunity.unit}.`,
-          type: 'progression',
-          data: opportunity
-        });
-      });
-    }
-    
-    return suggestions;
-  };
   
+  // Helper functions
   const detectPlateaus = (history) => {
     // This would analyze the workout history to detect exercises where progress has stalled
     // For demo purposes, we'll return sample data
@@ -149,6 +94,63 @@ const AIAssistant = ({ workoutHistory, currentPlan, onApplySuggestion }) => {
       { exercise: 'Schulterdrücken', suggestedIncrease: 2.5, unit: 'kg', currentWeight: 40, consecutiveSuccesses: 4 }
     ];
   };
+
+  // Wrap generateSuggestions in useCallback to prevent it from causing infinite loops
+  const generateSuggestions = useCallback((history, plan) => {
+    const suggestionList = [];
+    
+    // Check for plateaus in major lifts
+    const plateaus = detectPlateaus(history);
+    if (plateaus.length > 0) {
+      plateaus.forEach(plateau => {
+        suggestionList.push({
+          id: `plateau-${plateau.exercise}`,
+          title: `Plateau bei ${plateau.exercise}`,
+          description: `Du machst seit ${plateau.weeks} Wochen keine Fortschritte bei ${plateau.exercise}. Probiere eine der folgenden Strategien: Ändere das Volumen, variiere die Intensität oder füge eine alternative Übung hinzu.`,
+          type: 'plateau',
+          data: plateau
+        });
+      });
+    }
+    
+    // Check for overtraining risk
+    const overtrainingRisks = detectOvertrainingRisks(history, plan);
+    if (overtrainingRisks.length > 0) {
+      overtrainingRisks.forEach(risk => {
+        suggestionList.push({
+          id: `overtraining-${risk.muscleGroup}`,
+          title: `Übertrainingsrisiko: ${risk.muscleGroup}`,
+          description: `Du trainierst die ${risk.muscleGroup} möglicherweise zu häufig (${risk.frequency}x pro Woche). Erwäge, mehr Ruhetage zwischen den Trainingseinheiten für diese Muskelgruppe einzuplanen.`,
+          type: 'overtraining',
+          data: risk
+        });
+      });
+    }
+    
+    // Suggest progression opportunities
+    const progressionOpportunities = identifyProgressionOpportunities(history, plan);
+    if (progressionOpportunities.length > 0) {
+      progressionOpportunities.forEach(opportunity => {
+        suggestionList.push({
+          id: `progression-${opportunity.exercise}`,
+          title: `Progressionsmöglichkeit: ${opportunity.exercise}`,
+          description: `Du hast das Ziel für ${opportunity.exercise} konsistent erreicht. Zeit für eine Steigerung um ${opportunity.suggestedIncrease} ${opportunity.unit}.`,
+          type: 'progression',
+          data: opportunity
+        });
+      });
+    }
+    
+    return suggestionList;
+  }, []);
+
+  useEffect(() => {
+    if (workoutHistory && currentPlan) {
+      // Generate suggestions based on workout history and current plan
+      const generatedSuggestions = generateSuggestions(workoutHistory, currentPlan);
+      setSuggestions(generatedSuggestions);
+    }
+  }, [workoutHistory, currentPlan, generateSuggestions]);
 
   const handleApply = (suggestion) => {
     onApplySuggestion(suggestion);

@@ -4,14 +4,14 @@ import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
 const Container = styled.div`
-  padding: 20px;
+  padding: ${props => props.theme.spacing.lg};
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const Title = styled.h1`
@@ -21,65 +21,69 @@ const Title = styled.h1`
 const TemplateGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  gap: ${props => props.theme.spacing.lg};
 `;
 
 const TemplateCard = styled.div`
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+  border: ${props => props.selected ? `2px solid ${props.theme.colors.secondary}` : `1px solid ${props.theme.colors.border}`};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  padding: ${props => props.theme.spacing.lg};
+  box-shadow: ${props => props.theme.shadows.small};
+  transition: transform ${props => props.theme.transitions.short}, box-shadow ${props => props.theme.transitions.short}, border-color ${props => props.theme.transitions.short};
+  cursor: pointer;
+  transform: ${props => props.selected ? 'translateY(-5px)' : 'none'};
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: ${props => props.theme.shadows.medium};
+    border-color: ${props => props.selected ? props.theme.colors.secondary : props.theme.colors.primaryLight};
   }
 `;
 
 const TemplateName = styled.h3`
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const TemplateDescription = styled.p`
-  color: #666;
-  margin-bottom: 15px;
+  color: ${props => props.theme.colors.textLight};
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const TemplateInfo = styled.div`
-  margin-bottom: 15px;
-  font-size: 14px;
+  margin-bottom: ${props => props.theme.spacing.md};
+  font-size: ${props => props.theme.typography.fontSizes.sm};
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: ${props => props.theme.spacing.sm};
+  flex-wrap: wrap;
 `;
 
 const Button = styled.button`
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  border-radius: ${props => props.theme.borderRadius.small};
   border: none;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
+  color: ${props => props.theme.colors.white};
   
   &.primary {
-    background-color: #4caf50;
-    color: white;
+    background-color: ${props => props.theme.colors.secondary};
     
     &:hover {
-      background-color: #3d8b40;
+      background-color: ${props => props.theme.colors.secondaryDark};
     }
   }
   
   &.secondary {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: ${props => props.theme.colors.grayLight};
+    color: ${props => props.theme.colors.text};
     
     &:hover {
-      background-color: #e0e0e0;
+      background-color: ${props => props.theme.colors.border};
     }
   }
 `;
@@ -107,7 +111,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 12, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: 'Achte auf eine gerade Rückenposition und dass die Knie nicht über die Zehenspitzen hinausragen.'
             },
@@ -117,7 +121,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 10, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: 'Bei Anfängern kann auch mit Kurzhanteln gearbeitet werden.'
             },
@@ -127,7 +131,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 8, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 1, 
               rest: 60,
               notes: 'Bei Bedarf Hilfestellung nutzen oder mit Negativen Klimmzügen starten.'
             },
@@ -137,7 +141,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 10, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: ''
             },
@@ -147,7 +151,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 12, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: ''
             }
@@ -178,7 +182,7 @@ const workoutTemplates = [
               sets: 4, 
               reps: 8, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 1, 
               rest: 90,
               notes: ''
             },
@@ -188,7 +192,7 @@ const workoutTemplates = [
               sets: 4, 
               reps: 8, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 1, 
               rest: 90,
               notes: ''
             },
@@ -198,7 +202,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 10, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 90,
               notes: ''
             },
@@ -208,7 +212,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 12, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: ''
             },
@@ -218,7 +222,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 12, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: ''
             }
@@ -234,7 +238,7 @@ const workoutTemplates = [
               sets: 4, 
               reps: 8, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 1, 
               rest: 120,
               notes: ''
             },
@@ -244,7 +248,7 @@ const workoutTemplates = [
               sets: 4, 
               reps: 8, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 1, 
               rest: 120,
               notes: ''
             },
@@ -254,7 +258,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 12, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 90,
               notes: ''
             },
@@ -264,7 +268,7 @@ const workoutTemplates = [
               sets: 4, 
               reps: 15, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 2, 
               rest: 60,
               notes: ''
             }
@@ -295,7 +299,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 15, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 0, 
               rest: 30,
               notes: '30 Sekunden Pause zwischen den Übungen, 2 Minuten Pause zwischen den Runden'
             },
@@ -305,7 +309,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 30, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 0, 
               rest: 30,
               notes: ''
             },
@@ -315,7 +319,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 20, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 0, 
               rest: 30,
               notes: ''
             },
@@ -325,8 +329,8 @@ const workoutTemplates = [
               sets: 3, 
               reps: 0, 
               weight: 0, 
-              duration: 60, 
-              rest: 30,
+              repsInReserve: 0, 
+              rest: 60, 
               notes: '60 Sekunden'
             },
             { 
@@ -335,7 +339,7 @@ const workoutTemplates = [
               sets: 3, 
               reps: 20, 
               weight: 0, 
-              duration: 0, 
+              repsInReserve: 0, 
               rest: 30,
               notes: '10 pro Bein'
             }
@@ -379,11 +383,8 @@ const WorkoutTemplates = () => {
         {workoutTemplates.map((template) => (
           <TemplateCard 
             key={template.id}
+            selected={selectedTemplate?.id === template.id}
             onClick={() => handleTemplateSelect(template)}
-            style={selectedTemplate?.id === template.id ? {
-              border: '2px solid #4caf50',
-              transform: 'translateY(-5px)'
-            } : {}}
           >
             <TemplateName>{template.name}</TemplateName>
             <TemplateDescription>{template.description}</TemplateDescription>

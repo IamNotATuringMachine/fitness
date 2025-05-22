@@ -74,9 +74,23 @@ const NavLink = styled(Link)`
     transform: translateX(4px);
   }
   
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.primary} inset;
+  }
+  
   svg {
     margin-right: ${props => props.collapsed ? '0' : props.theme.spacing.sm};
     font-size: 1.2rem;
+  }
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.primaryDark};
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.white} inset;
   }
   
   span {
@@ -120,6 +134,11 @@ const ThemeToggle = styled.button`
   
   &:hover {
     background-color: ${props => props.theme.colors.grayLight};
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.primary} inset;
   }
   
   svg {
@@ -167,6 +186,11 @@ const Sidebar = () => {
           <NavItem>
             <NavLink to="/create-plan" active={isActive('/create-plan')} collapsed={collapsed}>
               {collapsed ? '➕' : <span>➕ Plan erstellen</span>}
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/workout-tracker" active={isActive('/workout-tracker')} collapsed={collapsed}>
+              {collapsed ? '📝' : <span>📝 Workout Tracker</span>}
             </NavLink>
           </NavItem>
           <NavItem>
@@ -238,6 +262,11 @@ const Sidebar = () => {
           <NavItem>
             <NavLink to="/data-import-export" active={isActive('/data-import-export')} collapsed={collapsed}>
               {collapsed ? '📤' : <span>📤 Datenimport/-export</span>}
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/data-repair" active={isActive('/data-repair')} collapsed={collapsed}>
+              {collapsed ? '🔧' : <span>🔧 Datenreparatur</span>}
             </NavLink>
           </NavItem>
           <NavItem>

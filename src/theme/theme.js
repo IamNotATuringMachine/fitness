@@ -1,7 +1,8 @@
 const lightTheme = {
+  name: 'light',
   colors: {
-    primary: '#3498db',
-    primaryDark: '#2980b9',
+    primary: '#217dbb',
+    primaryDark: '#1c699f',
     primaryLight: '#85c1e9',
     secondary: '#2ecc71',
     secondaryDark: '#27ae60',
@@ -23,9 +24,9 @@ const lightTheme = {
     border: '#dfe4ea',
   },
   shadows: {
-    small: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    medium: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    large: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    small: '0 2px 8px 0px rgba(0, 0, 0, 0.07)',
+    medium: '0 5px 15px 0px rgba(0, 0, 0, 0.07)',
+    large: '0 10px 30px 0px rgba(0, 0, 0, 0.07)',
   },
   borderRadius: {
     small: '4px',
@@ -42,7 +43,7 @@ const lightTheme = {
     xxl: '3rem',
   },
   typography: {
-    fontFamily: "'Roboto', 'Segoe UI', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontSizes: {
       xs: '0.75rem',
       sm: '0.875rem',
@@ -76,6 +77,7 @@ const lightTheme = {
 
 const darkTheme = {
   ...lightTheme,
+  name: 'dark',
   colors: {
     ...lightTheme.colors,
     primary: '#3498db',
@@ -92,6 +94,7 @@ const darkTheme = {
 // Blue theme with more vivid blue colors
 const blueTheme = {
   ...lightTheme,
+  name: 'blue',
   colors: {
     ...lightTheme.colors,
     primary: '#1e88e5',
@@ -114,10 +117,11 @@ const blueTheme = {
 // Green theme with nature-inspired colors
 const greenTheme = {
   ...lightTheme,
+  name: 'green',
   colors: {
     ...lightTheme.colors,
-    primary: '#43a047',
-    primaryDark: '#2e7d32',
+    primary: '#256d28',
+    primaryDark: '#19501c',
     primaryLight: '#66bb6a',
     secondary: '#00897b',
     secondaryDark: '#00695c',

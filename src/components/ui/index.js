@@ -4,6 +4,7 @@ import Alert from './Alert';
 import ViewCustomizer from './ViewCustomizer';
 import ThemeSwitcher from './ThemeSwitcher';
 import DragDrop from './DragDrop';
+import Spinner from './Spinner';
 
 export {
   Card,
@@ -11,5 +12,6 @@ export {
   Alert,
   ViewCustomizer,
   ThemeSwitcher,
-  DragDrop
+  DragDrop,
+  Spinner
 }; 

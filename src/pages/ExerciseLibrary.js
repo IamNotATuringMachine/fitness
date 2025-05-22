@@ -9,17 +9,17 @@ const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const ExercisesContainer = styled.div`
-  margin-top: 1.5rem;
+  margin-top: ${props => props.theme.spacing.lg};
 `;
 
 const ExerciseGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  gap: ${props => props.theme.spacing.lg};
 `;
 
 const ExerciseCard = styled(Card)`
@@ -30,197 +30,527 @@ const ExerciseCard = styled(Card)`
 
 const MuscleGroupTag = styled.span`
   display: inline-block;
-  background-color: #e0f7fa;
-  color: #00838f;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
+  background-color: ${props => `${props.theme.colors.primaryLight}60`};
+  color: ${props => props.theme.colors.primaryDark};
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.sm};
+  margin-right: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const FilterContainer = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: ${props => props.theme.spacing.lg};
   display: flex;
-  gap: 1rem;
+  gap: ${props => props.theme.spacing.md};
   flex-wrap: wrap;
 `;
 
 const SearchInput = styled.input`
   flex: 1;
   min-width: 200px;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
   
   &:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 0.2rem ${props => `${props.theme.colors.primary}40`};
   }
 `;
 
 const AddExerciseForm = styled.form`
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  margin-top: ${props => props.theme.spacing.lg};
+  padding: ${props => props.theme.spacing.lg};
+  background-color: ${props => props.theme.colors.background};
+  border-radius: ${props => props.theme.borderRadius.medium};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  margin-bottom: ${props => props.theme.spacing.sm};
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
   
   &:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 0.2rem ${props => `${props.theme.colors.primary}40`};
   }
 `;
 
 const MuscleGroupSelector = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: ${props => props.theme.spacing.sm};
+  margin-top: ${props => props.theme.spacing.sm};
 `;
 
 const MuscleGroupOption = styled.div`
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  background-color: ${props => props.selected ? '#007bff' : '#e9ecef'};
-  color: ${props => props.selected ? 'white' : '#495057'};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.typography.fontSizes.xs};
+  border-radius: ${props => props.theme.borderRadius.small};
+  background-color: ${props => props.selected ? props.theme.colors.primary : props.theme.colors.grayLight};
+  color: ${props => props.selected ? props.theme.colors.white : props.theme.colors.text};
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all ${props => props.theme.transitions.short};
   
   &:hover {
-    background-color: ${props => props.selected ? '#0069d9' : '#dee2e6'};
+    background-color: ${props => props.selected ? props.theme.colors.primaryDark : props.theme.colors.border};
   }
 `;
 
 const FilterSection = styled.div`
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  margin-bottom: ${props => props.theme.spacing.lg};
+  padding: ${props => props.theme.spacing.md};
+  background-color: ${props => props.theme.colors.background};
+  border-radius: ${props => props.theme.borderRadius.medium};
 `;
 
 const FilterTitle = styled.h3`
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const FilterGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const FilterTag = styled.div`
   display: inline-block;
-  padding: 0.4rem 0.8rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-  background-color: ${props => props.selected ? '#007bff' : '#e9ecef'};
-  color: ${props => props.selected ? 'white' : '#495057'};
-  border-radius: 20px;
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  margin-right: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
+  background-color: ${props => props.selected ? props.theme.colors.primary : props.theme.colors.grayLight};
+  color: ${props => props.selected ? props.theme.colors.white : props.theme.colors.text};
+  border-radius: ${props => props.theme.borderRadius.large};
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: ${props => props.theme.typography.fontSizes.sm};
+  transition: all ${props => props.theme.transitions.short};
   
   &:hover {
-    background-color: ${props => props.selected ? '#0069d9' : '#dee2e6'};
+    background-color: ${props => props.selected ? props.theme.colors.primaryDark : props.theme.colors.border};
   }
 `;
 
 const EquipmentTag = styled.span`
   display: inline-block;
-  background-color: #e6f7ff;
-  color: #0050b3;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
+  background-color: ${props => `${props.theme.colors.primaryLight}99`};
+  color: ${props => props.theme.colors.primaryDark};
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.sm};
+  margin-right: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const DifficultyTag = styled.span`
   display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.sm};
+  margin-right: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
   background-color: ${props => {
     switch (props.level) {
-      case 'Leicht': return '#e6f7e6';
-      case 'Mittel': return '#fff7e6';
-      case 'Schwer': return '#ffe6e6';
-      default: return '#f0f0f0';
+      case 'Leicht': return `${props.theme.colors.secondary}33`;
+      case 'Mittel': return `${props.theme.colors.warning}33`;
+      case 'Schwer': return `${props.theme.colors.accent}33`;
+      default: return props.theme.colors.grayLight;
     }
   }};
   color: ${props => {
     switch (props.level) {
-      case 'Leicht': return '#52c41a';
-      case 'Mittel': return '#fa8c16';
-      case 'Schwer': return '#f5222d';
-      default: return '#666';
+      case 'Leicht': return props.theme.colors.secondaryDark;
+      case 'Mittel': return props.theme.colors.warningDark;
+      case 'Schwer': return props.theme.colors.accentDark;
+      default: return props.theme.colors.textLight;
     }
   }};
 `;
 
 const Select = styled.select`
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  margin-right: 1rem;
-  
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  margin-right: ${props => props.theme.spacing.md};
+  background-color: ${props => props.theme.colors.cardBackground};
+
   &:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 0.2rem ${props => `${props.theme.colors.primary}40`};
   }
 `;
 
 const ClearFiltersButton = styled(Button)`
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #ddd;
+  background-color: ${props => props.theme.colors.background};
+  color: ${props => props.theme.colors.text};
+  border: 1px solid ${props => props.theme.colors.border};
   
   &:hover {
-    background-color: #e9ecef;
-    border-color: #ced4da;
+    background-color: ${props => props.theme.colors.grayLight};
+    border-color: ${props => props.theme.colors.gray};
   }
 `;
 
 // List of common muscle groups
 const muscleGroups = [
-  'Brust', 'Rücken', 'Schultern', 'Bizeps', 'Trizeps', 
-  'Beine', 'Gesäß', 'Waden', 'Bauchmuskeln', 'Oberschenkel', 'Beinbizeps'
+  'Brust', 'Brustmuskulatur', 'Rücken', 'Rückenmuskulatur', 'Schultern', 'Schultermuskulatur', 
+  'Bizeps', 'Trizeps', 'Beine', 'Beinmuskulatur', 'Gesäß', 'Waden', 
+  'Bauchmuskeln', 'Bauchmuskulatur', 'Oberschenkel', 'Beinbizeps'
 ];
 
 // List of equipment types
 const equipmentTypes = [
-  'Körpergewicht', 'Langhantel', 'Kurzhanteln', 'Kabelzug', 'Maschine',
-  'SZ-Stange', 'Hantelbank', 'Klimmzugstange', 'Rack', 'Beinstreckmaschine',
-  'Beinbeugermaschine', 'Wadenmaschine', 'Stufe'
+  'Körpergewicht', 'Langhantel', 'Kurzhanteln', 'Kurzhantel', 'Kabelzug', 'Maschine',
+  'SZ-Stange', 'Hantelbank', 'Schrägbank', 'Negativ-Bank', 'Klimmzugstange', 'Rack', 
+  'Beinstreckmaschine', 'Beinbeugermaschine', 'Wadenmaschine', 'Sitzcalves-Maschine',
+  'Stufe', 'Brustpressmaschine', 'Butterfly-Maschine', 'Latzugmaschine',
+  'T-Bar', 'Rudermaschine', 'Hyperextension-Bank', 'Beinpressmaschine',
+  'Bank', 'Dip-Station', 'Scott-Bank', 'Hantelscheibe', 'Gewichtsscheibe',
+  'Reverse Butterfly-Maschine'
 ];
 
 // Difficulty levels
 const difficultyLevels = ['Leicht', 'Mittel', 'Schwer'];
+
+// Liste der neuen Übungen
+const newExercises = [
+  {
+    name: 'Bankdrücken mit der Langhantel',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Langhantel', 'Hantelbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Schrägbankdrücken mit der Langhantel',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Langhantel', 'Schrägbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Negativbankdrücken mit der Langhantel',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Langhantel', 'Negativ-Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Kurzhantel-Bankdrücken',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kurzhanteln', 'Hantelbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Kurzhantel-Schrägbankdrücken',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kurzhanteln', 'Schrägbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Kurzhantel-Negativbankdrücken',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kurzhanteln', 'Negativ-Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Fliegende Bewegung auf der Flachbank',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kurzhanteln', 'Hantelbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Fliegende Bewegung auf der Schrägbank',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kurzhanteln', 'Schrägbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Cable Crossovers / Fliegende am Kabelzug',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Dips',
+    muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultern'],
+    equipment: ['Dip-Station'],
+    difficulty: 'Schwer'
+  },
+  {
+    name: 'Brustpresse an der Maschine',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Brustpressmaschine'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Butterfly / Peck Deck Maschine',
+    muscleGroups: ['Brustmuskulatur'],
+    equipment: ['Butterfly-Maschine'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Latzug zur Brust',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Latzugmaschine'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Langhantelrudern vorgebeugt',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Langhantel'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Kurzhantelrudern einarmig',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Kurzhantel', 'Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'T-Bar Rudern',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['T-Bar'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Rudern am Kabelzug sitzend',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Rudern an der Maschine',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Rudermaschine'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Überzüge mit Kurzhantel oder am Kabel',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Kurzhantel', 'Kabelzug'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Hyperextensions / Rückenstrecker',
+    muscleGroups: ['Rückenmuskulatur'],
+    equipment: ['Hyperextension-Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Good Mornings',
+    muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
+    equipment: ['Langhantel'],
+    difficulty: 'Schwer'
+  },
+  {
+    name: 'Frontkniebeugen mit der Langhantel',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Langhantel'],
+    difficulty: 'Schwer'
+  },
+  {
+    name: 'Beinpresse',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Beinpressmaschine'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Bulgarian Split Squats',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Bank', 'Kurzhanteln'],
+    difficulty: 'Schwer'
+  },
+  {
+    name: 'Rumänisches Kreuzheben',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Langhantel'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Gestrecktes Kreuzheben',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Langhantel'],
+    difficulty: 'Schwer'
+  },
+  {
+    name: 'Hüftheben / Glute Bridges',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Langhantel', 'Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Hip Thrusts',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Langhantel', 'Bank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Wadenheben sitzend',
+    muscleGroups: ['Beinmuskulatur'],
+    equipment: ['Sitzcalves-Maschine'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Schulterdrücken mit Kurzhanteln',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Arnold Press',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Seitheben mit Kurzhanteln',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Seitheben am Kabelzug',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Vorgebeugtes Seitheben mit Kurzhanteln',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Reverse Butterfly / Reverse Peck Deck',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Reverse Butterfly-Maschine'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Frontheben mit Kurzhanteln oder Hantelscheibe',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Kurzhanteln', 'Hantelscheibe'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Aufrechtes Rudern',
+    muscleGroups: ['Schultermuskulatur'],
+    equipment: ['Langhantel', 'Kurzhanteln'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Langhantel-Curls',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Langhantel'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Hammercurls',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Konzentrationscurls',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Kurzhantel'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Scottcurls / Preacher Curls',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Scott-Bank', 'Langhantel', 'Kurzhanteln'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Bizepscurls am Kabelzug',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Reverse Curls',
+    muscleGroups: ['Bizeps'],
+    equipment: ['Langhantel', 'SZ-Stange'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Enges Bankdrücken',
+    muscleGroups: ['Trizeps'],
+    equipment: ['Langhantel', 'Hantelbank'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Stirndrücken / French Press',
+    muscleGroups: ['Trizeps'],
+    equipment: ['Langhantel', 'SZ-Stange', 'Kurzhanteln'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Überkopf-Trizepsdrücken mit Kurzhantel',
+    muscleGroups: ['Trizeps'],
+    equipment: ['Kurzhantel'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Kickbacks mit Kurzhanteln',
+    muscleGroups: ['Trizeps'],
+    equipment: ['Kurzhanteln'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Crunches',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Körpergewicht'],
+    difficulty: 'Leicht'
+  },
+  {
+    name: 'Beinheben',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Körpergewicht', 'Klimmzugstange'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Plank / Unterarmstütz',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Körpergewicht'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Russian Twists',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Körpergewicht', 'Gewichtsscheibe'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Kabel-Crunches',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Mittel'
+  },
+  {
+    name: 'Wood Chops / Holzfäller am Kabelzug',
+    muscleGroups: ['Bauchmuskulatur'],
+    equipment: ['Kabelzug'],
+    difficulty: 'Mittel'
+  }
+];
 
 const ExerciseLibrary = () => {
   const { state, dispatch } = useWorkout();
@@ -243,6 +573,41 @@ const ExerciseLibrary = () => {
   
   // Filtered exercises
   const [filteredExercises, setFilteredExercises] = useState(state.exercises);
+  
+  // Importiere neue Übungen
+  const importNewExercises = () => {
+    // Prüfen, welche Übungen bereits existieren (anhand des Namens)
+    const existingExerciseNames = state.exercises.map(ex => ex.name);
+    const exercisesToAdd = newExercises.filter(ex => !existingExerciseNames.includes(ex.name));
+    
+    // Hinzufügen der neuen Übungen
+    if (exercisesToAdd.length > 0) {
+      // Ein Array mit allen Übungen erstellen, die hinzugefügt werden sollen
+      const exercisesToDispatch = exercisesToAdd.map(exercise => ({
+        id: uuidv4(),
+        ...exercise
+      }));
+      
+      // Übungen einzeln hinzufügen
+      exercisesToDispatch.forEach(exercise => {
+        dispatch({
+          type: 'ADD_EXERCISE',
+          payload: exercise
+        });
+      });
+      
+      // Feedback für den Benutzer mit Vorschlag, die Seite bei Problemen zu aktualisieren
+      alert(`${exercisesToAdd.length} neue Übungen wurden hinzugefügt! Wenn die Übungen nicht angezeigt werden, aktualisieren Sie bitte die Seite.`);
+      
+      // Anzeigen der neuen Übungen in Konsole (hilft bei Debugging)
+      console.log("Neu hinzugefügte Übungen:", exercisesToDispatch);
+      
+      // Nach dem Import Filter zurücksetzen, um alle Übungen anzuzeigen
+      clearFilters();
+    } else {
+      alert("Es wurden keine neuen Übungen gefunden, die importiert werden könnten.");
+    }
+  };
   
   // Apply filters when any filter or search changes
   useEffect(() => {
@@ -405,10 +770,12 @@ const ExerciseLibrary = () => {
     <div>
       <PageHeader>
         <h1>Übungsbibliothek</h1>
-        <div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button onClick={importNewExercises}>
+            Übungen importieren
+          </Button>
           <Button 
             onClick={() => setShowFilters(!showFilters)} 
-            style={{ marginRight: '0.5rem' }}
           >
             {showFilters ? 'Filter ausblenden' : 'Filter anzeigen'}
           </Button>

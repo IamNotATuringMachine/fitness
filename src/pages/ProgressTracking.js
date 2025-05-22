@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useWorkout } from '../context/WorkoutContext';
 import { format } from 'date-fns';
@@ -11,14 +11,14 @@ import { Card } from '../components/ui/Card';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ChartTitle, Tooltip, Legend);
 
 const Container = styled.div`
-  padding: 20px;
+  padding: ${props => props.theme.spacing.lg};
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const PageTitle = styled.h1`
@@ -26,82 +26,86 @@ const PageTitle = styled.h1`
 `;
 
 const TabContainer = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const TabButton = styled.button`
-  padding: 10px 20px;
-  background-color: ${({ active }) => (active ? '#007bff' : '#f0f0f0')};
-  color: ${({ active }) => (active ? 'white' : '#333')};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
+  background-color: ${({ active, theme }) => (active ? theme.colors.primary : theme.colors.grayLight)};
+  color: ${({ active, theme }) => (active ? theme.colors.white : theme.colors.text)};
   border: none;
-  border-radius: 4px;
-  margin-right: 10px;
+  border-radius: ${props => props.theme.borderRadius.small};
+  margin-right: ${props => props.theme.spacing.sm};
   cursor: pointer;
-  font-weight: 500;
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
+  transition: background-color ${props => props.theme.transitions.short};
   
   &:hover {
-    background-color: ${({ active }) => (active ? '#0069d9' : '#e0e0e0')};
+    background-color: ${({ active, theme }) => (active ? theme.colors.primaryDark : theme.colors.border)};
   }
 `;
 
 const StyledCard = styled.div`
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
+  background-color: ${props => props.theme.colors.cardBackground};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.small};
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 15px;
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
+  margin-bottom: ${props => props.theme.spacing.xs};
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const Button = styled.button`
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
+  background-color: ${props => props.theme.colors.secondary};
+  color: ${props => props.theme.colors.white};
   border: none;
-  border-radius: 4px;
+  border-radius: ${props => props.theme.borderRadius.small};
   cursor: pointer;
-  font-weight: 500;
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
+  transition: background-color ${props => props.theme.transitions.short};
   
   &:hover {
-    background-color: #3d8b40;
+    background-color: ${props => props.theme.colors.secondaryDark};
   }
   
   &:disabled {
-    background-color: #cccccc;
+    background-color: ${props => props.theme.colors.gray};
     cursor: not-allowed;
+    opacity: 0.7;
   }
 `;
 
@@ -110,29 +114,29 @@ const Table = styled.table`
   border-collapse: collapse;
   
   th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
+    padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.md};
+    border-bottom: 1px solid ${props => props.theme.colors.border};
     text-align: left;
   }
   
   th {
-    background-color: #f8f9fa;
-    font-weight: 500;
+    background-color: ${props => props.theme.colors.grayLight};
+    font-weight: ${props => props.theme.typography.fontWeights.medium};
   }
   
-  tr:hover {
-    background-color: #f1f1f1;
+  tr:hover td {
+    background-color: ${props => props.theme.colors.grayLight};
   }
 `;
 
 const ChartContainer = styled.div`
   height: 400px;
-  margin-top: 20px;
+  margin-top: ${props => props.theme.spacing.lg};
 `;
 
 const Message = styled.p`
   text-align: center;
-  color: #666;
+  color: ${props => props.theme.colors.textLight};
   font-style: italic;
 `;
 
@@ -143,6 +147,7 @@ const TRACK_BODY_MEASUREMENT = 'TRACK_BODY_MEASUREMENT';
 
 const ProgressTracking = () => {
   const { state, dispatch } = useWorkout();
+  const theme = useTheme();
   const [activeTab, setActiveTab] = useState('workout');
   
   // Workout Tracking
@@ -710,7 +715,7 @@ const ProgressTracking = () => {
           
           {selectedDay && exerciseRecords.length > 0 && (
             <>
-              <h3 style={{ marginTop: '1.5rem' }}>Übungen</h3>
+              <h3 style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.md }}>Übungen</h3>
               
               <Table>
                 <thead>
@@ -733,8 +738,8 @@ const ProgressTracking = () => {
                     return (
                       <React.Fragment key={record.id}>
                         {showGroupHeader && (
-                          <tr style={{ backgroundColor: '#f0f7ff' }}>
-                            <td colSpan="5" style={{ padding: '0.75rem', fontWeight: 'bold' }}>
+                          <tr style={{ backgroundColor: `${theme.colors.primaryLight}30` }}>
+                            <td colSpan="5" style={{ padding: theme.spacing.sm, fontWeight: theme.typography.fontWeights.bold }}>
                               {record.methodName}: {record.groupName}
                             </td>
                           </tr>
@@ -797,7 +802,7 @@ const ProgressTracking = () => {
                 </tbody>
               </Table>
               
-              <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+              <div style={{ marginTop: theme.spacing.md, textAlign: 'right' }}>
                 <Button onClick={handleWorkoutSubmit}>
                   Training protokollieren
                 </Button>

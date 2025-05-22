@@ -3,6 +3,12 @@ import styled from 'styled-components';
 import { useNutrition } from '../../context/NutritionContext';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
+import { Button, Spinner } from '../../components/ui';
+
+// Create a ButtonSecondary as a styled extension of Button
+const ButtonSecondary = styled(Button).attrs({ variant: 'secondary' })`
+  /* Any additional custom styles for ButtonSecondary can go here */
+`;
 
 const Container = styled.div`
   margin: 20px 0;
@@ -38,28 +44,6 @@ const Select = styled.select`
   padding: 8px;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: 4px;
-`;
-
-const Button = styled.button`
-  padding: 10px 15px;
-  background-color: ${props => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 10px;
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.primaryDark};
-  }
-`;
-
-const ButtonSecondary = styled(Button)`
-  background-color: ${props => props.theme.colors.secondary};
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.secondaryDark};
-  }
 `;
 
 const ProgressContainer = styled.div`
@@ -305,7 +289,7 @@ function NutritionTracker() {
     return (current / goal) * 100;
   };
   
-  if (!dailyLog) return <div>Loading...</div>;
+  if (!dailyLog) return <Spinner centered size="60px" />;
   
   return (
     <Container>

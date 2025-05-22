@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const AlertContainer = styled.div`
   padding: ${props => props.theme.spacing.md};
   margin-bottom: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   display: flex;
   align-items: center;
   justify-content: space-between;

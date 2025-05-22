@@ -23,6 +23,10 @@ import Feedback from './pages/Feedback';
 import FeedbackManagement from './pages/FeedbackManagement';
 import { WorkoutProvider } from './context/WorkoutContext';
 import ThemeProvider from './theme/ThemeProvider';
+import ExerciseTracker from './components/workout/ExerciseTracker';
+import DataRepair from './pages/DataRepair';
+import WorkoutDetails from './pages/WorkoutDetails';
+import EditWorkoutPage from './pages/EditWorkoutPage';
 
 const AppContainer = styled.div`
   display: flex;
@@ -78,6 +82,10 @@ function App() {
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/feedback-management" element={<FeedbackManagement />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/workout-tracker" element={<ExerciseTracker />} />
+                  <Route path="/data-repair" element={<DataRepair />} />
+                  <Route path="/workout/:id" element={<WorkoutDetails />} />
+                  <Route path="/edit-workout/:id" element={<EditWorkoutPage />} />
                 </Routes>
               </ContentContainer>
             </MainContainer>

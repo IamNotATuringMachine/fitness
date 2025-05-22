@@ -51,7 +51,7 @@ const Input = styled.input`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -68,7 +68,7 @@ const TextArea = styled.textarea`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -87,7 +87,7 @@ const Select = styled.select`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -130,7 +130,7 @@ const FeedbackHistory = styled.div`
 const FeedbackItem = styled.div`
   padding: ${props => props.theme.spacing.md};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   margin-bottom: ${props => props.theme.spacing.md};
   background-color: ${props => props.theme.colors.backgroundSecondary};
 `;

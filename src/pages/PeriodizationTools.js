@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useWorkout } from '../context/WorkoutContext';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -8,147 +8,153 @@ import Card from '../components/ui/Card';
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  padding: ${props => props.theme.spacing.lg};
 `;
 
 const Title = styled.h1`
-  margin-bottom: 1.5rem;
-  color: #333;
+  margin-bottom: ${props => props.theme.spacing.lg};
+  color: ${props => props.theme.colors.text};
 `;
 
 const Section = styled.section`
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  background-color: ${props => props.theme.colors.cardBackground};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.small};
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.xl};
 `;
 
 const SectionTitle = styled.h2`
-  margin-bottom: 1rem;
-  color: #444;
+  margin-bottom: ${props => props.theme.spacing.md};
+  color: ${props => props.theme.colors.text};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: ${props => props.theme.spacing.lg};
 `;
 
 const Label = styled.label`
   display: block;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+  font-weight: ${props => props.theme.typography.fontWeights.bold};
+  margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: ${props => props.theme.typography.fontSizes.xs};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.typography.fontSizes.md};
   min-height: 100px;
+  background-color: ${props => props.theme.colors.cardBackground};
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: ${props => props.theme.spacing.md};
+  margin-top: ${props => props.theme.spacing.md};
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  margin-bottom: ${props => props.theme.spacing.md};
   
   th, td {
-    border: 1px solid #ddd;
-    padding: 0.75rem;
+    border: 1px solid ${props => props.theme.colors.border};
+    padding: ${props => props.theme.typography.fontSizes.xs};
     text-align: left;
   }
   
   th {
-    background-color: #f5f5f5;
-    font-weight: bold;
+    background-color: ${props => props.theme.colors.grayLight};
+    font-weight: ${props => props.theme.typography.fontWeights.bold};
   }
   
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
+  tr:nth-child(even) td {
+    background-color: ${props => props.theme.colors.background};
   }
 `;
 
 const CycleCard = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.md};
+  transition: transform ${props => props.theme.transitions.short}, box-shadow ${props => props.theme.transitions.short};
+  background-color: ${props => props.theme.colors.cardBackground};
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: ${props => props.theme.shadows.medium};
   }
 `;
 
 const WeekCard = styled.div`
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  background-color: #f9f9f9;
+  border: 1px solid ${props => props.theme.colors.grayLight};
+  border-radius: ${props => props.theme.borderRadius.small};
+  padding: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.sm};
+  background-color: ${props => props.theme.colors.background};
 `;
 
-const IntensitySlider = styled.input`
+const IntensitySlider = styled.input.attrs({ type: 'range' })`
   width: 100%;
-  margin: 1rem 0;
+  margin: ${props => props.theme.spacing.md} 0;
 `;
 
-const VolumeSlider = styled.input`
+const VolumeSlider = styled.input.attrs({ type: 'range' })`
   width: 100%;
-  margin: 1rem 0;
+  margin: ${props => props.theme.spacing.md} 0;
 `;
 
 const SliderContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
+  margin-bottom: ${props => props.theme.spacing.md};
 `;
 
 const SliderLabels = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 0.25rem;
+  margin-top: ${props => props.theme.spacing.xs};
   
   span {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: ${props => props.theme.typography.fontSizes.sm};
+    color: ${props => props.theme.colors.textLight};
   }
 `;
 
 const SecondaryButton = styled(Button)`
-  background-color: #6c757d;
+  background-color: ${props => props.theme.colors.gray};
   
   &:hover {
-    background-color: #5a6268;
+    background-color: ${props => props.theme.colors.grayDark};
   }
 `;
 
 const PeriodizationTools = () => {
   const { state, dispatch } = useWorkout();
   const navigate = useNavigate();
+  const theme = useTheme();
   
   // State for periodization plan
   const [periodizationPlan, setPeriodizationPlan] = useState({
@@ -443,7 +449,11 @@ const PeriodizationTools = () => {
                 <option value="block">Block-Periodisierung</option>
                 <option value="conjugate">Konjugat-Periodisierung</option>
               </Select>
-              <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+              <p style={{ 
+                fontSize: theme.typography.fontSizes.sm, 
+                color: theme.colors.textLight, 
+                marginTop: theme.spacing.sm 
+              }}>
                 {getCycleTypeDescription(periodizationPlan.type)}
               </p>
             </FormGroup>
@@ -477,7 +487,7 @@ const PeriodizationTools = () => {
                     <p><strong>Ziel:</strong> {cycle.goal}</p>
                     <p><strong>Dauer:</strong> {cycle.weekCount} Wochen</p>
                     
-                    <div style={{ marginTop: '1rem' }}>
+                    <div style={{ marginTop: theme.spacing.md }}>
                       <h4>Wochen:</h4>
                       {cycle.weeks.map((week, i) => (
                         <WeekCard key={i}>
@@ -503,7 +513,7 @@ const PeriodizationTools = () => {
               <p>Noch keine Mesozyklen hinzugefügt. Füge unten einen neuen Mesozyklus hinzu.</p>
             )}
             
-            <div style={{ marginTop: '2rem' }}>
+            <div style={{ marginTop: theme.spacing.xl }}>
               <h3>Neuen Mesozyklus hinzufügen</h3>
               
               <FormGroup>
@@ -544,7 +554,7 @@ const PeriodizationTools = () => {
               </FormGroup>
               
               {currentMesoCycle.weeks.length > 0 && (
-                <div style={{ marginTop: '1.5rem' }}>
+                <div style={{ marginTop: theme.spacing.lg }}>
                   <h4>Wochenplanung:</h4>
                   
                   {currentMesoCycle.weeks.map((week, index) => (
@@ -657,7 +667,7 @@ const PeriodizationTools = () => {
           </FormGroup>
           
           {currentMesoCycle.weeks.length > 0 && (
-            <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginTop: theme.spacing.lg }}>
               <h4>Wochenplanung:</h4>
               
               {currentMesoCycle.weeks.map((week, index) => (

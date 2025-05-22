@@ -5,6 +5,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { format } from 'date-fns';
 
 const DashboardContainer = styled.div`
   display: grid;
@@ -46,7 +47,7 @@ const StatLabel = styled.div`
   margin-top: 0.25rem;
 `;
 
-const RecentPlansContainer = styled.div`
+const RecentWorkoutsContainer = styled.div`
   margin-top: 2rem;
 `;
 
@@ -64,41 +65,64 @@ const ListLayoutContainer = styled.div`
   margin-top: ${props => props.theme.spacing.md};
 `;
 
-const PlanCard = styled(Card)`
+const ClickableCard = styled(Card)`
   height: 100%;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.primary}, 0 8px 16px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+  }
 `;
 
-const PlanListItem = styled(Card)`
+const ClickableListItem = styled(Card)`
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: ${props => props.theme.spacing.md};
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   
+  &:hover {
+    background-color: ${props => props.theme.colors.grayLight};
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.primary};
+    background-color: ${props => props.theme.colors.grayLight};
+  }
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
   }
 `;
 
-const PlanInfo = styled.div`
+const WorkoutInfo = styled.div`
   flex: 1;
   padding: 0 ${props => props.theme.spacing.md};
 `;
 
-const PlanTitle = styled.h3`
+const WorkoutTitle = styled.h3`
   margin: 0;
   margin-bottom: ${props => props.theme.spacing.xs};
   color: ${props => props.theme.colors.text};
 `;
 
-const PlanDescription = styled.p`
+const WorkoutDescription = styled.p`
   margin: 0;
   color: ${props => props.theme.colors.textLight};
 `;
 
-const PlanMeta = styled.div`
+const WorkoutMeta = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.md};
   margin-top: ${props => props.theme.spacing.xs};
@@ -106,15 +130,26 @@ const PlanMeta = styled.div`
   font-size: ${props => props.theme.typography.fontSizes.sm};
 `;
 
-const PlanActions = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.sm};
-  margin-top: auto;
-  
-  @media (max-width: 768px) {
-    margin-top: ${props => props.theme.spacing.md};
-    width: 100%;
-  }
+const ExerciseList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+  margin: ${props => props.theme.spacing.md} 0;
+`;
+
+const ExerciseItem = styled.li`
+  padding: ${props => props.theme.spacing.xs} 0;
+  font-size: 0.9rem;
+`;
+
+const Badge = styled.span`
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: ${props => props.theme.borderRadius.small};
+  background-color: ${props => props.theme.colors.primaryLight};
+  color: ${props => props.theme.colors.primary};
+  margin-right: ${props => props.theme.spacing.xs};
 `;
 
 const Dashboard = () => {
@@ -127,12 +162,13 @@ const Dashboard = () => {
   const calendarEvents = state?.calendarEvents || [];
   const workoutHistory = state?.workoutHistory || [];
   
-  // Get recent plans (up to 3)
-  const recentPlans = [...workoutPlans].sort((a, b) => {
-    const dateA = a.createdAt || 0;
-    const dateB = b.createdAt || 0;
-    return dateB - dateA;
-  }).slice(0, 3);
+  // Get recent workouts (up to 3)
+  const recentWorkouts = [...workoutHistory].sort((a, b) => {
+    // Sort by timestamp or date, whichever is available
+    const timeA = a.timestamp || new Date(a.date).getTime() || 0;
+    const timeB = b.timestamp || new Date(b.date).getTime() || 0;
+    return timeB - timeA;
+  }).slice(0, userPreferences.showMaxRecentWorkouts || 3);
 
   // Helper function to format date 
   const formatDate = (timestamp) => {
@@ -143,6 +179,16 @@ const Dashboard = () => {
       month: 'short', 
       day: 'numeric'
     });
+  };
+
+  // Format date from ISO string
+  const formatDateFromString = (dateString) => {
+    if (!dateString) return 'Kein Datum';
+    try {
+      return format(new Date(dateString), 'dd.MM.yyyy');
+    } catch (error) {
+      return 'Ungültiges Datum';
+    }
   };
   
   return (
@@ -191,59 +237,74 @@ const Dashboard = () => {
         </Card>
       </DashboardContainer>
       
-      <RecentPlansContainer>
-        <h2>Deine letzten Trainingspläne</h2>
-        {recentPlans.length > 0 ? (
+      <RecentWorkoutsContainer>
+        <h2>Deine letzten Workouts</h2>
+        {recentWorkouts.length > 0 ? (
           userPreferences.dashboardLayout === 'grid' ? (
             // Grid Layout
             <GridLayoutContainer>
-              {recentPlans.map(plan => (
-                <PlanCard key={plan.id}>
-                  <Card.Header>{plan.name}</Card.Header>
-                  <Card.Body>
-                    <p>{plan.description || 'Keine Beschreibung.'}</p>
-                    <p><strong>Tage:</strong> {plan.days ? plan.days.length : 0}</p>
-                    <p><strong>Erstellt:</strong> {formatDate(plan.createdAt)}</p>
-                  </Card.Body>
-                  <Card.Footer>
-                    <PlanActions>
-                      <Button as={Link} to={`/edit-plan/${plan.id}`} variant="primary">Bearbeiten</Button>
-                      <Button as={Link} to="/calendar" variant="secondary">Planen</Button>
-                    </PlanActions>
-                  </Card.Footer>
-                </PlanCard>
+              {recentWorkouts.map(workout => (
+                <Link key={workout.id} to={`/workout/${workout.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <ClickableCard>
+                    <Card.Header>
+                      {workout.name || 'Unbenanntes Workout'}
+                    </Card.Header>
+                    <Card.Body>
+                      <p><strong>Datum:</strong> {formatDateFromString(workout.date)}</p>
+                      <p><strong>Übungen:</strong> {workout.exercises?.length || 0}</p>
+                      
+                      {workout.exercises && workout.exercises.length > 0 && (
+                        <ExerciseList>
+                          {workout.exercises.slice(0, 3).map(exercise => (
+                            <ExerciseItem key={exercise.exerciseId || exercise.id}>
+                              <Badge>{exercise.performedSets?.length || exercise.sets?.length || 0} Sätze</Badge>
+                              {exercise.name}
+                            </ExerciseItem>
+                          ))}
+                        </ExerciseList>
+                      )}
+                    </Card.Body>
+                  </ClickableCard>
+                </Link>
               ))}
             </GridLayoutContainer>
           ) : (
             // List Layout
             <ListLayoutContainer>
-              {recentPlans.map(plan => (
-                <PlanListItem key={plan.id}>
-                  <PlanInfo>
-                    <PlanTitle>{plan.name}</PlanTitle>
-                    <PlanDescription>{plan.description || 'Keine Beschreibung.'}</PlanDescription>
-                    <PlanMeta>
-                      <span>Tage: {plan.days ? plan.days.length : 0}</span>
-                      <span>Erstellt: {formatDate(plan.createdAt)}</span>
-                    </PlanMeta>
-                  </PlanInfo>
-                  <PlanActions>
-                    <Button as={Link} to={`/edit-plan/${plan.id}`} variant="primary">Bearbeiten</Button>
-                    <Button as={Link} to="/calendar" variant="secondary">Planen</Button>
-                  </PlanActions>
-                </PlanListItem>
+              {recentWorkouts.map(workout => (
+                <Link key={workout.id} to={`/workout/${workout.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <ClickableListItem>
+                    <WorkoutInfo>
+                      <WorkoutTitle>{workout.name || 'Unbenanntes Workout'}</WorkoutTitle>
+                      <WorkoutDescription>
+                        Datum: {formatDateFromString(workout.date)} - Übungen: {workout.exercises?.length || 0}
+                      </WorkoutDescription>
+                      {workout.exercises && workout.exercises.length > 0 && (
+                        <ExerciseList style={{ margin: '8px 0 0 0' }}>
+                          {workout.exercises.slice(0, 2).map(exercise => (
+                            <ExerciseItem key={exercise.exerciseId || exercise.id} style={{ fontSize: '0.8rem', padding: '2px 0'}}>
+                              <Badge style={{fontSize: '0.7rem', padding: '1px 4px'}}>{exercise.performedSets?.length || exercise.sets?.length || 0} Sätze</Badge>
+                              {exercise.name}
+                            </ExerciseItem>
+                          ))}
+                          {workout.exercises.length > 2 && <ExerciseItem style={{ fontSize: '0.8rem', color: 'gray' }}>... und {workout.exercises.length - 2} weitere</ExerciseItem>}
+                        </ExerciseList>
+                      )}
+                    </WorkoutInfo>
+                  </ClickableListItem>
+                </Link>
               ))}
             </ListLayoutContainer>
           )
         ) : (
           <Card>
             <Card.Body>
-              <p>Du hast noch keine Trainingspläne erstellt.</p>
-              <Button as={Link} to="/create-plan">Ersten Plan erstellen</Button>
+              <p>Du hast noch keine Workouts erfasst.</p>
+              <Button as={Link} to="/workout-tracker">Erstes Workout erfassen</Button>
             </Card.Body>
           </Card>
         )}
-      </RecentPlansContainer>
+      </RecentWorkoutsContainer>
     </div>
   );
 };

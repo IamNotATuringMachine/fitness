@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { Card, Button, Alert } from '../components/ui';
+import styled, { keyframes } from 'styled-components';
+import { Card, Button, Alert, Spinner } from '../components/ui';
 
 const PageContainer = styled.div`
   display: flex;
@@ -59,7 +59,7 @@ const Select = styled.select`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -70,7 +70,7 @@ const SearchInput = styled.input`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -216,12 +216,24 @@ const Modal = styled.div`
   z-index: ${props => props.theme.zIndices.modal};
 `;
 
+const scaleAndFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
 const ModalContent = styled(Card)`
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   padding: ${props => props.theme.spacing.lg};
+  animation: ${scaleAndFadeIn} ${props => props.theme.transitions.short} ease-out;
 `;
 
 const ModalHeader = styled.div`
@@ -271,7 +283,7 @@ const TextArea = styled.textarea`
   width: 100%;
   padding: ${props => props.theme.spacing.sm};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-family: inherit;
   font-size: ${props => props.theme.typography.fontSizes.md};
   background-color: ${props => props.theme.colors.inputBackground};
@@ -618,7 +630,7 @@ const FeedbackManagement = () => {
         </FiltersContainer>
         
         {loading ? (
-          <p>Lade Feedback...</p>
+          <Spinner centered size="60px" />
         ) : filteredFeedbackList.length === 0 ? (
           <p>Keine Feedback-Einträge gefunden.</p>
         ) : (

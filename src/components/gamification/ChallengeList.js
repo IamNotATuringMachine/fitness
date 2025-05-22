@@ -9,7 +9,7 @@ const ChallengesContainer = styled.div`
 const Challenge = styled.div`
   padding: 15px;
   background-color: ${props => props.theme.colors.cardBackground};
-  border-radius: 8px;
+  border-radius: ${props => props.theme.borderRadius.medium};
   border-left: 5px solid ${props => props.completed 
     ? props.theme.colors.success 
     : props.active 
@@ -65,7 +65,7 @@ const ProgressContainer = styled.div`
 const ProgressBar = styled.div`
   height: 10px;
   background-color: ${props => props.theme.colors.background2};
-  border-radius: 5px;
+  border-radius: ${props => props.theme.borderRadius.small};
   overflow: hidden;
   margin-bottom: 5px;
 `;

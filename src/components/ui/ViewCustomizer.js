@@ -53,7 +53,7 @@ const ToggleSwitch = styled.input.attrs({ type: 'checkbox' })`
     position: absolute;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: ${props => props.theme.borderRadius.round};
     top: 2px;
     left: ${props => props.checked ? '22px' : '2px'};
     background-color: white;

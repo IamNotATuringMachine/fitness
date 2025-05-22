@@ -49,7 +49,7 @@ const AdminLink = styled(Link)`
   background-color: ${props => props.theme.colors.primary};
   color: ${props => props.theme.colors.white};
   text-decoration: none;
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   transition: background-color 0.2s;
   
   &:hover {

@@ -54,7 +54,7 @@ const ImportLabel = styled.label`
   padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
   background-color: ${props => props.theme.colors.primary};
   color: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.default};
+  border-radius: ${props => props.theme.borderRadius.medium};
   cursor: pointer;
   transition: background-color ${props => props.theme.transitions.short};
   font-weight: ${props => props.theme.typography.fontWeights.medium};
@@ -62,6 +62,16 @@ const ImportLabel = styled.label`
   &:hover {
     background-color: ${props => props.theme.colors.primaryDark};
   }
+`;
+
+const FileInputLabel = styled.label`
+  display: inline-block;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  background-color: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.white};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  cursor: pointer;
+  transition: background-color ${props => props.theme.transitions.short};
 `;
 
 const DataImportExport = () => {

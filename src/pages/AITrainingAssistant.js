@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import AIAssistant from '../components/workout/AIAssistant';
 import RecoveryAdvisor from '../components/workout/RecoveryAdvisor';
 import ExerciseAlternatives from '../components/workout/ExerciseAlternatives';
+import { Spinner } from '../components/ui';
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -174,14 +175,14 @@ const AITrainingAssistant = () => {
           onApplySuggestion={handleApplySuggestion}
         />
       ) : (
-        <p>Lade Trainingsdaten...</p>
+        <Spinner centered />
       )}
       
       <SectionTitle>Regenerationsberücksichtigung</SectionTitle>
       {workoutHistory ? (
         <RecoveryAdvisor workoutHistory={workoutHistory} />
       ) : (
-        <p>Lade Trainingsdaten...</p>
+        <Spinner centered />
       )}
       
       <SectionTitle>Übungsbewertung und Alternativen</SectionTitle>

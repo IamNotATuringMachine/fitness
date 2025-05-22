@@ -39,6 +39,12 @@ const IconButton = styled.button`
   &:hover {
     background-color: ${props => props.theme.colors.grayLight};
   }
+  
+  &:focus {
+    outline: none;
+    background-color: ${props => props.theme.colors.grayLight};
+    box-shadow: 0 0 0 2px ${props => props.theme.colors.primary} inset;
+  }
 `;
 
 const SettingsLink = styled(Link)`

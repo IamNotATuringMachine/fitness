@@ -154,10 +154,11 @@ const InfoMessage = styled.div`
   font-size: 0.9rem;
 `;
 
-const AdvancedTrainingMethod = ({ value, onChange, exercises }) => {
+const AdvancedTrainingMethod = ({ value, onChange, exercises = [] }) => {
   const { state } = useWorkout();
   const [trainingMethod, setTrainingMethod] = useState('Standard');
   const [exerciseGroups, setExerciseGroups] = useState([]);
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState('');
   
   // Initialize with standard method or existing data
   useEffect(() => {
@@ -273,7 +274,8 @@ const AdvancedTrainingMethod = ({ value, onChange, exercises }) => {
   
   // Get description for selected training method
   const getMethodDescription = () => {
-    const method = state.trainingMethods.find(m => m.name === trainingMethod);
+    const methods = state.trainingMethods || [];
+    const method = methods.find(m => m.name === trainingMethod);
     return method ? method.description : '';
   };
   
@@ -295,6 +297,16 @@ const AdvancedTrainingMethod = ({ value, onChange, exercises }) => {
     }
   };
   
+  // Ensure trainingMethods exists before mapping
+  const trainingMethods = state?.trainingMethods || [
+    { id: '1', name: 'Standard', description: 'Normales Training mit Sätzen und Wiederholungen' }
+  ];
+  
+  // Filter exercises by muscle group
+  const filteredExercises = selectedMuscleGroup
+    ? exercises.filter(ex => ex.muscleGroups.includes(selectedMuscleGroup))
+    : exercises;
+  
   return (
     <Container>
       <Header>
@@ -307,7 +319,7 @@ const AdvancedTrainingMethod = ({ value, onChange, exercises }) => {
           value={trainingMethod}
           onChange={(e) => setTrainingMethod(e.target.value)}
         >
-          {state.trainingMethods.map(method => (
+          {trainingMethods.map(method => (
             <option key={method.id} value={method.name}>
               {method.name}
             </option>
@@ -355,18 +367,41 @@ const AdvancedTrainingMethod = ({ value, onChange, exercises }) => {
                   </div>
                   
                   <FormGroup>
+                    <Label>Muskelgruppe</Label>
+                    <Select
+                      value={selectedMuscleGroup}
+                      onChange={(e) => setSelectedMuscleGroup(e.target.value)}
+                    >
+                      <option value="">Alle Muskelgruppen</option>
+                      <option value="Brustmuskulatur">Brustmuskulatur (Pectoralis)</option>
+                      <option value="Rückenmuskulatur">Rückenmuskulatur (Latissimus, Trapezius)</option>
+                      <option value="Beinmuskulatur">Beinmuskulatur (Quadrizeps, Beinbeuger)</option>
+                      <option value="Schultermuskulatur">Schultermuskulatur (Deltoideus)</option>
+                      <option value="Bizeps">Bizeps</option>
+                      <option value="Trizeps">Trizeps</option>
+                      <option value="Bauchmuskulatur">Bauchmuskulatur</option>
+                    </Select>
+                  </FormGroup>
+                  
+                  <FormGroup>
                     <Label>Übung auswählen</Label>
                     <Select
                       value={exercise.exerciseId}
                       onChange={(e) => handleExerciseChange(group.id, exercise.id, 'exerciseId', e.target.value)}
                     >
                       <option value="">Übung auswählen...</option>
-                      {exercises.map(ex => (
+                      {filteredExercises.map(ex => (
                         <option key={ex.id} value={ex.id}>
                           {ex.name}
                         </option>
                       ))}
                     </Select>
+                    {filteredExercises.length === 0 && (
+                      <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                        <em>Keine Übungen gefunden. Bitte verwenden Sie den "Übungsdatenbank zurücksetzen"-Button 
+                        auf der "Trainingsplan erstellen"-Seite.</em>
+                      </div>
+                    )}
                   </FormGroup>
                   
                   <ExerciseParameters>

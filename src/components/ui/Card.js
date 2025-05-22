@@ -9,18 +9,18 @@ const CardContainer = styled.div`
   transition: transform ${props => props.theme.transitions.short}, 
               box-shadow ${props => props.theme.transitions.short};
   
-  ${props => props.hoverable && `
+  ${props => props.$hoverable && `
     &:hover {
       transform: translateY(-4px);
       box-shadow: ${props.theme.shadows.medium};
     }
   `}
   
-  ${props => props.clickable && `
+  ${props => props.$clickable && `
     cursor: pointer;
   `}
   
-  ${props => props.bordered && `
+  ${props => props.$bordered && `
     border: 1px solid ${props.theme.colors.border};
   `}
 `;
@@ -35,7 +35,7 @@ const CardHeader = styled.div`
     text-align: center;
   `}
   
-  ${props => props.accent && `
+  ${props => props.$accent && `
     background-color: ${props.theme.colors.primaryLight};
     color: ${props.theme.colors.primary};
   `}
@@ -58,7 +58,7 @@ const CardFooter = styled.div`
     text-align: center;
   `}
   
-  ${props => props.actions && `
+  ${props => props.$actions && `
     display: flex;
     justify-content: flex-end;
     gap: ${props.theme.spacing.sm};
@@ -74,9 +74,9 @@ export const Card = ({
 }) => {
   return (
     <CardContainer 
-      hoverable={hoverable} 
-      clickable={clickable} 
-      bordered={bordered} 
+      $hoverable={hoverable} 
+      $clickable={clickable} 
+      $bordered={bordered} 
       {...props}
     >
       {children}
@@ -91,7 +91,7 @@ export const Header = ({
   ...props 
 }) => {
   return (
-    <CardHeader center={center} accent={accent} {...props}>
+    <CardHeader center={center} $accent={accent} {...props}>
       {children}
     </CardHeader>
   );
@@ -116,7 +116,7 @@ export const Footer = ({
   ...props 
 }) => {
   return (
-    <CardFooter center={center} actions={actions} {...props}>
+    <CardFooter center={center} $actions={actions} {...props}>
       {children}
     </CardFooter>
   );

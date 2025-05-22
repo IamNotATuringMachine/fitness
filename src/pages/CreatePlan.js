@@ -1,6 +1,20 @@
-import React, { useState, useEffect } from 'react';import styled from 'styled-components';import { useNavigate, useLocation } from 'react-router-dom';import { v4 as uuidv4 } from 'uuid';import Card from '../components/ui/Card';import Button from '../components/ui/Button';import { useWorkout } from '../context/WorkoutContext';
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { useWorkout } from '../context/WorkoutContext';
 import AdvancedTrainingMethod from '../components/workout/AdvancedTrainingMethod';
-import NotesHistory from '../components/notes/NotesHistory';
+
+// Fallback exercise options in case the context is empty
+const initialExerciseOptions = [
+  { value: 'ex1', label: 'Kniebeugen' },
+  { value: 'ex2', label: 'Bankdrücken' },
+  { value: 'ex3', label: 'Kreuzheben' },
+  { value: 'ex4', label: 'Klimmzüge' },
+  { value: 'ex5', label: 'Schulterdrücken' }
+];
 
 const FormContainer = styled.div`
   max-width: 800px;
@@ -119,6 +133,70 @@ const Select = styled.select`
   }
 `;
 
+const SearchableSelect = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const CustomSelect = styled.div`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  &:focus, &:hover {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  &:after {
+    content: "▼";
+    font-size: 0.8rem;
+    color: #555;
+  }
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  font-size: 0.9rem;
+`;
+
+const SelectOptions = styled.div`
+  position: absolute;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  background-color: white;
+  z-index: 10;
+`;
+
+const OptionItem = styled.div`
+  padding: 0.75rem;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #f0f0f0;
+  }
+  
+  &.selected {
+    background-color: #e3f2fd;
+  }
+`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 0.5rem;
@@ -175,6 +253,16 @@ const CreatePlan = () => {
   const location = useLocation();
   const { state: contextState, dispatch } = useWorkout();
   
+  // Ensure exercises are loaded
+  useEffect(() => {
+    if (!contextState.exercises || contextState.exercises.length === 0) {
+      // If there are no exercises, fetch default ones or reload
+      console.log("No exercises found! Resetting to default state...");
+      localStorage.removeItem('workoutState');
+      window.location.reload();
+    }
+  }, [contextState.exercises]);
+  
   const [plan, setPlan] = useState({
     name: '',
     description: '',
@@ -190,25 +278,41 @@ const CreatePlan = () => {
   const [showDayForm, setShowDayForm] = useState(false);
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [selectedExerciseId, setSelectedExerciseId] = useState('');
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState('');
+  const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
   const [exerciseParams, setExerciseParams] = useState({
     sets: '',
     reps: '',
     weight: '',
-    duration: '',
+    repsInReserve: '',
     rest: '',
     notes: ''
   });
   
-  // Use template data if provided via location state
+  // Effect to handle clicking outside the exercise dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdown = document.getElementById('exerciseDropdown');
+      const options = document.getElementById('exerciseOptions');
+      
+      if (dropdown && options && !dropdown.contains(event.target)) {
+        options.style.display = 'none';
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
   useEffect(() => {
     if (location.state && location.state.template) {
       const template = location.state.template;
       
-      // Set up initial plan based on template data
       let planName = '';
       let planDescription = '';
       
-      // Determine plan name and description based on goal
       if (template.goal === 'strength') {
         planName = 'Kraftaufbau-Plan';
         planDescription = 'Trainingsplan für Kraftaufbau basierend auf meinem Fitnesslevel und meinen Präferenzen.';
@@ -238,12 +342,10 @@ const CreatePlan = () => {
         days: []
       });
       
-      // Create suitable days based on preferences
       const targetDays = template.trainingDays === '1-2' ? 2 :
                         template.trainingDays === '3' ? 3 : 5;
       
       if (targetDays <= 2) {
-        // Create a suitable 2-day split (e.g., upper/lower body)
         const days = [
           {
             id: uuidv4(),
@@ -262,7 +364,6 @@ const CreatePlan = () => {
         ];
         setPlan(prev => ({ ...prev, days }));
       } else if (targetDays === 3) {
-        // Create a suitable 3-day split
         const days = [
           {
             id: uuidv4(),
@@ -288,7 +389,6 @@ const CreatePlan = () => {
         ];
         setPlan(prev => ({ ...prev, days }));
       } else {
-        // Create a suitable 5-day split
         const days = [
           {
             id: uuidv4(),
@@ -331,7 +431,6 @@ const CreatePlan = () => {
     }
   }, [location.state]);
   
-  // Handle plan basic info changes
   const handlePlanChange = (e) => {
     setPlan({
       ...plan,
@@ -339,7 +438,6 @@ const CreatePlan = () => {
     });
   };
   
-  // Handle day name change
   const handleDayChange = (e) => {
     setCurrentDay({
       ...currentDay,
@@ -347,7 +445,6 @@ const CreatePlan = () => {
     });
   };
   
-  // Handle add day
   const handleAddDay = () => {
     if (!currentDay.name.trim()) {
       alert('Bitte gib einen Namen für den Trainingstag ein.');
@@ -375,7 +472,6 @@ const CreatePlan = () => {
     setShowDayForm(false);
   };
   
-  // Handle delete day
   const handleDeleteDay = (dayId) => {
     setPlan({
       ...plan,
@@ -383,7 +479,6 @@ const CreatePlan = () => {
     });
   };
   
-  // Handle exercise parameter changes
   const handleExerciseParamChange = (e) => {
     setExerciseParams({
       ...exerciseParams,
@@ -391,32 +486,29 @@ const CreatePlan = () => {
     });
   };
   
-  // Handle add exercise to day
   const handleAddExercise = (dayId) => {
     if (!selectedExerciseId) {
       alert('Bitte wähle eine Übung aus.');
       return;
     }
     
-    // Find the exercise from the global state
     const selectedExercise = contextState.exercises.find(ex => ex.id === selectedExerciseId);
     
     if (!selectedExercise) return;
     
-    // Create a new exercise instance
     const newExercise = {
       id: uuidv4(),
       exerciseId: selectedExerciseId,
       name: selectedExercise.name,
+      muscleGroups: selectedExercise.muscleGroups || [],
       sets: exerciseParams.sets ? parseInt(exerciseParams.sets, 10) : null,
       reps: exerciseParams.reps ? parseInt(exerciseParams.reps, 10) : null,
       weight: exerciseParams.weight ? parseFloat(exerciseParams.weight) : null,
-      duration: exerciseParams.duration || null,
+      repsInReserve: exerciseParams.repsInReserve ? parseInt(exerciseParams.repsInReserve, 10) : null,
       rest: exerciseParams.rest || null,
       notes: exerciseParams.notes || null
     };
     
-    // Add exercise to the specified day
     setPlan({
       ...plan,
       days: plan.days.map(day => {
@@ -430,13 +522,14 @@ const CreatePlan = () => {
       })
     });
     
-    // Reset form
     setSelectedExerciseId('');
+    setSelectedMuscleGroup('');
+    setExerciseSearchTerm('');
     setExerciseParams({
       sets: '',
       reps: '',
       weight: '',
-      duration: '',
+      repsInReserve: '',
       rest: '',
       notes: ''
     });
@@ -444,7 +537,6 @@ const CreatePlan = () => {
     setShowExerciseForm(false);
   };
   
-  // Handle remove exercise from day
   const handleRemoveExercise = (dayId, exerciseId) => {
     setPlan({
       ...plan,
@@ -460,7 +552,6 @@ const CreatePlan = () => {
     });
   };
   
-  // New handler for adding advanced training method
   const handleAddAdvancedMethod = (dayId) => {
     setPlan({
       ...plan,
@@ -483,7 +574,6 @@ const CreatePlan = () => {
     });
   };
   
-  // New handler for updating advanced training method
   const handleUpdateAdvancedMethod = (dayId, methodId, methodData) => {
     setPlan({
       ...plan,
@@ -507,7 +597,6 @@ const CreatePlan = () => {
     });
   };
   
-  // New handler for removing advanced training method
   const handleRemoveAdvancedMethod = (dayId, methodId) => {
     setPlan({
       ...plan,
@@ -523,7 +612,6 @@ const CreatePlan = () => {
     });
   };
   
-  // Handle save plan
   const handleSavePlan = () => {
     if (!plan.name.trim()) {
       alert('Bitte gib einen Namen für den Trainingsplan ein.');
@@ -535,13 +623,27 @@ const CreatePlan = () => {
       return;
     }
     
+    // Ensure days array is valid
+    if (!Array.isArray(plan.days)) {
+      console.error('Days is not an array before saving:', plan.days);
+      alert('Fehler: Trainingstage sind ungültig. Bitte versuche es erneut oder lade die Seite neu.');
+      return;
+    }
+    
+    // Log the plan structure before creating newPlan
+    console.log('Plan state before creating newPlan for save:', JSON.parse(JSON.stringify(plan)));
+    console.log('Days count:', plan.days.length);
+    console.log('Days are array:', Array.isArray(plan.days));
+
     const newPlan = {
       id: uuidv4(),
       name: plan.name.trim(),
       description: plan.description.trim(),
-      days: plan.days,
+      days: [...plan.days], // Ensure we create a new array
       createdAt: new Date().toISOString()
     };
+    
+    console.log('New plan to be dispatched:', JSON.parse(JSON.stringify(newPlan)));
     
     dispatch({
       type: 'ADD_WORKOUT_PLAN',
@@ -554,6 +656,38 @@ const CreatePlan = () => {
   return (
     <div>
       <h1>Neuen Trainingsplan erstellen</h1>
+      
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <Button 
+          variant="secondary"
+          onClick={() => {
+            console.log('Exercises:', contextState.exercises);
+            console.log('Exercise count:', contextState.exercises ? contextState.exercises.length : 0);
+            if (contextState.exercises && contextState.exercises.length > 0) {
+              alert(`${contextState.exercises.length} Übungen gefunden!`);
+            } else {
+              alert('Keine Übungen gefunden! Datenbank zurücksetzen...');
+              localStorage.removeItem('workoutState');
+              window.location.reload();
+            }
+          }}
+          style={{ fontSize: '0.9rem' }}
+        >
+          Debug-Übungen
+        </Button>
+        <Button 
+          variant="secondary"
+          onClick={() => {
+            if (window.confirm('Diese Aktion setzt die Übungsdatenbank zurück. Fortfahren?')) {
+              localStorage.removeItem('workoutState');
+              window.location.reload();
+            }
+          }}
+          style={{ fontSize: '0.9rem' }}
+        >
+          Übungsdatenbank zurücksetzen
+        </Button>
+      </div>
       
       <FormContainer>
         <Card>
@@ -681,7 +815,7 @@ const CreatePlan = () => {
                           <strong>Sätze:</strong> {exercise.sets}
                           {exercise.reps && <> | <strong>Wiederholungen:</strong> {exercise.reps}</>}
                           {exercise.weight && <> | <strong>Gewicht:</strong> {exercise.weight} kg</>}
-                          {exercise.duration && <> | <strong>Dauer:</strong> {exercise.duration} s</>}
+                          {exercise.repsInReserve && <> | <strong>RIR:</strong> {exercise.repsInReserve}</>}
                           {exercise.rest && <> | <strong>Pause:</strong> {exercise.rest} s</>}
                         </div>
                         {exercise.notes && (
@@ -692,7 +826,6 @@ const CreatePlan = () => {
                       </ExerciseItem>
                     ))}
                     
-                    {/* Display advanced training methods */}
                     {day.advancedMethods && day.advancedMethods.map(method => (
                       <Card key={method.id} style={{ marginBottom: '1rem', border: '1px solid #007bff' }}>
                         <Card.Header style={{ backgroundColor: '#f0f7ff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -714,11 +847,13 @@ const CreatePlan = () => {
                     <Button 
                       onClick={() => {
                         setSelectedExerciseId('');
+                        setSelectedMuscleGroup('');
+                        setExerciseSearchTerm('');
                         setExerciseParams({
                           sets: '',
                           reps: '',
                           weight: '',
-                          duration: '',
+                          repsInReserve: '',
                           rest: '',
                           notes: ''
                         });
@@ -740,20 +875,103 @@ const CreatePlan = () => {
                     {showExerciseForm === day.id && (
                       <ExerciseForm>
                         <ExerciseSelector>
-                          <Label htmlFor="exercise">Übung auswählen</Label>
+                          <Label htmlFor="muscleGroup">Muskelgruppe auswählen</Label>
                           <Select 
-                            id="exercise" 
-                            value={selectedExerciseId}
-                            onChange={(e) => setSelectedExerciseId(e.target.value)}
-                            required
+                            id="muscleGroup" 
+                            value={selectedMuscleGroup}
+                            onChange={(e) => {
+                              setSelectedMuscleGroup(e.target.value);
+                              setSelectedExerciseId('');
+                            }}
                           >
-                            <option value="">Übung auswählen...</option>
-                            {contextState.exercises.map(exercise => (
-                              <option key={exercise.id} value={exercise.id}>
-                                {exercise.name} ({exercise.muscleGroups.join(', ')})
-                              </option>
-                            ))}
+                            <option value="">Alle Muskelgruppen</option>
+                            <option value="Brustmuskulatur">Brustmuskulatur (Pectoralis)</option>
+                            <option value="Rückenmuskulatur">Rückenmuskulatur (Latissimus, Trapezius)</option>
+                            <option value="Beinmuskulatur">Beinmuskulatur (Quadrizeps, Beinbeuger)</option>
+                            <option value="Schultermuskulatur">Schultermuskulatur (Deltoideus)</option>
+                            <option value="Bizeps">Bizeps</option>
+                            <option value="Trizeps">Trizeps</option>
+                            <option value="Bauchmuskulatur">Bauchmuskulatur</option>
                           </Select>
+                        </ExerciseSelector>
+
+                        <ExerciseSelector>
+                          <Label htmlFor="exercise">Übung auswählen</Label>
+                          <SearchableSelect id="exerciseDropdown">
+                            <CustomSelect
+                              onClick={() => {
+                                const options = document.getElementById('exerciseOptions');
+                                if (options) {
+                                  options.style.display = options.style.display === 'block' ? 'none' : 'block';
+                                }
+                              }}
+                            >
+                              {selectedExerciseId 
+                                ? contextState.exercises.find(ex => ex.id === selectedExerciseId)?.name || 'Übung auswählen...'
+                                : 'Übung auswählen...'
+                              }
+                            </CustomSelect>
+                            <SelectOptions id="exerciseOptions" style={{display: 'none'}}>
+                              <SearchInput 
+                                placeholder="Übung suchen..." 
+                                value={exerciseSearchTerm}
+                                onChange={(e) => setExerciseSearchTerm(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                autoFocus
+                              />
+                              <div style={{ padding: '5px', color: '#666', fontSize: '0.8rem' }}>
+                                Gefundene Übungen: {contextState.exercises ? contextState.exercises.length : 0}
+                              </div>
+                              {contextState.exercises && contextState.exercises.length > 0 ? (
+                                contextState.exercises
+                                  .filter(exercise => {
+                                    // Check if muscle group is selected and exercise has that muscle group
+                                    const matchesMuscleGroup = !selectedMuscleGroup || 
+                                      (exercise.muscleGroups && 
+                                       Array.isArray(exercise.muscleGroups) && 
+                                       exercise.muscleGroups.includes(selectedMuscleGroup));
+                                    
+                                    // Check if search term matches exercise name
+                                    const matchesSearchTerm = !exerciseSearchTerm || 
+                                      (exercise.name && 
+                                       exercise.name.toLowerCase().includes(exerciseSearchTerm.toLowerCase()));
+                                    
+                                    return matchesMuscleGroup && matchesSearchTerm;
+                                  })
+                                  .map(exercise => (
+                                    <OptionItem 
+                                      key={exercise.id}
+                                      className={selectedExerciseId === exercise.id ? 'selected' : ''}
+                                      onClick={() => {
+                                        setSelectedExerciseId(exercise.id);
+                                        document.getElementById('exerciseOptions').style.display = 'none';
+                                      }}
+                                    >
+                                      {exercise.name} ({exercise.muscleGroups && Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.join(', ') : 'Keine Muskelgruppe'})
+                                    </OptionItem>
+                                  ))
+                              ) : (
+                                <OptionItem>Keine Übungen gefunden</OptionItem>
+                              )}
+                            </SelectOptions>
+                          </SearchableSelect>
+
+                          {/* Fallback standard select as a backup */}
+                          {(!contextState.exercises || contextState.exercises.length === 0) && (
+                            <div style={{ marginTop: '10px' }}>
+                              <p style={{ color: 'red', fontSize: '0.9rem' }}>Keine Übungen gefunden! Bitte Datenbank zurücksetzen.</p>
+                              <Select 
+                                id="exercise-fallback" 
+                                value={selectedExerciseId}
+                                onChange={(e) => setSelectedExerciseId(e.target.value)}
+                              >
+                                <option value="">Übung auswählen...</option>
+                                {initialExerciseOptions.map(option => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                              </Select>
+                            </div>
+                          )}
                         </ExerciseSelector>
                         
                         <Label>Parameter (optional)</Label>
@@ -796,14 +1014,16 @@ const CreatePlan = () => {
                           </ParameterInput>
                           
                           <ParameterInput>
-                            <label htmlFor="duration">Dauer</label>
+                            <label htmlFor="repsInReserve">RIR</label>
                             <input 
-                              type="text" 
-                              id="duration" 
-                              name="duration" 
-                              value={exerciseParams.duration}
+                              type="number" 
+                              id="repsInReserve" 
+                              name="repsInReserve" 
+                              value={exerciseParams.repsInReserve}
                               onChange={handleExerciseParamChange}
-                              placeholder="z.B. 30 sec"
+                              min="0"
+                              max="10"
+                              placeholder="0-10"
                             />
                           </ParameterInput>
                           
