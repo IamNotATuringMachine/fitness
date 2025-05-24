@@ -1,0 +1,122 @@
+{
+  "short_name": "FitTrack",
+  "name": "FitTrack - Advanced Fitness Tracker",
+  "description": "A comprehensive fitness tracking application with AI-powered insights and progressive overload optimization",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#4A90E2",
+  "background_color": "#1A1A1A",
+  "scope": "/",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle",
+    "sports"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "description": "Quick start a new workout session",
+      "url": "/workout-tracker",
+      "icons": [
+        {
+          "src": "icons/workout-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Stats",
+      "description": "View your fitness analytics and progress",
+      "url": "/analytics",
+      "icons": [
+        {
+          "src": "icons/analytics-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Exercise Library",
+      "short_name": "Exercises",
+      "description": "Browse exercise library",
+      "url": "/exercises",
+      "icons": [
+        {
+          "src": "icons/exercises-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-screenshot.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "FitTrack Dashboard on Desktop"
+    },
+    {
+      "src": "screenshots/mobile-screenshot.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "FitTrack Mobile Experience"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+fittrack",
+      "url": "/share?data=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "workout-data",
+          "accept": ["application/json", ".json"]
+        }
+      ]
+    }
+  }
+} 
