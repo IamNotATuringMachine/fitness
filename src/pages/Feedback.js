@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Card, Button, Alert } from '../components/ui';
+import { sanitizeText, isValidEmail, defaultRateLimiter } from '../utils/security';
 
 const PageContainer = styled.div`
   display: flex;
@@ -209,12 +210,25 @@ const Feedback = () => {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Sanitize input before setting state
+    const sanitizedValue = sanitizeText(value);
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
   };
   
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Rate limiting check
+    if (!defaultRateLimiter.isAllowed('feedback-submission')) {
+      setAlertInfo({
+        show: true,
+        message: 'Sie haben zu viele Anfragen gesendet. Bitte warten Sie eine Minute.',
+        type: 'error'
+      });
+      return;
+    }
+    
+    // Enhanced validation
     if (!formData.title.trim() || !formData.description.trim()) {
       setAlertInfo({
         show: true,
@@ -224,9 +238,38 @@ const Feedback = () => {
       return;
     }
     
+    if (formData.title.length > 100) {
+      setAlertInfo({
+        show: true,
+        message: 'Der Titel darf maximal 100 Zeichen lang sein.',
+        type: 'error'
+      });
+      return;
+    }
+    
+    if (formData.description.length > 1000) {
+      setAlertInfo({
+        show: true,
+        message: 'Die Beschreibung darf maximal 1000 Zeichen lang sein.',
+        type: 'error'
+      });
+      return;
+    }
+    
+    if (formData.email && !isValidEmail(formData.email)) {
+      setAlertInfo({
+        show: true,
+        message: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        type: 'error'
+      });
+      return;
+    }
+    
     const newFeedback = {
       id: Date.now().toString(),
       ...formData,
+      title: sanitizeText(formData.title),
+      description: sanitizeText(formData.description),
       date: new Date().toISOString(),
       status: 'received'
     };

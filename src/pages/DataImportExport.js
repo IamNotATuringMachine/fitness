@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useWorkout } from '../context/WorkoutContext';
 import { Card, Button, Alert } from '../components/ui';
+import BackupManager from '../components/backup/BackupManager';
 
 const PageContainer = styled.div`
   display: flex;
@@ -42,6 +43,7 @@ const ButtonContainer = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.md};
   margin-top: ${props => props.theme.spacing.md};
+  flex-wrap: wrap;
 `;
 
 const ImportInput = styled.input`
@@ -64,19 +66,41 @@ const ImportLabel = styled.label`
   }
 `;
 
-const FileInputLabel = styled.label`
-  display: inline-block;
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  background-color: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
+const TabContainer = styled.div`
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+`;
+
+const Tab = styled.button`
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: ${({ active, theme }) => (active ? theme.colors.primary : '#666')};
+  font-weight: ${({ active }) => (active ? '600' : '400')};
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color ${props => props.theme.transitions.short};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: ${props => props.theme.colors.primary};
+  }
+  
+  ${({ active, theme }) => active && `
+    border-bottom-color: ${theme.colors.primary};
+    color: ${theme.colors.primary};
+  `}
+`;
+
+const TabContent = styled.div`
+  display: ${({ active }) => (active ? 'block' : 'none')};
 `;
 
 const DataImportExport = () => {
   const { state, dispatch } = useWorkout();
   const [importStatus, setImportStatus] = useState({ message: '', type: '' });
+  const [activeTab, setActiveTab] = useState('backup'); // 'backup' or 'legacy'
 
   // Export data in JSON format
   const exportJson = (dataType) => {
@@ -130,7 +154,6 @@ const DataImportExport = () => {
 
     switch (dataType) {
       case 'workoutPlans':
-        // For workout plans, we'll export a simplified version since the structure is complex
         data = state.workoutPlans.map(plan => ({
           id: plan.id,
           name: plan.name,
@@ -430,8 +453,11 @@ const DataImportExport = () => {
   return (
     <PageContainer>
       <PageHeader>
-        <Title>Datenimport und -export</Title>
-        <Subtitle>Exportieren und importieren Sie Ihre Trainingsdaten in verschiedenen Formaten</Subtitle>
+        <Title>Backup & Datenmanagement</Title>
+        <Subtitle>
+          Verwalten Sie Ihre Fitness-Daten sicher mit erweiterten Backup-Funktionen 
+          oder nutzen Sie einfache Import/Export-Optionen für einzelne Datenbereiche.
+        </Subtitle>
       </PageHeader>
 
       {importStatus.message && (
@@ -443,121 +469,132 @@ const DataImportExport = () => {
         </Alert>
       )}
 
-      <Section>
-        <SectionTitle>Trainingspläne exportieren</SectionTitle>
-        <SectionDescription>
-          Exportieren Sie Ihre Trainingspläne zur Sicherung oder zur Verwendung in anderen Anwendungen.
-        </SectionDescription>
-        <ButtonContainer>
-          <Button onClick={() => exportJson('workoutPlans')}>Als JSON exportieren</Button>
-          <Button variant="secondary" onClick={() => exportCsv('workoutPlans')}>Als CSV exportieren</Button>
-        </ButtonContainer>
-      </Section>
+      <TabContainer>
+        <Tab 
+          active={activeTab === 'backup'} 
+          onClick={() => setActiveTab('backup')}
+        >
+          📦 Intelligente Backups
+        </Tab>
+        <Tab 
+          active={activeTab === 'legacy'} 
+          onClick={() => setActiveTab('legacy')}
+        >
+          📁 Einzeldaten Export/Import
+        </Tab>
+      </TabContainer>
 
-      <Section>
-        <SectionTitle>Übungsbibliothek exportieren</SectionTitle>
-        <SectionDescription>
-          Exportieren Sie Ihre persönliche Übungsbibliothek.
-        </SectionDescription>
-        <ButtonContainer>
-          <Button onClick={() => exportJson('exercises')}>Als JSON exportieren</Button>
-          <Button variant="secondary" onClick={() => exportCsv('exercises')}>Als CSV exportieren</Button>
-        </ButtonContainer>
-      </Section>
+      <TabContent active={activeTab === 'backup'}>
+        <BackupManager />
+      </TabContent>
 
-      <Section>
-        <SectionTitle>Trainingshistorie exportieren</SectionTitle>
-        <SectionDescription>
-          Exportieren Sie Ihre absolvierte Trainingseinheiten für die Analyse in externen Tools.
-        </SectionDescription>
-        <ButtonContainer>
-          <Button onClick={() => exportJson('workoutHistory')}>Als JSON exportieren</Button>
-          <Button variant="secondary" onClick={() => exportCsv('workoutHistory')}>Als CSV exportieren</Button>
-        </ButtonContainer>
-      </Section>
+      <TabContent active={activeTab === 'legacy'}>
+        <Section>
+          <SectionTitle>Trainingspläne</SectionTitle>
+          <SectionDescription>
+            Exportieren oder importieren Sie Ihre Trainingspläne einzeln.
+          </SectionDescription>
+          <ButtonContainer>
+            <Button onClick={() => exportJson('workoutPlans')}>Als JSON exportieren</Button>
+            <Button variant="secondary" onClick={() => exportCsv('workoutPlans')}>Als CSV exportieren</Button>
+            <ImportLabel htmlFor="import-workout-plans">
+              Trainingspläne importieren
+              <ImportInput
+                id="import-workout-plans"
+                type="file"
+                accept=".json"
+                onChange={(e) => handleImport(e, 'workoutPlans')}
+              />
+            </ImportLabel>
+          </ButtonContainer>
+        </Section>
 
-      <Section>
-        <SectionTitle>Körpermaße exportieren</SectionTitle>
-        <SectionDescription>
-          Exportieren Sie Ihre Körpermaße für die langfristige Verfolgung Ihrer Fortschritte.
-        </SectionDescription>
-        <ButtonContainer>
-          <Button onClick={() => exportJson('bodyMeasurements')}>Als JSON exportieren</Button>
-          <Button variant="secondary" onClick={() => exportCsv('bodyMeasurements')}>Als CSV exportieren</Button>
-        </ButtonContainer>
-      </Section>
+        <Section>
+          <SectionTitle>Übungsbibliothek</SectionTitle>
+          <SectionDescription>
+            Verwalten Sie Ihre persönliche Übungsbibliothek.
+          </SectionDescription>
+          <ButtonContainer>
+            <Button onClick={() => exportJson('exercises')}>Als JSON exportieren</Button>
+            <Button variant="secondary" onClick={() => exportCsv('exercises')}>Als CSV exportieren</Button>
+            <ImportLabel htmlFor="import-exercises">
+              Übungen importieren
+              <ImportInput
+                id="import-exercises"
+                type="file"
+                accept=".json,.csv"
+                onChange={(e) => handleImport(e, 'exercises')}
+              />
+            </ImportLabel>
+          </ButtonContainer>
+        </Section>
 
-      <Section>
-        <SectionTitle>Alle Daten exportieren</SectionTitle>
-        <SectionDescription>
-          Exportieren Sie alle Ihre Daten für eine vollständige Sicherung.
-        </SectionDescription>
-        <ButtonContainer>
-          <Button onClick={() => exportJson('all')}>Als JSON exportieren</Button>
-        </ButtonContainer>
-      </Section>
+        <Section>
+          <SectionTitle>Trainingshistorie</SectionTitle>
+          <SectionDescription>
+            Exportieren oder importieren Sie Ihre absolvierte Trainingseinheiten.
+          </SectionDescription>
+          <ButtonContainer>
+            <Button onClick={() => exportJson('workoutHistory')}>Als JSON exportieren</Button>
+            <Button variant="secondary" onClick={() => exportCsv('workoutHistory')}>Als CSV exportieren</Button>
+            <ImportLabel htmlFor="import-workout-history">
+              Trainingshistorie importieren
+              <ImportInput
+                id="import-workout-history"
+                type="file"
+                accept=".json"
+                onChange={(e) => handleImport(e, 'workoutHistory')}
+              />
+            </ImportLabel>
+          </ButtonContainer>
+        </Section>
 
-      <Section>
-        <SectionTitle>Daten importieren</SectionTitle>
-        <SectionDescription>
-          Importieren Sie zuvor exportierte Daten oder Daten aus anderen Quellen.
-        </SectionDescription>
-        
-        <div>
-          <h3>Trainingspläne importieren</h3>
-          <ImportInput 
-            type="file" 
-            id="import-workout-plans" 
-            accept=".json,.csv"
-            onChange={(e) => handleImport(e, 'workoutPlans')}
-          />
-          <ImportLabel htmlFor="import-workout-plans">Trainingspläne importieren</ImportLabel>
-        </div>
-        
-        <div style={{ marginTop: '1rem' }}>
-          <h3>Übungen importieren</h3>
-          <ImportInput 
-            type="file" 
-            id="import-exercises" 
-            accept=".json,.csv"
-            onChange={(e) => handleImport(e, 'exercises')}
-          />
-          <ImportLabel htmlFor="import-exercises">Übungen importieren</ImportLabel>
-        </div>
-        
-        <div style={{ marginTop: '1rem' }}>
-          <h3>Trainingshistorie importieren</h3>
-          <ImportInput 
-            type="file" 
-            id="import-workout-history" 
-            accept=".json,.csv"
-            onChange={(e) => handleImport(e, 'workoutHistory')}
-          />
-          <ImportLabel htmlFor="import-workout-history">Trainingshistorie importieren</ImportLabel>
-        </div>
-        
-        <div style={{ marginTop: '1rem' }}>
-          <h3>Körpermaße importieren</h3>
-          <ImportInput 
-            type="file" 
-            id="import-body-measurements" 
-            accept=".json,.csv"
-            onChange={(e) => handleImport(e, 'bodyMeasurements')}
-          />
-          <ImportLabel htmlFor="import-body-measurements">Körpermaße importieren</ImportLabel>
-        </div>
-        
-        <div style={{ marginTop: '1rem' }}>
-          <h3>Alle Daten importieren</h3>
-          <ImportInput 
-            type="file" 
-            id="import-all" 
-            accept=".json"
-            onChange={(e) => handleImport(e, 'all')}
-          />
-          <ImportLabel htmlFor="import-all">Vollständigen Datensatz importieren</ImportLabel>
-        </div>
-      </Section>
+        <Section>
+          <SectionTitle>Körpermaße</SectionTitle>
+          <SectionDescription>
+            Verwalten Sie Ihre Körpermaße und Fortschrittsdaten.
+          </SectionDescription>
+          <ButtonContainer>
+            <Button onClick={() => exportJson('bodyMeasurements')}>Als JSON exportieren</Button>
+            <Button variant="secondary" onClick={() => exportCsv('bodyMeasurements')}>Als CSV exportieren</Button>
+            <ImportLabel htmlFor="import-body-measurements">
+              Körpermaße importieren
+              <ImportInput
+                id="import-body-measurements"
+                type="file"
+                accept=".json"
+                onChange={(e) => handleImport(e, 'bodyMeasurements')}
+              />
+            </ImportLabel>
+          </ButtonContainer>
+        </Section>
+
+        <Section>
+          <SectionTitle>⚠️ Alle Daten (Legacy)</SectionTitle>
+          <SectionDescription>
+            <strong>Vorsicht:</strong> Diese Option exportiert alle Ihre Daten in einem einfachen Format 
+            ohne erweiterte Validierung oder Metadaten. Für sichere Backups verwenden Sie die 
+            "Intelligente Backups" Option oben.
+          </SectionDescription>
+          <ButtonContainer>
+            <Button 
+              onClick={() => exportJson('all')}
+              style={{ background: '#dc3545' }}
+            >
+              Alle Daten als JSON exportieren
+            </Button>
+            <ImportLabel htmlFor="import-all" style={{ background: '#dc3545' }}>
+              Alle Daten importieren
+              <ImportInput
+                id="import-all"
+                type="file"
+                accept=".json"
+                onChange={(e) => handleImport(e, 'all')}
+              />
+            </ImportLabel>
+          </ButtonContainer>
+        </Section>
+      </TabContent>
     </PageContainer>
   );
 };

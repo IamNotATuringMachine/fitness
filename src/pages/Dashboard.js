@@ -51,11 +51,43 @@ const RecentWorkoutsContainer = styled.div`
   margin-top: 2rem;
 `;
 
+/*
 const GridLayoutContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: ${props => props.theme.spacing.lg};
   margin-top: ${props => props.theme.spacing.md};
+`;
+*/
+
+const RecentWorkoutsRow = styled.div`
+  display: flex;
+  overflow-x: auto;
+  gap: ${props => props.theme.spacing.lg};
+  margin-top: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+
+  scroll-snap-type: x mandatory;
+
+  /* Hide scrollbar for Webkit browsers */
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 4px;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox - these might not be needed if webkit works well */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: thin;  /* Firefox - or auto */
+  scrollbar-color: ${props => props.theme.colors.border} transparent; /* Firefox */
+
+  > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 280px;
+  }
 `;
 
 const ListLayoutContainer = styled.div`
@@ -63,6 +95,7 @@ const ListLayoutContainer = styled.div`
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
   margin-top: ${props => props.theme.spacing.md};
+  color: ${props => props.theme.colors.textLight};
 `;
 
 const ClickableCard = styled(Card)`
@@ -122,14 +155,6 @@ const WorkoutDescription = styled.p`
   color: ${props => props.theme.colors.textLight};
 `;
 
-const WorkoutMeta = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.md};
-  margin-top: ${props => props.theme.spacing.xs};
-  color: ${props => props.theme.colors.textLight};
-  font-size: ${props => props.theme.typography.fontSizes.sm};
-`;
-
 const ExerciseList = styled.ul`
   list-style-type: none;
   padding: 0;
@@ -162,16 +187,16 @@ const Dashboard = () => {
   const calendarEvents = state?.calendarEvents || [];
   const workoutHistory = state?.workoutHistory || [];
   
-  // Get recent workouts (up to 3)
+  // Get recent workouts
   const recentWorkouts = [...workoutHistory].sort((a, b) => {
     // Sort by timestamp or date, whichever is available
     const timeA = a.timestamp || new Date(a.date).getTime() || 0;
     const timeB = b.timestamp || new Date(b.date).getTime() || 0;
     return timeB - timeA;
-  }).slice(0, userPreferences.showMaxRecentWorkouts || 3);
+  });
 
   // Helper function to format date 
-  const formatDate = (timestamp) => {
+  /* const formatDate = (timestamp) => {
     if (!timestamp) return 'Kein Datum';
     const date = new Date(timestamp);
     return date.toLocaleDateString('de-DE', { 
@@ -179,7 +204,7 @@ const Dashboard = () => {
       month: 'short', 
       day: 'numeric'
     });
-  };
+  }; */
 
   // Format date from ISO string
   const formatDateFromString = (dateString) => {
@@ -198,10 +223,7 @@ const Dashboard = () => {
       <DashboardContainer>
         <WelcomeCard>
           <Card.Body>
-            <h2>Willkommen bei deinem Fitness-Trainingsplaner</h2>
-            <p>
-              Erstelle und verwalte deine Trainingspläne, verfolge deinen Fortschritt und erreiche deine Fitnessziele.
-            </p>
+                        <h2>Professionelles Fitness Management System</h2>            <p>              Entwerfen und verwalten Sie umfassende Trainingsprogramme, überwachen Sie Leistungsmetriken und erreichen Sie Ihre Fitnessziele mit Präzision.            </p>
             <StatsContainer>
               <StatItem>
                 <StatValue>{workoutPlans.length}</StatValue>
@@ -213,36 +235,30 @@ const Dashboard = () => {
               </StatItem>
               <StatItem>
                 <StatValue>{calendarEvents.length}</StatValue>
-                <StatLabel>Geplante Trainings</StatLabel>
+                <StatLabel>Geplante Einheiten</StatLabel>
               </StatItem>
               <StatItem>
                 <StatValue>{workoutHistory.length}</StatValue>
-                <StatLabel>Absolvierte Trainings</StatLabel>
+                <StatLabel>Abgeschlossene Workouts</StatLabel>
               </StatItem>
             </StatsContainer>
           </Card.Body>
           <Card.Footer>
-            <Button as={Link} to="/create-plan">Neuen Trainingsplan erstellen</Button>
+            <Button as={Link} to="/create-plan">Trainingsplan erstellen</Button>
           </Card.Footer>
         </WelcomeCard>
         
         <Card>
-          <Card.Header>Trainingsanalyse</Card.Header>
-          <Card.Body>
-            <p>Analysiere deine Trainingsdaten, um Fortschritte zu erkennen und Verbesserungspotential zu identifizieren.</p>
-          </Card.Body>
-          <Card.Footer>
-            <Button as={Link} to="/analysis">Zur Analyse</Button>
-          </Card.Footer>
+                    <Card.Header>Leistungsanalyse</Card.Header>          <Card.Body>            <p>Analysieren Sie Trainingsdaten, um Fortschrittsmuster und Optimierungsmöglichkeiten für eine verbesserte Leistung zu identifizieren.</p>          </Card.Body>          <Card.Footer>
+            <Button as={Link} to="/analysis">Analysen anzeigen</Button>          </Card.Footer>
         </Card>
       </DashboardContainer>
       
-      <RecentWorkoutsContainer>
-        <h2>Deine letzten Workouts</h2>
+            <RecentWorkoutsContainer>        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>          <h2>Letzte Trainingseinheiten</h2>          {recentWorkouts.length > 0 && (            <Button as={Link} to="/workout-history" variant="outline" size="small">              Alle anzeigen            </Button>          )}        </div>
         {recentWorkouts.length > 0 ? (
           userPreferences.dashboardLayout === 'grid' ? (
-            // Grid Layout
-            <GridLayoutContainer>
+            // Grid Layout (now a single horizontal row)
+            <RecentWorkoutsRow>
               {recentWorkouts.map(workout => (
                 <Link key={workout.id} to={`/workout/${workout.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <ClickableCard>
@@ -250,8 +266,7 @@ const Dashboard = () => {
                       {workout.name || 'Unbenanntes Workout'}
                     </Card.Header>
                     <Card.Body>
-                      <p><strong>Datum:</strong> {formatDateFromString(workout.date)}</p>
-                      <p><strong>Übungen:</strong> {workout.exercises?.length || 0}</p>
+                                            <p><strong>Datum:</strong> {formatDateFromString(workout.date)}</p>                      <p><strong>Übungen:</strong> {workout.exercises?.length || 0}</p>
                       
                       {workout.exercises && workout.exercises.length > 0 && (
                         <ExerciseList>
@@ -267,7 +282,7 @@ const Dashboard = () => {
                   </ClickableCard>
                 </Link>
               ))}
-            </GridLayoutContainer>
+            </RecentWorkoutsRow>
           ) : (
             // List Layout
             <ListLayoutContainer>
@@ -299,8 +314,7 @@ const Dashboard = () => {
         ) : (
           <Card>
             <Card.Body>
-              <p>Du hast noch keine Workouts erfasst.</p>
-              <Button as={Link} to="/workout-tracker">Erstes Workout erfassen</Button>
+                            <p>Noch keine Trainingseinheiten erfasst.</p>              <Button as={Link} to="/workout-tracker">Erstes Workout starten</Button>
             </Card.Body>
           </Card>
         )}

@@ -68,6 +68,17 @@ const ActionButtons = styled.div`
   margin-top: ${props => props.theme.spacing.xl};
 `;
 
+const Label = styled.label`
+  display: block;
+  margin-bottom: ${props => props.theme.spacing.xs};
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
 const Input = styled.input`
   padding: ${props => props.theme.spacing.sm};
   border-radius: ${props => props.theme.borderRadius.small};
@@ -227,22 +238,27 @@ const EditWorkoutPage = () => {
       <Title>Workout bearbeiten</Title>
       <StyledForm onSubmit={handleSubmit}>
         <SectionCard>
-          <Card.Header>Allgemeine Informationen</Card.Header>
+          <Card.Header>Trainingstag bearbeiten</Card.Header>
           <Card.Body>
-            <Input
-              label="Workout Name"
-              type="text"
-              value={workoutName}
-              onChange={(e) => setWorkoutName(e.target.value)}
-              required
-            />
-            <Input
-              label="Datum"
-              type="date"
-              value={workoutDate}
-              onChange={(e) => setWorkoutDate(e.target.value)}
-              required
-            />
+            <FormGroup>
+              <Label>Name des Trainingstags</Label>
+              <Input
+                type="text"
+                value={workoutName}
+                onChange={(e) => setWorkoutName(e.target.value)}
+                placeholder="z.B. Push Tag, Oberkörper, Beine, etc."
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label>Datum</Label>
+              <Input
+                type="date"
+                value={workoutDate}
+                onChange={(e) => setWorkoutDate(e.target.value)}
+                required
+              />
+            </FormGroup>
           </Card.Body>
         </SectionCard>
 
@@ -254,18 +270,22 @@ const EditWorkoutPage = () => {
               </ExerciseHeader>
             </Card.Header>
             <Card.Body>
-              <Input
-                label="Übungsname"
-                type="text"
-                value={exercise.name}
-                onChange={(e) => handleExerciseChange(exerciseIndex, 'name', e.target.value)}
-              />
-              <Textarea
-                label="Notizen zur Übung"
-                value={exercise.exerciseNotes || ''}
-                onChange={(e) => handleExerciseChange(exerciseIndex, 'exerciseNotes', e.target.value)}
-                rows={2}
-              />
+              <FormGroup>
+                <Label>Übungsname</Label>
+                <Input
+                  type="text"
+                  value={exercise.name}
+                  onChange={(e) => handleExerciseChange(exerciseIndex, 'name', e.target.value)}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Notizen zur Übung</Label>
+                <Textarea
+                  value={exercise.exerciseNotes || ''}
+                  onChange={(e) => handleExerciseChange(exerciseIndex, 'exerciseNotes', e.target.value)}
+                  rows={2}
+                />
+              </FormGroup>
               
               <h4>Sätze</h4>
               {exercise.performedSets?.map((set, setIndex) => (
@@ -314,13 +334,15 @@ const EditWorkoutPage = () => {
                       />
                     </SetInputContainer>
                   </SetsGrid>
-                  <Textarea
-                    label="Notizen zum Satz"
-                    value={set.notes || ''}
-                    onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
-                    rows={1}
-                    placeholder="Satznotizen"
-                  />
+                  <FormGroup>
+                    <Label>Notizen zum Satz</Label>
+                    <Textarea
+                      value={set.notes || ''}
+                      onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
+                      rows={1}
+                      placeholder="Satznotizen"
+                    />
+                  </FormGroup>
                   <Button type="button" onClick={() => handleRemoveSet(exerciseIndex, setIndex)} variant="danger-outlined" size="small" style={{marginTop: '0.5rem'}}>
                     Satz entfernen
                   </Button>

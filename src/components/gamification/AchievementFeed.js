@@ -103,7 +103,7 @@ function AchievementFeed({ limit = 10 }) {
       {sortedAchievements.map(achievement => (
         <FeedItem key={achievement.id}>
           <FeedIcon type={achievement.type}>
-            {achievement.icon || (achievement.type === 'badge' ? '🏅' : achievement.type === 'challenge' ? '🎯' : '⭐')}
+            {achievement.icon || (achievement.type === 'badge' ? '◆' : achievement.type === 'challenge' ? '▲' : '●')}
           </FeedIcon>
           <FeedContent>
             <FeedTitle>{achievement.name}</FeedTitle>

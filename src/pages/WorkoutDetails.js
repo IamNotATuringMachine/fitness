@@ -193,7 +193,10 @@ const WorkoutDetails = () => {
   
   const handleDeleteWorkout = () => {
     dispatch({ type: 'DELETE_WORKOUT', payload: id });
-    navigate('/');
+    // Add a small delay to allow state to propagate before navigation
+    setTimeout(() => {
+      navigate('/');
+    }, 50); // 50ms delay
   };
   
   const formatDate = (dateString) => {

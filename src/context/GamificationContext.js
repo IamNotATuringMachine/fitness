@@ -12,7 +12,7 @@ const initialState = {
       id: 'badge_first_workout',
       name: 'Erster Schritt',
       description: 'Absolviere dein erstes Training',
-      icon: '🏃',
+      icon: '▶',
       unlocked: false,
       points: 10
     },
@@ -20,7 +20,7 @@ const initialState = {
       id: 'badge_three_workouts',
       name: 'Auf dem Weg',
       description: 'Absolviere 3 Trainingseinheiten',
-      icon: '🔄',
+      icon: '↻',
       unlocked: false,
       points: 20
     },
@@ -28,7 +28,7 @@ const initialState = {
       id: 'badge_week_streak',
       name: 'Wochenstreak',
       description: 'Trainiere 7 Tage in Folge',
-      icon: '🔥',
+      icon: '⬆',
       unlocked: false,
       points: 50
     },
@@ -36,7 +36,7 @@ const initialState = {
       id: 'badge_first_plan',
       name: 'Planmacher',
       description: 'Erstelle deinen ersten Trainingsplan',
-      icon: '📝',
+      icon: '□',
       unlocked: false,
       points: 15
     },
@@ -44,7 +44,7 @@ const initialState = {
       id: 'badge_nutrition_plan',
       name: 'Ernährungsprofi',
       description: 'Erstelle deinen ersten Ernährungsplan',
-      icon: '🥗',
+      icon: '◈',
       unlocked: false,
       points: 15 
     },
@@ -52,7 +52,7 @@ const initialState = {
       id: 'badge_strength_5',
       name: 'Kraftpaket',
       description: 'Steigere dein Gewicht bei einer Übung 5 Mal in Folge',
-      icon: '💪',
+      icon: '◆',
       unlocked: false,
       points: 25
     },
@@ -60,7 +60,7 @@ const initialState = {
       id: 'badge_body_progress',
       name: 'Körpertransformation',
       description: 'Erfasse deine Körpermaße für 4 Wochen in Folge',
-      icon: '📏',
+      icon: '▢',
       unlocked: false,
       points: 30
     },
@@ -68,7 +68,7 @@ const initialState = {
       id: 'badge_log_food',
       name: 'Ernährungsbewusst',
       description: 'Erfasse deine Ernährung für 5 Tage in Folge',
-      icon: '🍎',
+      icon: '○',
       unlocked: false,
       points: 25
     },
@@ -76,7 +76,7 @@ const initialState = {
       id: 'badge_total_points_100',
       name: 'Punktesammler',
       description: 'Sammle insgesamt 100 Punkte',
-      icon: '🏆',
+      icon: '★',
       unlocked: false,
       points: 30
     },
@@ -91,7 +91,7 @@ const initialState = {
       reward: 100,
       active: false,
       completed: false,
-      icon: '📆'
+      icon: '▧'
     },
     {
       id: 'challenge_strength',
@@ -102,7 +102,7 @@ const initialState = {
       reward: 50,
       active: false,
       completed: false,
-      icon: '🏋️'
+      icon: '▲'
     },
     {
       id: 'challenge_nutrition',
@@ -113,7 +113,7 @@ const initialState = {
       reward: 75,
       active: false,
       completed: false,
-      icon: '🥦'
+      icon: '◇'
     }
   ],
   achievements: [],
@@ -266,7 +266,7 @@ export function GamificationProvider({ children }) {
           type: 'points',
           name: 'Punkte erhalten',
           description: reason,
-          icon: '⭐',
+          icon: '●',
           points: points
         }
       });

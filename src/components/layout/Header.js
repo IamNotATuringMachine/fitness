@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../../theme/ThemeProvider';
 import { Link } from 'react-router-dom';
+import { FaCog, FaSun, FaMoon } from 'react-icons/fa';
 
 const HeaderContainer = styled.header`
   background-color: ${props => props.theme.colors.cardBackground};
@@ -59,13 +60,15 @@ const Header = () => {
   
   return (
     <HeaderContainer>
-      <HeaderTitle>Fitness Tracker</HeaderTitle>
+      <HeaderTitle>FitnessPro</HeaderTitle>
       <HeaderActions>
-        <IconButton onClick={toggleTheme}>
-          {theme === 'light' ? '🌙' : '☀️'}
+        <IconButton onClick={toggleTheme} title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}>
+          {theme === 'light' ? <FaMoon /> : <FaSun />}
         </IconButton>
-        <SettingsLink to="/settings">
-          <IconButton>⚙️</IconButton>
+        <SettingsLink to="/settings" title="Settings">
+          <IconButton>
+            <FaCog />
+          </IconButton>
         </SettingsLink>
       </HeaderActions>
     </HeaderContainer>

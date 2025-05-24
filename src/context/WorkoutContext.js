@@ -1,510 +1,529 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { secureStorage } from '../utils/security';
 
-// Initial state
-export const initialState = {
-  workoutPlans: [],
-  exercises: [
-    // Brustmuskulatur Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Bankdrücken mit der Langhantel', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Schrägbankdrücken mit der Langhantel', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Negativbankdrücken mit der Langhantel', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kurzhantel-Bankdrücken', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kurzhantel-Schrägbankdrücken', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kurzhantel-Negativbankdrücken', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Fliegende Bewegung auf der Flachbank', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Fliegende Bewegung auf der Schrägbank', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Cable Crossovers / Fliegende am Kabelzug', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Dips', 
-      muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultermuskulatur'],
-      equipment: ['Barren'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Liegestütze', 
-      muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultermuskulatur'],
-      equipment: ['Körpergewicht'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Brustpresse an der Maschine', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Leicht'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Butterfly / Peck Deck Maschine', 
-      muscleGroups: ['Brustmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Leicht'
-    },
-    
-    // Rückenmuskulatur Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Klimmzüge', 
-      muscleGroups: ['Rückenmuskulatur', 'Bizeps'],
-      equipment: ['Klimmzugstange'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Latzug zur Brust', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Langhantelrudern vorgebeugt', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kurzhantelrudern einarmig', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Kurzhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'T-Bar Rudern', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['T-Bar'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Rudern am Kabelzug sitzend', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Rudern an der Maschine', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Überzüge mit Kurzhantel oder am Kabel', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Kurzhantel', 'Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kreuzheben', 
-      muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Hyperextensions / Rückenstrecker', 
-      muscleGroups: ['Rückenmuskulatur'],
-      equipment: ['Gerät'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Good Mornings', 
-      muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Mittel'
-    },
-    
-    // Beinmuskulatur Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Kniebeugen mit der Langhantel', 
-      muscleGroups: ['Beinmuskulatur', 'Gesäß'],
-      equipment: ['Langhantel', 'Rack'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Frontkniebeugen mit der Langhantel', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Beinpresse', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Ausfallschritte', 
-      muscleGroups: ['Beinmuskulatur', 'Gesäß'],
-      equipment: ['Körpergewicht', 'Kurzhanteln', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Bulgarian Split Squats', 
-      muscleGroups: ['Beinmuskulatur', 'Gesäß'],
-      equipment: ['Bank', 'Kurzhanteln'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Rumänisches Kreuzheben', 
-      muscleGroups: ['Beinmuskulatur', 'Rückenmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Gestrecktes Kreuzheben', 
-      muscleGroups: ['Beinmuskulatur', 'Rückenmuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Beinbeuger liegend', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Beinbeuger sitzend', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Beinstrecker', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Hüftheben / Glute Bridges', 
-      muscleGroups: ['Beinmuskulatur', 'Gesäß'],
-      equipment: ['Körpergewicht', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Hip Thrusts', 
-      muscleGroups: ['Beinmuskulatur', 'Gesäß'],
-      equipment: ['Langhantel', 'Bank'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Wadenheben stehend', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine', 'Stufe'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Wadenheben sitzend', 
-      muscleGroups: ['Beinmuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    
-    // Schultermuskulatur Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Schulterdrücken mit der Langhantel', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Langhantel'],
-      difficulty: 'Schwer'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Schulterdrücken mit Kurzhanteln', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Arnold Press', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Seitheben mit Kurzhanteln', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Seitheben am Kabelzug', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Vorgebeugtes Seitheben mit Kurzhanteln', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Reverse Butterfly / Reverse Peck Deck', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Maschine'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Frontheben mit Kurzhanteln oder Hantelscheibe', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Kurzhanteln', 'Hantelscheibe'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Aufrechtes Rudern', 
-      muscleGroups: ['Schultermuskulatur'],
-      equipment: ['Langhantel', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    
-    // Bizeps Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Langhantel-Curls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kurzhantel-Curls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Hammercurls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Konzentrationscurls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Kurzhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Scottcurls / Preacher Curls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Scottbank', 'Langhantel', 'SZ-Stange', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Bizepscurls am Kabelzug', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Reverse Curls', 
-      muscleGroups: ['Bizeps'],
-      equipment: ['Langhantel', 'SZ-Stange'],
-      difficulty: 'Mittel'
-    },
-    
-    // Trizeps Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Enges Bankdrücken', 
-      muscleGroups: ['Trizeps', 'Brustmuskulatur'],
-      equipment: ['Hantelbank', 'Langhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Stirndrücken / French Press', 
-      muscleGroups: ['Trizeps'],
-      equipment: ['Hantelbank', 'Langhantel', 'SZ-Stange', 'Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Überkopf-Trizepsdrücken mit Kurzhantel', 
-      muscleGroups: ['Trizeps'],
-      equipment: ['Kurzhantel'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Trizepsdrücken am Kabelzug', 
-      muscleGroups: ['Trizeps'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kickbacks mit Kurzhanteln', 
-      muscleGroups: ['Trizeps'],
-      equipment: ['Kurzhanteln'],
-      difficulty: 'Mittel'
-    },
-    
-    // Bauchmuskulatur Exercises
-    { 
-      id: uuidv4(), 
-      name: 'Crunches', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Körpergewicht'],
-      difficulty: 'Leicht'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Beinheben', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Körpergewicht', 'Klimmzugstange'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Plank / Unterarmstütz', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Körpergewicht'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Russian Twists', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Körpergewicht', 'Medizinball', 'Hantelscheibe'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Kabel-Crunches', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Wood Chops / Holzfäller am Kabelzug', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Kabelzug'],
-      difficulty: 'Mittel'
-    },
-    { 
-      id: uuidv4(), 
-      name: 'Sit-ups', 
-      muscleGroups: ['Bauchmuskulatur'],
-      equipment: ['Körpergewicht'],
-      difficulty: 'Leicht'
+// Smart initial state - only use default exercises if no data exists
+const getSmartInitialState = () => {
+  try {
+    const existingState = secureStorage.get('workoutState');
+    if (existingState && existingState.exercises) {
+      console.log('🔍 Found existing exercises in localStorage, using minimal initial state');
+      return {
+        workoutPlans: [],
+        exercises: [], // Empty - will be loaded from localStorage
+        workoutHistory: [],
+        bodyMeasurements: [],
+        trainingMethods: [],
+        notesHistory: [],
+        calendarEvents: [],
+        periodizationPlans: [],
+        userProfile: {
+          name: '',
+          age: '',
+          weight: '',
+          height: '',
+          fitnessLevel: '',
+          goals: []
+        }
+      };
+    } else {
+      console.log('🆕 No existing data found, using full initial state with default exercises');
+      return {
+        workoutPlans: [],
+        exercises: [
+          // Brustmuskulatur Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Bankdrücken mit der Langhantel', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Schrägbankdrücken mit der Langhantel', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Negativbankdrücken mit der Langhantel', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kurzhantel-Bankdrücken', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kurzhantel-Schrägbankdrücken', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kurzhantel-Negativbankdrücken', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Fliegende Bewegung auf der Flachbank', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Fliegende Bewegung auf der Schrägbank', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Cable Crossovers / Fliegende am Kabelzug', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Dips', 
+            muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultermuskulatur'],
+            equipment: ['Barren'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Liegestütze', 
+            muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultermuskulatur'],
+            equipment: ['Körpergewicht'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Brustpresse an der Maschine', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Leicht'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Butterfly / Peck Deck Maschine', 
+            muscleGroups: ['Brustmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Leicht'
+          },
+          
+          // Rückenmuskulatur Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Klimmzüge', 
+            muscleGroups: ['Rückenmuskulatur', 'Bizeps'],
+            equipment: ['Klimmzugstange'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Latzug zur Brust', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Langhantelrudern vorgebeugt', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kurzhantelrudern einarmig', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Kurzhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'T-Bar Rudern', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['T-Bar'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Rudern am Kabelzug sitzend', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Rudern an der Maschine', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Überzüge mit Kurzhantel oder am Kabel', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Kurzhantel', 'Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kreuzheben', 
+            muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Hyperextensions / Rückenstrecker', 
+            muscleGroups: ['Rückenmuskulatur'],
+            equipment: ['Gerät'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Good Mornings', 
+            muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Mittel'
+          },
+          
+          // Beinmuskulatur Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Kniebeugen mit der Langhantel', 
+            muscleGroups: ['Beinmuskulatur', 'Gesäß'],
+            equipment: ['Langhantel', 'Rack'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Frontkniebeugen mit der Langhantel', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Beinpresse', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Ausfallschritte', 
+            muscleGroups: ['Beinmuskulatur', 'Gesäß'],
+            equipment: ['Körpergewicht', 'Kurzhanteln', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Bulgarian Split Squats', 
+            muscleGroups: ['Beinmuskulatur', 'Gesäß'],
+            equipment: ['Bank', 'Kurzhanteln'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Rumänisches Kreuzheben', 
+            muscleGroups: ['Beinmuskulatur', 'Rückenmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Gestrecktes Kreuzheben', 
+            muscleGroups: ['Beinmuskulatur', 'Rückenmuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Beinbeuger liegend', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Beinbeuger sitzend', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Beinstrecker', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Hüftheben / Glute Bridges', 
+            muscleGroups: ['Beinmuskulatur', 'Gesäß'],
+            equipment: ['Körpergewicht', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Hip Thrusts', 
+            muscleGroups: ['Beinmuskulatur', 'Gesäß'],
+            equipment: ['Langhantel', 'Bank'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Wadenheben stehend', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine', 'Stufe'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Wadenheben sitzend', 
+            muscleGroups: ['Beinmuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          
+          // Schultermuskulatur Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Schulterdrücken mit der Langhantel', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Langhantel'],
+            difficulty: 'Schwer'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Schulterdrücken mit Kurzhanteln', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Arnold Press', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Seitheben mit Kurzhanteln', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Seitheben am Kabelzug', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Vorgebeugtes Seitheben mit Kurzhanteln', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Reverse Butterfly / Reverse Peck Deck', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Maschine'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Frontheben mit Kurzhanteln oder Hantelscheibe', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Kurzhanteln', 'Hantelscheibe'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Aufrechtes Rudern', 
+            muscleGroups: ['Schultermuskulatur'],
+            equipment: ['Langhantel', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          
+          // Bizeps Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Langhantel-Curls', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kurzhantel-Curls', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Hammercurls', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Konzentrationscurls', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Kurzhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Scottcurls / Preacher Curls', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Scottbank', 'Langhantel', 'SZ-Stange', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Bizepscurls am Kabelzug', 
+            muscleGroups: ['Bizeps'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          {       id: uuidv4(),       name: 'Reverse Curls',       muscleGroups: ['Bizeps'],      equipment: ['Langhantel', 'SZ-Stange'],      difficulty: 'Mittel'    },    {       id: uuidv4(),       name: 'Schrägbank-Kurzhantel-Curls',       muscleGroups: ['Bizeps'],      equipment: ['Hantelbank', 'Kurzhanteln'],      difficulty: 'Mittel'    },        // Trizeps Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Enges Bankdrücken', 
+            muscleGroups: ['Trizeps', 'Brustmuskulatur'],
+            equipment: ['Hantelbank', 'Langhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Stirndrücken / French Press', 
+            muscleGroups: ['Trizeps'],
+            equipment: ['Hantelbank', 'Langhantel', 'SZ-Stange', 'Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Überkopf-Trizepsdrücken mit Kurzhantel', 
+            muscleGroups: ['Trizeps'],
+            equipment: ['Kurzhantel'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Trizepsdrücken am Kabelzug', 
+            muscleGroups: ['Trizeps'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kickbacks mit Kurzhanteln', 
+            muscleGroups: ['Trizeps'],
+            equipment: ['Kurzhanteln'],
+            difficulty: 'Mittel'
+          },
+          
+          // Bauchmuskulatur Exercises
+          { 
+            id: uuidv4(), 
+            name: 'Crunches', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Körpergewicht'],
+            difficulty: 'Leicht'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Beinheben', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Körpergewicht', 'Klimmzugstange'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Plank / Unterarmstütz', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Körpergewicht'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Russian Twists', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Körpergewicht', 'Medizinball', 'Hantelscheibe'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Kabel-Crunches', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Wood Chops / Holzfäller am Kabelzug', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Kabelzug'],
+            difficulty: 'Mittel'
+          },
+          { 
+            id: uuidv4(), 
+            name: 'Sit-ups', 
+            muscleGroups: ['Bauchmuskulatur'],
+            equipment: ['Körpergewicht'],
+                        difficulty: 'Leicht'          }        ],        workoutHistory: [],        bodyMeasurements: [],        trainingMethods: [          { id: uuidv4(), name: 'Standard', description: 'Normales Training mit Sätzen und Wiederholungen' },          { id: uuidv4(), name: 'Supersatz', description: 'Zwei verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },          { id: uuidv4(), name: 'Triset', description: 'Drei verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },          { id: uuidv4(), name: 'Riesensatz', description: 'Vier oder mehr verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },          { id: uuidv4(), name: 'Dropset', description: 'Nach Erreichen des Muskelversagens wird das Gewicht reduziert und sofort weitertrainiert' },          { id: uuidv4(), name: 'Pyramiden-Training', description: 'Schrittweise Erhöhung des Gewichts bei gleichzeitiger Verringerung der Wiederholungen' },          { id: uuidv4(), name: 'Rest-Pause', description: 'Kurze Pausen (10-15 Sekunden) zwischen Wiederholungen innerhalb eines Satzes' },          { id: uuidv4(), name: 'Zirkeltraining', description: 'Mehrere Übungen werden in einem Zirkel ohne längere Pausen ausgeführt' }        ],        notesHistory: [],        calendarEvents: [],        periodizationPlans: [],        userProfile: {          name: '',          age: '',          weight: '',          height: '',          fitnessLevel: '',          goals: []        }      };
     }
-  ],
-  workoutHistory: [],
-  bodyMeasurements: [],
-  trainingMethods: [
-    { id: uuidv4(), name: 'Standard', description: 'Normales Training mit Sätzen und Wiederholungen' },
-    { id: uuidv4(), name: 'Supersatz', description: 'Zwei verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },
-    { id: uuidv4(), name: 'Triset', description: 'Drei verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },
-    { id: uuidv4(), name: 'Riesensatz', description: 'Vier oder mehr verschiedene Übungen werden direkt nacheinander ohne Pause ausgeführt' },
-    { id: uuidv4(), name: 'Dropset', description: 'Nach Erreichen des Muskelversagens wird das Gewicht reduziert und sofort weitertrainiert' },
-    { id: uuidv4(), name: 'Pyramiden-Training', description: 'Schrittweise Erhöhung des Gewichts bei gleichzeitiger Verringerung der Wiederholungen' },
-    { id: uuidv4(), name: 'Rest-Pause', description: 'Kurze Pausen (10-15 Sekunden) zwischen Wiederholungen innerhalb eines Satzes' },
-    { id: uuidv4(), name: 'Zirkeltraining', description: 'Mehrere Übungen werden in einem Zirkel ohne längere Pausen ausgeführt' }
-  ],
-  notesHistory: [],
-  userProfile: {
-    fitnessLevel: 'beginner',
-    goal: '',
-    trainingDays: '',
-    equipment: '',
-    limitations: '',
-    preferredExercises: '',
-  },
-  periodizationPlans: [],
-  calendarEvents: []
+  } catch (error) {
+    console.error('Error checking for existing state:', error);
+    // Return minimal state in case of error
+    return {
+      workoutPlans: [],
+      exercises: [],
+      workoutHistory: [],
+      bodyMeasurements: [],
+      trainingMethods: [],
+      notesHistory: [],
+      calendarEvents: [],
+      periodizationPlans: [],
+      userProfile: {
+        name: '',
+        age: '',
+        weight: '',
+        height: '',
+        fitnessLevel: '',
+        goals: []
+      }
+    };
+  }
 };
+
+// Use smart initial state
+export const initialState = getSmartInitialState();
 
 // Utility to ensure deep copy of complex objects
 export const deepCloneWithSafeChecks = (obj) => {
@@ -621,11 +640,13 @@ const workoutReducer = (state, action) => {
           : [workout],
       };
     case 'DELETE_WORKOUT':
+      const updatedWorkoutHistory = Array.isArray(state.workoutHistory)
+        ? state.workoutHistory.filter(workout => workout.id !== action.payload)
+        : [];
+      
       return {
         ...state,
-        workoutHistory: Array.isArray(state.workoutHistory)
-          ? state.workoutHistory.filter(workout => workout.id !== action.payload)
-          : [],
+        workoutHistory: updatedWorkoutHistory,
       };
     case 'TRACK_BODY_MEASUREMENT':
       return {
@@ -763,32 +784,44 @@ export const WorkoutProvider = ({ children }) => {
   // Load state from localStorage if available
   const loadState = () => {
     try {
-      const savedState = localStorage.getItem('workoutState');
-      if (!savedState) return initialState;
+      console.log('🔄 Loading state from localStorage with security validation');
+      const parsedState = secureStorage.get('workoutState');
+      const defaultInitialState = getSmartInitialState(); // Get a fresh copy of initial state for fallback
+
+      if (!parsedState) {
+        console.log('❌ No saved state found in localStorage, using initial state');
+        return { ...defaultInitialState, isInitialized: true };
+      }
       
-      console.log('Loading state from localStorage');
-      console.log('Raw localStorage data:', savedState);
-      const parsedState = JSON.parse(savedState);
-      console.log('Parsed workoutPlans count:', 
+      console.log('✅ Found saved state in localStorage');
+      // Ensure exercises are populated if they are missing or empty in the stored state
+      if (!parsedState.exercises || !Array.isArray(parsedState.exercises) || parsedState.exercises.length === 0) {
+        console.warn('⚠️ Exercises in stored state are missing, not an array, or empty. Falling back to default exercises.');
+        parsedState.exercises = defaultInitialState.exercises;
+      }
+      
+      console.log('📊 Parsed workoutPlans count:', 
         parsedState.workoutPlans ? parsedState.workoutPlans.length : 0);
-      console.log('Parsed workoutPlans IDs:', 
+      console.log('🆔 Parsed workoutPlans IDs:', 
         parsedState.workoutPlans ? parsedState.workoutPlans.map(p => p.id).join(', ') : 'none');
+      console.log('📝 Workout history count:', 
+        parsedState.workoutHistory ? parsedState.workoutHistory.length : 0);
       
       // Validate workoutPlans structure
       if (parsedState.workoutPlans && Array.isArray(parsedState.workoutPlans)) {
-        console.log('WorkoutPlans array is valid');
+        console.log('✅ WorkoutPlans array is valid');
         // Ensure each plan has a valid days array
         parsedState.workoutPlans = parsedState.workoutPlans.map(plan => {
           let updatedPlan = { ...plan };
           
           if (!updatedPlan.days) {
-            console.warn(`Plan ${updatedPlan.id} has no days property, fixing...`);
+            console.warn(`⚠️ Plan ${updatedPlan.id} has no days property, fixing...`);
             updatedPlan.days = [];
           } else if (!Array.isArray(updatedPlan.days)) {
-            console.warn(`Plan ${updatedPlan.id} has days but it's not an array, fixing...`);
+            console.warn(`⚠️ Plan ${updatedPlan.id} has days but it's not an array, fixing...`);
             updatedPlan.days = [];
           } else {
-            console.log(`Plan ${updatedPlan.id} has ${updatedPlan.days.length} days`);
+            console.log(`✅ Plan ${updatedPlan.id} has ${updatedPlan.days.length} days`);
           }
           
           // Ensure each day within the plan has valid exercises and advancedMethods arrays
@@ -796,11 +829,11 @@ export const WorkoutProvider = ({ children }) => {
             updatedPlan.days = updatedPlan.days.map(day => {
               let updatedDay = { ...day };
               if (!updatedDay.exercises || !Array.isArray(updatedDay.exercises)) {
-                console.warn(`Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid exercises array, fixing...`);
+                console.warn(`⚠️ Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid exercises array, fixing...`);
                 updatedDay.exercises = [];
               }
               if (!updatedDay.advancedMethods || !Array.isArray(updatedDay.advancedMethods)) {
-                console.warn(`Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid advancedMethods array, fixing...`);
+                console.warn(`⚠️ Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid advancedMethods array, fixing...`);
                 updatedDay.advancedMethods = [];
               }
               return updatedDay;
@@ -810,26 +843,50 @@ export const WorkoutProvider = ({ children }) => {
           return updatedPlan;
         });
       } else {
-        console.warn('workoutPlans property is missing or not an array, initializing to empty array');
+        console.warn('⚠️ workoutPlans property is missing or not an array, initializing to empty array');
         parsedState.workoutPlans = [];
       }
       
+      // Validate workout history
+      if (!parsedState.workoutHistory || !Array.isArray(parsedState.workoutHistory)) {
+        console.warn('⚠️ workoutHistory is missing or not an array, initializing to empty array');
+        parsedState.workoutHistory = [];
+      }
+      
+      // Ensure trainingMethods are populated if they are missing or empty
+      if (!parsedState.trainingMethods || !Array.isArray(parsedState.trainingMethods) || parsedState.trainingMethods.length === 0) {
+        console.warn('⚠️ Training methods in stored state are missing, not an array, or empty. Falling back to default training methods.');
+        parsedState.trainingMethods = defaultInitialState.trainingMethods;
+      }
+      
+      // Mark state as loaded from storage
+      parsedState.isInitialized = true;
+      parsedState.loadedFromStorage = true;
+      
       return parsedState;
     } catch (error) {
-      console.error('Error loading state from localStorage:', error);
+      console.error('❌ Error loading state from localStorage:', error);
       // If there's an error, clear localStorage and reset to initial state
-      localStorage.removeItem('workoutState');
-      return initialState;
+      localStorage.removeItem('workoutState'); // Consider secureStorage.remove here if it exists
+      const defaultInitialStateOnError = getSmartInitialState(); // Get a fresh copy
+      return { ...defaultInitialStateOnError, isInitialized: true };
     }
   };
 
   const [state, dispatch] = useReducer(workoutReducer, loadState());
 
-  // Save state to localStorage when it changes
+  // Save state to localStorage when it changes (but only after initial load)
   useEffect(() => {
+    // Don't save during the initial load
+    if (!state.isInitialized) {
+      return;
+    }
+    
     try {
-      console.log('Saving state to localStorage, workoutPlans count:',
+      console.log('💾 Saving state to localStorage, workoutPlans count:',
         state.workoutPlans ? state.workoutPlans.length : 0);
+      console.log('💾 Saving state to localStorage, workoutHistory count:',
+        state.workoutHistory ? state.workoutHistory.length : 0);
       
       // Validate workoutPlans before saving
       const stateToSave = { ...state };
@@ -838,18 +895,18 @@ export const WorkoutProvider = ({ children }) => {
           let updatedPlan = { ...plan };
           // Ensure days is a valid array
           if (!updatedPlan.days || !Array.isArray(updatedPlan.days)) {
-            console.warn(`Plan ${updatedPlan.id} has invalid days array, fixing before save...`);
+            console.warn(`⚠️ Plan ${updatedPlan.id} has invalid days array, fixing before save...`);
             updatedPlan.days = [];
           }
           // Ensure each day within the plan has valid exercises and advancedMethods arrays before save
           updatedPlan.days = updatedPlan.days.map(day => {
             let updatedDay = { ...day };
             if (!updatedDay.exercises || !Array.isArray(updatedDay.exercises)) {
-              console.warn(`Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid exercises array, fixing before save...`);
+              console.warn(`⚠️ Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid exercises array, fixing before save...`);
               updatedDay.exercises = [];
             }
             if (!updatedDay.advancedMethods || !Array.isArray(updatedDay.advancedMethods)) {
-              console.warn(`Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid advancedMethods array, fixing before save...`);
+              console.warn(`⚠️ Day ${updatedDay.id} in plan ${updatedPlan.id} has invalid advancedMethods array, fixing before save...`);
               updatedDay.advancedMethods = [];
             }
             return updatedDay;
@@ -858,12 +915,19 @@ export const WorkoutProvider = ({ children }) => {
         });
       }
       
-      // Deep log of what's about to be saved
-      console.log('WorkoutContext: stateToSave.workoutPlans BEFORE stringify:', JSON.parse(JSON.stringify(stateToSave.workoutPlans)));
+      // Remove internal flags before saving
+      delete stateToSave.isInitialized;
+      delete stateToSave.loadedFromStorage;
       
-      localStorage.setItem('workoutState', JSON.stringify(stateToSave));
+      // Use secure storage instead of direct localStorage
+      const saveSuccess = secureStorage.set('workoutState', stateToSave);
+      if (!saveSuccess) {
+        console.error('❌ Failed to save state securely');
+      } else {
+        console.log('✅ State saved successfully to localStorage');
+      }
     } catch (error) {
-      console.error('Error saving state to localStorage:', error);
+      console.error('❌ Error saving state to localStorage:', error);
     }
   }, [state]);
 

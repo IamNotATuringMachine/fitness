@@ -76,11 +76,6 @@ const DayCardHeader = styled.div`
   margin-bottom: ${props => props.theme.spacing.md};
 `;
 
-const DayTitle = styled.h3`
-  margin: 0;
-  font-weight: ${props => props.theme.typography.fontWeights.medium};
-`;
-
 const ReorderButtons = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.xs};
@@ -352,9 +347,9 @@ const EditPlan = () => {
   
   const [showDayForm, setShowDayForm] = useState(false);
   const [showExerciseForm, setShowExerciseForm] = useState(null);
-  const [selectedExerciseId, setSelectedExerciseId] = useState('');
-  const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState('');
+  const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
+  const [selectedExerciseId, setSelectedExerciseId] = useState('');
   const [exerciseParams, setExerciseParams] = useState({
     sets: '',
     reps: '',
@@ -455,7 +450,7 @@ const EditPlan = () => {
     if (plan.id) {
       console.log('Plan has ID, should render content');
     }
-  }, [plan.id, plan.name]); // Only depend on key properties
+  }, [plan]); // Include full plan since JSON.stringify uses the entire object
   
   // If no plan is found in the state or URL, redirect to plans overview
   if (!plan && !id) {
@@ -616,6 +611,17 @@ const EditPlan = () => {
     setPlan({
       ...plan,
       days: plan.days.filter(day => day.id !== dayId)
+    });
+  };
+  
+  const handleDayNameChange = (dayId, newName) => {
+    setPlan({
+      ...plan,
+      days: plan.days.map(day => 
+        day.id === dayId 
+          ? { ...day, name: newName }
+          : day
+      )
     });
   };
   
@@ -936,7 +942,19 @@ const EditPlan = () => {
               <DayCard key={day.id}>
                 <Card.Body>
                   <DayCardHeader>
-                    <DayTitle>{day.name}</DayTitle>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                      <div style={{ flex: 1 }}>
+                        <Label htmlFor={`day-name-${day.id}`}>Name des Trainingstags</Label>
+                        <Input
+                          type="text"
+                          id={`day-name-${day.id}`}
+                          value={day.name}
+                          onChange={(e) => handleDayNameChange(day.id, e.target.value)}
+                          placeholder="z.B. Push Tag, Oberkörper, Beine..."
+                          style={{ marginBottom: 0 }}
+                        />
+                      </div>
+                    </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <ReorderButtons>
                         <ReorderButton 
