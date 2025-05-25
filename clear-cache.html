@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Fitness App Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .danger:hover {
+            background: #c82333;
+        }
+        .success {
+            background: #28a745;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Fitness App Cache Cleaner</h1>
+    
+    <div class="warning">
+        <strong>Hinweis:</strong> Verwenden Sie diese Seite nur, wenn die Fitness-App nach einem Update nicht richtig lädt oder in einer Authentifizierungs-Schleife hängt.
+    </div>
+    
+    <p>Diese Seite hilft dabei, Caching-Probleme nach App-Updates zu lösen. Klicken Sie auf die entsprechende Schaltfläche für Ihre Situation:</p>
+    
+    <h3>Schnelle Lösung</h3>
+    <button class="button" onclick="quickFix()">🚀 Schneller Cache-Clear + Reload</button>
+    <p><small>Löscht den Browser-Cache für die Fitness-App und lädt sie neu.</small></p>
+    
+    <h3>Vollständige Bereinigung</h3>
+    <button class="button danger" onclick="fullClear()">🧹 Vollständige Cache-Bereinigung</button>
+    <p><small>Löscht alle App-Daten, Cache und lädt die App neu. <strong>Warnung:</strong> Lokale Daten gehen verloren!</small></p>
+    
+    <h3>Manuelle Schritte</h3>
+    <p>Falls die automatischen Lösungen nicht funktionieren, können Sie folgende Schritte manuell durchführen:</p>
+    
+    <div class="code">
+        <strong>Chrome/Edge:</strong><br>
+        1. Drücken Sie F12 (Entwicklertools)<br>
+        2. Klicken Sie mit der rechten Maustaste auf den Reload-Button<br>
+        3. Wählen Sie "Leeren und hart neu laden"<br><br>
+        
+        <strong>Firefox:</strong><br>
+        1. Drücken Sie Strg+Shift+R (Windows) oder Cmd+Shift+R (Mac)<br><br>
+        
+        <strong>Safari:</strong><br>
+        1. Drücken Sie Cmd+Option+R
+    </div>
+    
+    <h3>Status</h3>
+    <div id="status"></div>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            const colors = {
+                info: '#007bff',
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107'
+            };
+            status.innerHTML = `<div style="color: ${colors[type]}; font-weight: bold;">${message}</div>`;
+        }
+        
+        async function quickFix() {
+            updateStatus('🔄 Clearing cache...', 'info');
+            
+            try {
+                // Clear service worker caches
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    await Promise.all(names.map(name => caches.delete(name)));
+                    console.log('✅ Service worker caches cleared');
+                }
+                
+                // Clear fitness app specific localStorage
+                ['workoutState', 'userProfile', 'gamificationState', 'nutritionState', 'app_version', 'demoUserSession'].forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                updateStatus('✅ Cache cleared! Redirecting to fitness app...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'https://iamnotaturingmachine.github.io/fitness/';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                updateStatus('❌ Error clearing cache. Try manual steps.', 'error');
+            }
+        }
+        
+        async function fullClear() {
+            if (!confirm('Dies löscht ALLE lokalen App-Daten. Sind Sie sicher?')) {
+                return;
+            }
+            
+            updateStatus('🧹 Performing full clear...', 'warning');
+            
+            try {
+                // Clear all caches
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    await Promise.all(names.map(name => caches.delete(name)));
+                }
+                
+                // Clear all localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                
+                // Clear cookies for the domain
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                updateStatus('✅ Full clear completed! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'https://iamnotaturingmachine.github.io/fitness/';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error during full clear:', error);
+                updateStatus('❌ Error during full clear. Try manual steps.', 'error');
+            }
+        }
+        
+        // Check if we're already on the fitness app domain
+        if (window.location.hostname === 'iamnotaturingmachine.github.io') {
+            updateStatus('⚠️ You are already on the fitness app. Use the built-in cache clear button or refresh with Ctrl+Shift+R', 'warning');
+        } else {
+            updateStatus('Ready to clear cache for fitness app', 'info');
+        }
+    </script>
+</body>
+</html> 

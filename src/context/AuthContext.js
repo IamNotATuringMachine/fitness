@@ -21,6 +21,31 @@ const DEMO_USER = {
   last_sign_in_at: new Date().toISOString()
 };
 
+// Cache busting utility
+const clearCacheAndReload = () => {
+  console.log('🔄 Clearing cache and reloading due to authentication loop...');
+  
+  // Clear service worker caches
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      for (let name of names) {
+        caches.delete(name);
+      }
+    });
+  }
+  
+  // Clear relevant localStorage
+  ['workoutState', 'userProfile', 'gamificationState', 'nutritionState', 'app_version'].forEach(key => {
+    localStorage.removeItem(key);
+  });
+  
+  // Clear sessionStorage
+  sessionStorage.clear();
+  
+  // Force hard reload
+  window.location.reload(true);
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +57,10 @@ export function AuthProvider({ children }) {
   const userRef = useRef(null);
   const loadingRef = useRef(true);
   const isInitializedRef = useRef(false);
+  
+  // Anti-loop protection
+  const initializationAttemptsRef = useRef(0);
+  const lastInitializationTimeRef = useRef(Date.now());
   
   // Update refs when state changes
   userRef.current = user;
@@ -45,6 +74,25 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         console.log('🔧 AuthContext: Initializing auth...');
+        
+        // Anti-loop protection
+        initializationAttemptsRef.current += 1;
+        const now = Date.now();
+        const timeSinceLastInit = now - lastInitializationTimeRef.current;
+        lastInitializationTimeRef.current = now;
+        
+        console.log('🔧 AuthContext: Initialization attempt #' + initializationAttemptsRef.current, {
+          timeSinceLastInit,
+          mounted,
+          initComplete
+        });
+        
+        // If we've tried too many times in a short period, clear cache and reload
+        if (initializationAttemptsRef.current > 5 && timeSinceLastInit < 2000) {
+          console.error('🚨 AuthContext: Too many initialization attempts detected, clearing cache...');
+          clearCacheAndReload();
+          return;
+        }
         
         // Get initial session
         const { session, error } = await authService.getSession();
@@ -172,8 +220,17 @@ export function AuthProvider({ children }) {
       }
     );
 
+    // Emergency failsafe for stuck authentication
+    const emergencyTimer = setTimeout(() => {
+      if (mounted && !initComplete && loading) {
+        console.error('🚨 AuthContext: Emergency timeout reached, clearing cache and reloading...');
+        clearCacheAndReload();
+      }
+    }, 20000); // 20 second emergency timeout
+
     return () => {
       mounted = false;
+      clearTimeout(emergencyTimer);
       // Handle both real and mock subscriptions
       if (authStateChangeResult?.data?.subscription?.unsubscribe) {
         authStateChangeResult.data.subscription.unsubscribe();

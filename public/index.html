@@ -11,10 +11,10 @@
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!-- Cache Control Meta Tags -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <!-- Enhanced Cache Control Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Expires" content="-1" />
     <!-- End Cache Control Meta Tags -->
     <!-- Mobile Menu Fix CSS -->
     <link rel="stylesheet" href="%PUBLIC_URL%/mobile-menu-fix.css" />
@@ -23,6 +23,55 @@
       if (typeof window.global === 'undefined') {
         window.global = window;
       }
+    </script>
+    <script type="text/javascript">
+      // Cache Busting and Version Check
+      (function() {
+        const APP_VERSION = '__BUILD_TIMESTAMP__'; // Will be replaced during build
+        const VERSION_KEY = 'app_version';
+        const LAST_REFRESH_KEY = 'last_forced_refresh';
+        
+        // Check if this is a new version
+        const storedVersion = localStorage.getItem(VERSION_KEY);
+        const now = Date.now();
+        const lastRefresh = parseInt(localStorage.getItem(LAST_REFRESH_KEY) || '0');
+        
+        console.log('🔄 Version Check:', {
+          currentVersion: APP_VERSION,
+          storedVersion: storedVersion,
+          timeSinceLastRefresh: now - lastRefresh
+        });
+        
+        // Force refresh if version changed and enough time has passed since last refresh
+        if (storedVersion && storedVersion !== APP_VERSION && (now - lastRefresh) > 5000) {
+          console.log('🚀 New version detected, clearing cache and reloading...');
+          
+          // Clear various caches
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              for (let name of names) {
+                caches.delete(name);
+              }
+            });
+          }
+          
+          // Clear localStorage items that might be cached
+          ['workoutState', 'userProfile', 'gamificationState', 'nutritionState'].forEach(key => {
+            localStorage.removeItem(key);
+          });
+          
+          // Store new version and refresh timestamp
+          localStorage.setItem(VERSION_KEY, APP_VERSION);
+          localStorage.setItem(LAST_REFRESH_KEY, now.toString());
+          
+          // Force a hard reload
+          window.location.reload(true);
+          return;
+        }
+        
+        // Store version for future checks
+        localStorage.setItem(VERSION_KEY, APP_VERSION);
+      })();
     </script>
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages

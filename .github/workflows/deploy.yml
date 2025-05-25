@@ -42,6 +42,34 @@ jobs:
         PUBLIC_URL: /fitness
         REACT_APP_SUPABASE_URL: https://osbkihliyfepgithobdx.supabase.co
         REACT_APP_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmtpaGxpeWZlcGdpdGhvYmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjE1NjEsImV4cCI6MjA2MzczNzU2MX0.sRt-kgQcDnxQKQQ4D0WGpqY8Z9Mx7B6EqFIQq8o6Y-I"
+
+    - name: Inject build timestamp for cache busting
+      run: |
+        BUILD_TIMESTAMP=$(date +%s)
+        echo "🔄 Injecting build timestamp: $BUILD_TIMESTAMP"
+        sed -i "s/__BUILD_TIMESTAMP__/$BUILD_TIMESTAMP/g" build/index.html
+        echo "✅ Build timestamp injected successfully"
+        
+    - name: Add cache-busting headers
+      run: |
+        echo "📄 Adding _headers file for cache control..."
+        cat > build/_headers << 'EOF'
+        /*
+          Cache-Control: no-cache, no-store, must-revalidate
+          Pragma: no-cache
+          Expires: -1
+        
+        /static/js/*
+          Cache-Control: no-cache, no-store, must-revalidate
+          Pragma: no-cache
+          Expires: -1
+        
+        /static/css/*
+          Cache-Control: no-cache, no-store, must-revalidate
+          Pragma: no-cache
+          Expires: -1
+        EOF
+        echo "✅ Headers file created"
         
     - name: Verify build output
       run: |
@@ -49,6 +77,10 @@ jobs:
         ls -la build/
         echo "Checking for index.html..."
         ls -la build/index.html
+        echo "Checking for _headers file..."
+        ls -la build/_headers || echo "No _headers file found"
+        echo "Checking timestamp injection..."
+        grep -n "BUILD_TIMESTAMP" build/index.html || echo "✅ Timestamp successfully replaced"
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
