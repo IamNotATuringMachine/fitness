@@ -7,14 +7,7 @@ import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 import AdvancedTrainingMethod from '../components/workout/AdvancedTrainingMethod';
 
-// Fallback exercise options in case the context is empty
-const initialExerciseOptions = [
-  { value: 'ex1', label: 'Kniebeugen' },
-  { value: 'ex2', label: 'Bankdrücken' },
-  { value: 'ex3', label: 'Kreuzheben' },
-  { value: 'ex4', label: 'Klimmzüge' },
-  { value: 'ex5', label: 'Schulterdrücken' }
-];
+// Note: Fallback exercises are no longer needed as we have comprehensive exercise database
 
 const FormContainer = styled.div`
   max-width: 800px;
@@ -34,9 +27,15 @@ const Label = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-radius: 4px;
   font-size: 1rem;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
+  
+  &::placeholder {
+    color: ${props => props.theme.colors?.textSecondary || '#999'};
+  }
   
   &:focus {
     outline: none;
@@ -48,10 +47,16 @@ const Input = styled.input`
 const Textarea = styled.textarea`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-radius: 4px;
   font-size: 1rem;
   min-height: 100px;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
+  
+  &::placeholder {
+    color: ${props => props.theme.colors?.textSecondary || '#999'};
+  }
   
   &:focus {
     outline: none;
@@ -78,10 +83,11 @@ const ExerciseList = styled.div`
 
 const ExerciseItem = styled.div`
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: ${props => props.theme.colors?.cardBackground || '#f8f9fa'};
   border-radius: 4px;
   margin-bottom: 1rem;
   position: relative;
+  border: 1px solid ${props => props.theme.colors?.border || 'transparent'};
 `;
 
 const ExerciseHeader = styled.div`
@@ -110,7 +116,7 @@ const RemoveButton = styled.button`
 const ExerciseForm = styled.div`
   margin-top: 1rem;
   padding: 1rem;
-  background-color: #f0f0f0;
+  background-color: ${props => props.theme.colors?.background || '#f0f0f0'};
   border-radius: 4px;
 `;
 
@@ -121,15 +127,21 @@ const ExerciseSelector = styled.div`
 const Select = styled.select`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-radius: 4px;
   font-size: 1rem;
-  background-color: white;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
   
   &:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  option {
+    background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+    color: ${props => props.theme.colors?.text || '#000'};
   }
 `;
 
@@ -141,10 +153,11 @@ const SearchableSelect = styled.div`
 const CustomSelect = styled.div`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-radius: 4px;
   font-size: 1rem;
-  background-color: white;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -159,17 +172,23 @@ const CustomSelect = styled.div`
   &:after {
     content: "▼";
     font-size: 0.8rem;
-    color: #555;
+    color: ${props => props.theme.colors?.textSecondary || '#555'};
   }
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-top: none;
   border-radius: 0 0 4px 4px;
   font-size: 0.9rem;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
+  
+  &::placeholder {
+    color: ${props => props.theme.colors?.textSecondary || '#999'};
+  }
 `;
 
 const SelectOptions = styled.div`
@@ -177,11 +196,13 @@ const SelectOptions = styled.div`
   width: 100%;
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
   border-top: none;
   border-radius: 0 0 4px 4px;
-  background-color: white;
+  background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+  color: ${props => props.theme.colors?.text || '#000'};
   z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const OptionItem = styled.div`
@@ -189,11 +210,11 @@ const OptionItem = styled.div`
   cursor: pointer;
   
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${props => props.theme.colors?.hoverBackground || '#f0f0f0'};
   }
   
   &.selected {
-    background-color: #e3f2fd;
+    background-color: ${props => props.theme.colors?.primaryLight || '#e3f2fd'};
   }
 `;
 
@@ -214,13 +235,26 @@ const ParameterInput = styled.div`
     display: block;
     font-size: 0.875rem;
     margin-bottom: 0.25rem;
+    color: ${props => props.theme.colors?.text || '#000'};
   }
   
   input {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
     border-radius: 4px;
+    background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+    color: ${props => props.theme.colors?.text || '#000'};
+    
+    &::placeholder {
+      color: ${props => props.theme.colors?.textSecondary || '#999'};
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
   }
 `;
 
@@ -230,14 +264,27 @@ const NotesInput = styled.div`
   label {
     display: block;
     margin-bottom: 0.25rem;
+    color: ${props => props.theme.colors?.text || '#000'};
   }
   
   textarea {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid ${props => props.theme.colors?.border || '#ddd'};
     border-radius: 4px;
     min-height: 60px;
+    background-color: ${props => props.theme.colors?.cardBackground || 'white'};
+    color: ${props => props.theme.colors?.text || '#000'};
+    
+    &::placeholder {
+      color: ${props => props.theme.colors?.textSecondary || '#999'};
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
   }
 `;
 
@@ -496,6 +543,10 @@ const CreatePlan = () => {
       exerciseId: selectedExerciseId,
       name: selectedExercise.name,
       muscleGroups: selectedExercise.muscleGroups || [],
+      übungstyp: selectedExercise.übungstyp || '',
+      equipment: selectedExercise.equipment || [],
+      beschreibung: selectedExercise.beschreibung || '',
+      gewichtete_muskelbeteiligung_pro_satz: selectedExercise.gewichtete_muskelbeteiligung_pro_satz || {},
       sets: exerciseParams.sets ? parseInt(exerciseParams.sets, 10) : null,
       reps: exerciseParams.reps ? parseInt(exerciseParams.reps, 10) : null,
       weight: exerciseParams.weight ? parseFloat(exerciseParams.weight) : null,
@@ -652,37 +703,7 @@ const CreatePlan = () => {
     <div>
       <h1>Neuen Trainingsplan erstellen</h1>
       
-      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-        <Button 
-          variant="secondary"
-          onClick={() => {
-            console.log('Exercises:', contextState.exercises);
-            console.log('Exercise count:', contextState.exercises ? contextState.exercises.length : 0);
-            if (contextState.exercises && contextState.exercises.length > 0) {
-              alert(`${contextState.exercises.length} Übungen gefunden!`);
-            } else {
-              alert('Keine Übungen gefunden! Datenbank zurücksetzen...');
-              localStorage.removeItem('workoutState');
-              window.location.reload();
-            }
-          }}
-          style={{ fontSize: '0.9rem' }}
-        >
-          Debug-Übungen
-        </Button>
-        <Button 
-          variant="secondary"
-          onClick={() => {
-            if (window.confirm('Diese Aktion setzt die Übungsdatenbank zurück. Fortfahren?')) {
-              localStorage.removeItem('workoutState');
-              window.location.reload();
-            }
-          }}
-          style={{ fontSize: '0.9rem' }}
-        >
-          Übungsdatenbank zurücksetzen
-        </Button>
-      </div>
+
       
       <FormContainer>
         <Card>
@@ -791,7 +812,17 @@ const CreatePlan = () => {
                     {day.exercises.map(exercise => (
                       <ExerciseItem key={exercise.id}>
                         <ExerciseHeader>
-                          <ExerciseName>{exercise.name}</ExerciseName>
+                          <div>
+                            <ExerciseName>{exercise.name}</ExerciseName>
+                            {exercise.übungstyp && (
+                              <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '2px' }}>
+                                {exercise.übungstyp} 
+                                {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+                                  <> • {exercise.muscleGroups.join(', ')}</>
+                                )}
+                              </div>
+                            )}
+                          </div>
                           <RemoveButton onClick={() => handleRemoveExercise(day.id, exercise.id)}>
                             &times;
                           </RemoveButton>
@@ -803,9 +834,19 @@ const CreatePlan = () => {
                           {exercise.repsInReserve && <> | <strong>RIR:</strong> {exercise.repsInReserve}</>}
                           {exercise.rest && <> | <strong>Pause:</strong> {exercise.rest} s</>}
                         </div>
+                        {exercise.equipment && exercise.equipment.length > 0 && (
+                          <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
+                            <strong>Equipment:</strong> {exercise.equipment.join(', ')}
+                          </div>
+                        )}
                         {exercise.notes && (
                           <div style={{ marginTop: '0.5rem' }}>
                             <strong>Notizen:</strong> {exercise.notes}
+                          </div>
+                        )}
+                        {exercise.beschreibung && (
+                          <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#555' }}>
+                            <strong>Beschreibung:</strong> {exercise.beschreibung}
                           </div>
                         )}
                       </ExerciseItem>
@@ -870,13 +911,13 @@ const CreatePlan = () => {
                             }}
                           >
                             <option value="">Alle Muskelgruppen</option>
-                            <option value="Brustmuskulatur">Brustmuskulatur (Pectoralis)</option>
-                            <option value="Rückenmuskulatur">Rückenmuskulatur (Latissimus, Trapezius)</option>
-                            <option value="Beinmuskulatur">Beinmuskulatur (Quadrizeps, Beinbeuger)</option>
-                            <option value="Schultermuskulatur">Schultermuskulatur (Deltoideus)</option>
+                            <option value="Brust">Brust</option>
+                            <option value="Rücken">Rücken</option>
+                            <option value="Schultern">Schultern</option>
                             <option value="Bizeps">Bizeps</option>
                             <option value="Trizeps">Trizeps</option>
-                            <option value="Bauchmuskulatur">Bauchmuskulatur</option>
+                            <option value="Beine">Beine</option>
+                            <option value="Bauch_Rumpf">Bauch & Rumpf</option>
                           </Select>
                         </ExerciseSelector>
 
@@ -898,31 +939,81 @@ const CreatePlan = () => {
                             </CustomSelect>
                             <SelectOptions id="exerciseOptions" style={{display: 'none'}}>
                               <SearchInput 
-                                placeholder="Übung suchen..." 
+                                placeholder="Nach Name, Equipment oder Beschreibung suchen..." 
                                 value={exerciseSearchTerm}
                                 onChange={(e) => setExerciseSearchTerm(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                                 autoFocus
                               />
                               <div style={{ padding: '5px', color: '#666', fontSize: '0.8rem' }}>
-                                Gefundene Übungen: {contextState.exercises ? contextState.exercises.length : 0}
+                                {contextState.exercises ? (
+                                  (() => {
+                                    const filteredCount = contextState.exercises.filter(exercise => {
+                                      const matchesMuscleGroup = !selectedMuscleGroup || 
+                                        (exercise.muscleGroups && 
+                                         Array.isArray(exercise.muscleGroups) && 
+                                         exercise.muscleGroups.includes(selectedMuscleGroup));
+                                      
+                                      const matchesSearchTerm = !exerciseSearchTerm || 
+                                        (exercise.name && 
+                                         exercise.name.toLowerCase().includes(exerciseSearchTerm.toLowerCase())) ||
+                                        (exercise.beschreibung && 
+                                         exercise.beschreibung.toLowerCase().includes(exerciseSearchTerm.toLowerCase())) ||
+                                        (exercise.equipment && Array.isArray(exercise.equipment) &&
+                                         exercise.equipment.some(eq => eq.toLowerCase().includes(exerciseSearchTerm.toLowerCase())));
+                                      
+                                      return matchesMuscleGroup && matchesSearchTerm;
+                                    }).length;
+                                    
+                                    return (
+                                      <>
+                                        Gefundene Übungen: {filteredCount} / {contextState.exercises.length}
+                                        {selectedMuscleGroup && (
+                                          <span style={{ marginLeft: '10px', fontSize: '0.75rem' }}>
+                                            (Filter: {selectedMuscleGroup})
+                                          </span>
+                                        )}
+                                      </>
+                                    );
+                                  })()
+                                ) : '0'}
                               </div>
                               {contextState.exercises && contextState.exercises.length > 0 ? (
-                                contextState.exercises
-                                  .filter(exercise => {
+                                (() => {
+                                  const filteredExercises = contextState.exercises.filter(exercise => {
                                     // Check if muscle group is selected and exercise has that muscle group
                                     const matchesMuscleGroup = !selectedMuscleGroup || 
                                       (exercise.muscleGroups && 
                                        Array.isArray(exercise.muscleGroups) && 
                                        exercise.muscleGroups.includes(selectedMuscleGroup));
                                     
-                                    // Check if search term matches exercise name
+                                    // Check if search term matches exercise name, description, or equipment
                                     const matchesSearchTerm = !exerciseSearchTerm || 
                                       (exercise.name && 
-                                       exercise.name.toLowerCase().includes(exerciseSearchTerm.toLowerCase()));
+                                       exercise.name.toLowerCase().includes(exerciseSearchTerm.toLowerCase())) ||
+                                      (exercise.beschreibung && 
+                                       exercise.beschreibung.toLowerCase().includes(exerciseSearchTerm.toLowerCase())) ||
+                                      (exercise.equipment && Array.isArray(exercise.equipment) &&
+                                       exercise.equipment.some(eq => eq.toLowerCase().includes(exerciseSearchTerm.toLowerCase())));
+                                    
+                                    // Enhanced debugging
+                                    if (selectedMuscleGroup && exerciseSearchTerm === '' && !matchesMuscleGroup) {
+                                      console.log(`❌ Exercise "${exercise.name}" - muscleGroups: [${exercise.muscleGroups?.join(', ')}], looking for: "${selectedMuscleGroup}"`);
+                                    }
                                     
                                     return matchesMuscleGroup && matchesSearchTerm;
-                                  })
+                                  });
+                                  
+                                  // Additional debug for first few results
+                                  if (selectedMuscleGroup && exerciseSearchTerm === '') {
+                                    console.log(`🔍 Filter results for "${selectedMuscleGroup}": ${filteredExercises.length} exercises found`);
+                                    if (filteredExercises.length > 0) {
+                                      console.log('✅ First 3 matching exercises:', filteredExercises.slice(0, 3).map(ex => ex.name));
+                                    }
+                                  }
+                                  
+                                  return filteredExercises;
+                                })()
                                   .map(exercise => (
                                     <OptionItem 
                                       key={exercise.id}
@@ -932,7 +1023,21 @@ const CreatePlan = () => {
                                         document.getElementById('exerciseOptions').style.display = 'none';
                                       }}
                                     >
-                                      {exercise.name} ({exercise.muscleGroups && Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.join(', ') : 'Keine Muskelgruppe'})
+                                      <div>
+                                        <div style={{ fontWeight: '500' }}>{exercise.name}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '2px' }}>
+                                          {exercise.übungstyp && <span>{exercise.übungstyp}</span>}
+                                          {exercise.übungstyp && exercise.muscleGroups && Array.isArray(exercise.muscleGroups) && exercise.muscleGroups.length > 0 && <span> • </span>}
+                                          {exercise.muscleGroups && Array.isArray(exercise.muscleGroups) && exercise.muscleGroups.length > 0 && (
+                                            <span>{exercise.muscleGroups.join(', ')}</span>
+                                          )}
+                                          {exercise.equipment && exercise.equipment.length > 0 && (
+                                            <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                              Equipment: {exercise.equipment.join(', ')}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
                                     </OptionItem>
                                   ))
                               ) : (
@@ -941,20 +1046,12 @@ const CreatePlan = () => {
                             </SelectOptions>
                           </SearchableSelect>
 
-                          {/* Fallback standard select as a backup */}
+                          {/* Show error message if no exercises are loaded */}
                           {(!contextState.exercises || contextState.exercises.length === 0) && (
                             <div style={{ marginTop: '10px' }}>
-                              <p style={{ color: 'red', fontSize: '0.9rem' }}>Keine Übungen gefunden! Bitte Datenbank zurücksetzen.</p>
-                              <Select 
-                                id="exercise-fallback" 
-                                value={selectedExerciseId}
-                                onChange={(e) => setSelectedExerciseId(e.target.value)}
-                              >
-                                <option value="">Übung auswählen...</option>
-                                {initialExerciseOptions.map(option => (
-                                  <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                              </Select>
+                              <p style={{ color: 'red', fontSize: '0.9rem' }}>
+                                Keine Übungen gefunden! Bitte verwende den "Übungsdatenbank zurücksetzen" Button oben rechts.
+                              </p>
                             </div>
                           )}
                         </ExerciseSelector>
