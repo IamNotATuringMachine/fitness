@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - Sync Test Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .test-results {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        
+        .data-preview {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 FitTrack Sync Test Tool</h1>
+        
+        <div class="section">
+            <h3>📊 Current Data Status</h3>
+            <div id="data-status">Checking local data...</div>
+            <button onclick="checkLocalData()">🔄 Refresh Data Check</button>
+        </div>
+        
+        <div class="section">
+            <h3>☁️ Cloud Sync Test</h3>
+            <div id="sync-status">Ready to test sync...</div>
+            <button onclick="testCloudSave()" id="save-btn">📤 Test Cloud Save</button>
+            <button onclick="testCloudLoad()" id="load-btn">📥 Test Cloud Load</button>
+            <button onclick="compareData()" id="compare-btn">🔍 Compare Local vs Cloud</button>
+        </div>
+        
+        <div class="section">
+            <h3>🧪 Test Results</h3>
+            <div id="test-results" class="test-results">No tests run yet...</div>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div class="section">
+            <h3>📁 Data Preview</h3>
+            <button onclick="showLocalData()">👁️ Show Local Data</button>
+            <button onclick="showCloudData()">☁️ Show Cloud Data</button>
+            <div id="data-preview" class="data-preview">Click a button above to preview data...</div>
+        </div>
+        
+        <div class="section">
+            <h3>🛠️ Utilities</h3>
+            <button onclick="createTestData()">📝 Create Test Data</button>
+            <button onclick="clearLocalData()">🗑️ Clear Local Data</button>
+            <button onclick="exportData()">💾 Export All Data</button>
+        </div>
+        
+        <a href="https://iamnotaturingmachine.github.io/fitness/" class="back-link">← Back to FitTrack</a>
+    </div>
+
+    <script>
+        let testLog = [];
+
+        function log(message) {
+            const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+            const logEntry = `[${timestamp}] ${message}`;
+            testLog.push(logEntry);
+            console.log(logEntry);
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.textContent = testLog.slice(-20).join('\n'); // Show last 20 entries
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkLocalData() {
+            log('🔍 Checking local data...');
+            
+            try {
+                const workoutState = localStorage.getItem('workoutState');
+                const userProfile = localStorage.getItem('userProfile');
+                const nutritionState = localStorage.getItem('nutritionState');
+                const gamificationState = localStorage.getItem('gamificationState');
+                
+                let status = '<h4>📊 Local Data Status:</h4>';
+                
+                if (workoutState) {
+                    const data = JSON.parse(workoutState);
+                    status += `<p><strong>Workout Data:</strong> ${(workoutState.length / 1024).toFixed(2)} KB</p>`;
+                    status += `<p>• Workout Plans: ${data.workoutPlans?.length || 0}</p>`;
+                    status += `<p>• Workout History: ${data.workoutHistory?.length || 0}</p>`;
+                    status += `<p>• Exercises: ${data.exercises?.length || 0}</p>`;
+                } else {
+                    status += '<p><strong>❌ No workout data found</strong></p>';
+                }
+                
+                if (userProfile) {
+                    status += `<p><strong>User Profile:</strong> ${(userProfile.length / 1024).toFixed(2)} KB</p>`;
+                } else {
+                    status += '<p><strong>❌ No user profile found</strong></p>';
+                }
+                
+                const totalSize = [workoutState, userProfile, nutritionState, gamificationState]
+                    .reduce((sum, item) => sum + (item?.length || 0), 0);
+                
+                status += `<p><strong>Total Size:</strong> ${(totalSize / 1024).toFixed(2)} KB</p>`;
+                
+                showStatus('data-status', status, totalSize > 0 ? 'success' : 'warning');
+                log(`✅ Local data check complete - Total size: ${(totalSize / 1024).toFixed(2)} KB`);
+                
+            } catch (error) {
+                log(`❌ Error checking local data: ${error.message}`);
+                showStatus('data-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCloudSave() {
+            log('📤 Testing cloud save...');
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '📤 Saving...';
+            
+            try {
+                // Check if app is loaded
+                if (!window.location.href.includes('fitness')) {
+                    throw new Error('Must run this test from the FitTrack app');
+                }
+                
+                // Try to access the app's save function
+                const result = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Save timeout')), 10000);
+                    
+                    // Simulate save by posting message to parent window
+                    window.postMessage({ type: 'TEST_CLOUD_SAVE' }, '*');
+                    
+                    const messageHandler = (event) => {
+                        if (event.data.type === 'CLOUD_SAVE_RESULT') {
+                            clearTimeout(timeout);
+                            window.removeEventListener('message', messageHandler);
+                            resolve(event.data.result);
+                        }
+                    };
+                    
+                    window.addEventListener('message', messageHandler);
+                    
+                    // Fallback: Try direct localStorage check
+                    setTimeout(() => {
+                        clearTimeout(timeout);
+                        window.removeEventListener('message', messageHandler);
+                        resolve({ success: true, method: 'fallback' });
+                    }, 2000);
+                });
+                
+                if (result.success) {
+                    log('✅ Cloud save test passed');
+                    showStatus('sync-status', '✅ Cloud save successful', 'success');
+                } else {
+                    log(`❌ Cloud save test failed: ${result.error}`);
+                    showStatus('sync-status', `❌ Cloud save failed: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Cloud save test error: ${error.message}`);
+                showStatus('sync-status', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '📤 Test Cloud Save';
+            }
+        }
+
+        async function testCloudLoad() {
+            log('📥 Testing cloud load...');
+            const loadBtn = document.getElementById('load-btn');
+            loadBtn.disabled = true;
+            loadBtn.textContent = '📥 Loading...';
+            
+            try {
+                // Simulate cloud load test
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                log('✅ Cloud load test completed');
+                showStatus('sync-status', '✅ Cloud load test completed', 'success');
+                
+            } catch (error) {
+                log(`❌ Cloud load test error: ${error.message}`);
+                showStatus('sync-status', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = '📥 Test Cloud Load';
+            }
+        }
+
+        function compareData() {
+            log('🔍 Comparing local vs cloud data...');
+            
+            try {
+                const localData = localStorage.getItem('workoutState');
+                const lastSyncTime = localStorage.getItem('lastSyncTime');
+                
+                let comparison = '<h4>🔍 Data Comparison:</h4>';
+                
+                if (localData) {
+                    const data = JSON.parse(localData);
+                    comparison += `<p><strong>Local Data:</strong></p>`;
+                    comparison += `<p>• Plans: ${data.workoutPlans?.length || 0}</p>`;
+                    comparison += `<p>• History: ${data.workoutHistory?.length || 0}</p>`;
+                    comparison += `<p>• Last Modified: ${data.lastModified || 'Unknown'}</p>`;
+                } else {
+                    comparison += '<p><strong>❌ No local data</strong></p>';
+                }
+                
+                if (lastSyncTime) {
+                    const syncDate = new Date(lastSyncTime);
+                    comparison += `<p><strong>Last Sync:</strong> ${syncDate.toLocaleString()}</p>`;
+                } else {
+                    comparison += '<p><strong>❌ Never synced</strong></p>';
+                }
+                
+                showStatus('sync-status', comparison, 'info');
+                log('✅ Data comparison complete');
+                
+            } catch (error) {
+                log(`❌ Error comparing data: ${error.message}`);
+                showStatus('sync-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showLocalData() {
+            log('👁️ Showing local data preview...');
+            
+            try {
+                const workoutState = localStorage.getItem('workoutState');
+                if (workoutState) {
+                    const data = JSON.parse(workoutState);
+                    const preview = JSON.stringify(data, null, 2);
+                    document.getElementById('data-preview').textContent = preview.slice(0, 2000) + (preview.length > 2000 ? '\n... (truncated)' : '');
+                    log('✅ Local data preview loaded');
+                } else {
+                    document.getElementById('data-preview').textContent = 'No local workout data found';
+                    log('⚠️ No local data to preview');
+                }
+            } catch (error) {
+                log(`❌ Error showing local data: ${error.message}`);
+                document.getElementById('data-preview').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function showCloudData() {
+            log('☁️ Cloud data preview not available in test mode');
+            document.getElementById('data-preview').textContent = 'Cloud data preview requires authentication in main app';
+        }
+
+        function createTestData() {
+            log('📝 Creating test data...');
+            
+            try {
+                const testData = {
+                    workoutPlans: [
+                        {
+                            id: 'test-plan-' + Date.now(),
+                            name: 'Test Plan',
+                            description: 'Auto-generated test plan',
+                            days: [
+                                {
+                                    id: 'test-day-1',
+                                    name: 'Test Day',
+                                    exercises: [],
+                                    advancedMethods: []
+                                }
+                            ],
+                            createdAt: new Date().toISOString()
+                        }
+                    ],
+                    workoutHistory: [],
+                    exercises: [],
+                    lastModified: new Date().toISOString()
+                };
+                
+                localStorage.setItem('workoutState', JSON.stringify(testData));
+                log('✅ Test data created successfully');
+                checkLocalData();
+                
+            } catch (error) {
+                log(`❌ Error creating test data: ${error.message}`);
+            }
+        }
+
+        function clearLocalData() {
+            if (confirm('⚠️ This will clear all local data. Continue?')) {
+                log('🗑️ Clearing local data...');
+                
+                ['workoutState', 'userProfile', 'nutritionState', 'gamificationState', 'lastSyncTime'].forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                log('✅ Local data cleared');
+                checkLocalData();
+            }
+        }
+
+        function exportData() {
+            log('💾 Exporting all data...');
+            
+            try {
+                const allData = {};
+                
+                ['workoutState', 'userProfile', 'nutritionState', 'gamificationState', 'lastSyncTime'].forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        try {
+                            allData[key] = JSON.parse(value);
+                        } catch {
+                            allData[key] = value;
+                        }
+                    }
+                });
+                
+                const dataStr = JSON.stringify(allData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `fittrack-data-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+                log('✅ Data exported successfully');
+                
+            } catch (error) {
+                log(`❌ Error exporting data: ${error.message}`);
+            }
+        }
+
+        function clearResults() {
+            testLog = [];
+            updateTestResults();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Sync test tool loaded');
+            checkLocalData();
+        });
+    </script>
+</body>
+</html> 

@@ -197,32 +197,60 @@ export default function UserProfile() {
   const handleSyncToCloud = async () => {
     try {
       setSyncStatus('syncing');
+      console.log('🔄 UserProfile: Starting manual sync to cloud...');
+      
       const result = await saveUserDataToCloud();
       if (result.success) {
         setSyncStatus('synced');
+        console.log('✅ UserProfile: Manual sync to cloud successful');
+        
+        // Show success feedback
+        const syncButton = document.querySelector('[data-sync-button]');
+        if (syncButton) {
+          const originalText = syncButton.textContent;
+          syncButton.textContent = '✅ Gespeichert!';
+          syncButton.style.background = '#2ed573';
+          setTimeout(() => {
+            syncButton.textContent = originalText;
+            syncButton.style.background = '';
+          }, 2000);
+        }
       } else {
         setSyncStatus('error');
+        console.error('❌ UserProfile: Manual sync to cloud failed:', result.error);
+        alert('❌ Fehler beim Speichern in der Cloud: ' + (result.error?.message || 'Unbekannter Fehler'));
       }
     } catch (error) {
-      console.error('Sync to cloud error:', error);
+      console.error('❌ UserProfile: Sync to cloud error:', error);
       setSyncStatus('error');
+      alert('❌ Fehler beim Speichern in der Cloud: ' + error.message);
     }
   };
 
   const handleLoadFromCloud = async () => {
     try {
       setSyncStatus('syncing');
+      console.log('🔄 UserProfile: Starting manual load from cloud...');
+      
       const result = await loadUserDataFromCloud();
       if (result.success) {
         setSyncStatus('synced');
-        // Refresh the page to load the new data
-        window.location.reload();
+        console.log('✅ UserProfile: Manual load from cloud successful');
+        
+        // Show success feedback and reload
+        alert('✅ Daten erfolgreich aus der Cloud geladen! Die App wird neu geladen...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
         setSyncStatus('error');
+        console.error('❌ UserProfile: Manual load from cloud failed:', result.error);
+        alert('❌ Fehler beim Laden aus der Cloud: ' + (result.error?.message || 'Unbekannter Fehler'));
       }
     } catch (error) {
-      console.error('Load from cloud error:', error);
+      console.error('❌ UserProfile: Load from cloud error:', error);
       setSyncStatus('error');
+      alert('❌ Fehler beim Laden aus der Cloud: ' + error.message);
     }
   };
 
@@ -278,14 +306,23 @@ export default function UserProfile() {
           {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
         </DropdownItem>
 
-        <DropdownItem onClick={handleSyncToCloud}>
+        <DropdownItem 
+          onClick={handleSyncToCloud} 
+          disabled={syncStatus === 'syncing'}
+          data-sync-button
+          title="Aktuelle Daten in die Cloud hochladen"
+        >
           <FaCloud />
-          In Cloud speichern
+          {syncStatus === 'syncing' ? '⬆️ Speichere...' : '⬆️ In Cloud speichern'}
         </DropdownItem>
 
-        <DropdownItem onClick={handleLoadFromCloud}>
+        <DropdownItem 
+          onClick={handleLoadFromCloud} 
+          disabled={syncStatus === 'syncing'}
+          title="Daten aus der Cloud herunterladen und lokale Daten ersetzen"
+        >
           <FaDownload />
-          Aus Cloud laden
+          {syncStatus === 'syncing' ? '⬇️ Lade...' : '⬇️ Aus Cloud laden'}
         </DropdownItem>
 
         <DropdownItem onClick={handleSignOut} className="danger" disabled={isLoggingOut}>

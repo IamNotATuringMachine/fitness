@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - Auth Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        .code {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 FitTrack Auth Diagnostic Tool</h1>
+        
+        <div class="section">
+            <h3>🔍 Authentication Status Check</h3>
+            <div id="auth-status">Checking authentication...</div>
+            <button onclick="checkAuthStatus()">🔄 Refresh Check</button>
+        </div>
+        
+        <div class="section">
+            <h3>📊 Session Details</h3>
+            <div id="session-details">Loading session information...</div>
+        </div>
+        
+        <div class="section">
+            <h3>🗄️ Local Storage Analysis</h3>
+            <div id="storage-analysis">Analyzing local storage...</div>
+            <button onclick="analyzeStorage()">🔄 Re-analyze Storage</button>
+        </div>
+        
+        <div class="section">
+            <h3>🛠️ Quick Fixes</h3>
+            <div class="status info">
+                <strong>Choose a fix based on your issue:</strong><br>
+                • <strong>Invalid Session:</strong> Clear auth data only<br>
+                • <strong>Stuck Loading:</strong> Clear all cache<br>
+                • <strong>App Won't Load:</strong> Full reset
+            </div>
+            <button onclick="clearAuthData()">🗑️ Clear Auth Data Only</button>
+            <button onclick="clearAllCache()">🧹 Clear All Cache</button>
+            <button class="danger" onclick="fullReset()">⚠️ Full Reset</button>
+        </div>
+        
+        <div class="section">
+            <h3>📱 App Access</h3>
+            <div class="actions">
+                <button onclick="goToApp()">🚀 Try App Now</button>
+                <button onclick="goToAppWithRefresh()">🔄 App + Force Refresh</button>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="https://iamnotaturingmachine.github.io/fitness/" class="back-link">← Back to FitTrack</a>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            console.log(`[Auth Diagnostic] ${message}`);
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkAuthStatus() {
+            log('🔐 Checking authentication status...');
+            
+            const supabaseKeys = [];
+            const authData = {};
+            let sessionFound = false;
+            let userFound = false;
+            
+            // Check localStorage for Supabase auth data
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+                    supabaseKeys.push(key);
+                    try {
+                        const value = localStorage.getItem(key);
+                        authData[key] = JSON.parse(value);
+                        
+                        // Check if this looks like a session
+                        if (value.includes('access_token') || value.includes('user')) {
+                            sessionFound = true;
+                            if (value.includes('user') && value.includes('email')) {
+                                userFound = true;
+                            }
+                        }
+                    } catch (e) {
+                        authData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            let status = '<h4>🔐 Authentication Analysis:</h4>';
+            status += `<p><strong>Supabase Keys Found:</strong> ${supabaseKeys.length}</p>`;
+            
+            if (supabaseKeys.length > 0) {
+                status += '<p><strong>Found Keys:</strong></p><ul>';
+                supabaseKeys.forEach(key => {
+                    status += `<li>${key}</li>`;
+                });
+                status += '</ul>';
+                
+                if (sessionFound && userFound) {
+                    status += '<div class="status success">🟢 Valid session and user data found</div>';
+                } else if (sessionFound) {
+                    status += '<div class="status warning">🟡 Session found but no user data - may be expired</div>';
+                } else {
+                    status += '<div class="status warning">🟡 Auth keys found but no valid session</div>';
+                }
+            } else {
+                status += '<div class="status error">🔴 No authentication data found - user not logged in</div>';
+            }
+            
+            // Check for demo mode
+            const demoSession = localStorage.getItem('demoUserSession');
+            if (demoSession) {
+                status += '<div class="status info">ℹ️ Demo mode session detected</div>';
+            }
+            
+            showStatus('auth-status', status);
+            log(`Auth check complete - Keys found: ${supabaseKeys.length}, Session: ${sessionFound}, User: ${userFound}`);
+            
+            return { supabaseKeys, sessionFound, userFound, authData };
+        }
+
+        function analyzeStorage() {
+            log('📊 Analyzing local storage...');
+            
+            let analysis = '<h4>🗄️ Storage Analysis:</h4>';
+            
+            // Check total storage usage
+            let totalSize = 0;
+            let itemCount = 0;
+            const storageItems = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                totalSize += size;
+                itemCount++;
+                
+                storageItems[key] = {
+                    size: size,
+                    sizeFormatted: (size / 1024).toFixed(2) + ' KB'
+                };
+            }
+            
+            analysis += `<p><strong>Total Items:</strong> ${itemCount}</p>`;
+            analysis += `<p><strong>Total Size:</strong> ${(totalSize / 1024).toFixed(2)} KB</p>`;
+            
+            // Show largest items
+            const sortedItems = Object.entries(storageItems)
+                .sort(([,a], [,b]) => b.size - a.size)
+                .slice(0, 5);
+            
+            if (sortedItems.length > 0) {
+                analysis += '<p><strong>Largest Items:</strong></p><ul>';
+                sortedItems.forEach(([key, data]) => {
+                    analysis += `<li>${key}: ${data.sizeFormatted}</li>`;
+                });
+                analysis += '</ul>';
+            }
+            
+            // Check for corrupted data
+            let corruptedItems = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                try {
+                    if (value.startsWith('{') || value.startsWith('[')) {
+                        JSON.parse(value);
+                    }
+                } catch (e) {
+                    corruptedItems++;
+                }
+            }
+            
+            if (corruptedItems > 0) {
+                analysis += `<div class="status warning">⚠️ Found ${corruptedItems} potentially corrupted items</div>`;
+            } else {
+                analysis += '<div class="status success">✅ No corrupted data detected</div>';
+            }
+            
+            showStatus('storage-analysis', analysis);
+        }
+
+        function clearAuthData() {
+            log('🗑️ Clearing authentication data only...');
+            
+            let clearedCount = 0;
+            const keysToRemove = [];
+            
+            // Find auth-related keys
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth') || key === 'demoUserSession')) {
+                    keysToRemove.push(key);
+                }
+            }
+            
+            // Remove them
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                clearedCount++;
+            });
+            
+            // Clear session storage too
+            sessionStorage.clear();
+            
+            showStatus('auth-status', `✅ Cleared ${clearedCount} authentication items. Try logging in again.`, 'success');
+            log(`Cleared ${clearedCount} auth items`);
+        }
+
+        function clearAllCache() {
+            log('🧹 Clearing all cache...');
+            
+            // Clear service worker caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                    log('Service worker caches cleared');
+                });
+            }
+            
+            // Clear localStorage (preserve some user data)
+            const userPrefs = localStorage.getItem('userPreferences');
+            const workoutState = localStorage.getItem('workoutState');
+            const nutritionState = localStorage.getItem('nutritionState');
+            const gamificationState = localStorage.getItem('gamificationState');
+            
+            localStorage.clear();
+            
+            // Restore user data
+            if (userPrefs) localStorage.setItem('userPreferences', userPrefs);
+            if (workoutState) localStorage.setItem('workoutState', workoutState);
+            if (nutritionState) localStorage.setItem('nutritionState', nutritionState);
+            if (gamificationState) localStorage.setItem('gamificationState', gamificationState);
+            
+            // Clear session storage
+            sessionStorage.clear();
+            
+            showStatus('auth-status', '✅ All cache cleared. User data preserved. App will reload fresh.', 'success');
+            log('All cache cleared, user data preserved');
+        }
+
+        function fullReset() {
+            if (!confirm('⚠️ This will delete ALL data including workouts and settings. Are you sure?')) {
+                return;
+            }
+            
+            log('⚠️ Performing full reset...');
+            
+            // Clear everything
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear service worker caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                    log('Service worker caches cleared');
+                });
+            }
+            
+            showStatus('auth-status', '⚠️ Full reset completed. All data cleared. App will start fresh.', 'warning');
+            log('Full reset completed');
+        }
+
+        function goToApp() {
+            log('🚀 Redirecting to app...');
+            window.location.href = 'https://iamnotaturingmachine.github.io/fitness/';
+        }
+
+        function goToAppWithRefresh() {
+            log('🔄 Redirecting to app with force refresh...');
+            window.location.href = 'https://iamnotaturingmachine.github.io/fitness/?refresh=true&v=' + Date.now();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Auth diagnostic tool loaded');
+            checkAuthStatus();
+            analyzeStorage();
+            
+            // Show session details
+            const authResult = checkAuthStatus();
+            let sessionDetails = '<h4>📊 Session Information:</h4>';
+            
+            if (authResult.authData && Object.keys(authResult.authData).length > 0) {
+                sessionDetails += '<div class="code">';
+                Object.entries(authResult.authData).forEach(([key, value]) => {
+                    sessionDetails += `${key}:\n${typeof value === 'string' ? value : JSON.stringify(value, null, 2)}\n\n`;
+                });
+                sessionDetails += '</div>';
+            } else {
+                sessionDetails += '<div class="status info">No session data found</div>';
+            }
+            
+            showStatus('session-details', sessionDetails);
+        });
+    </script>
+</body>
+</html> 

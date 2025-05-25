@@ -241,15 +241,57 @@ export class SupabaseAuthService {
     
     try {
       console.log('🔧 SupabaseService: Attempting supabase.auth.getSession() START');
-      const { data: { session }, error } = await supabase.auth.getSession();
-      console.log('🔧 SupabaseService: Attempting supabase.auth.getSession() END', { hasSession: !!session, error });
-      if (error) throw error;
       
-      return { session, error: null };
+      // Try to get the session with retry mechanism
+      let session = null;
+      let error = null;
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const result = await supabase.auth.getSession();
+          session = result.data?.session;
+          error = result.error;
+          
+          if (session || !error) {
+            break; // Success or clear no-session state
+          }
+          
+          console.log(`🔧 SupabaseService: Session attempt ${attempt} failed, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 100 * attempt)); // Progressive delay
+        } catch (attemptError) {
+          console.warn(`🔧 SupabaseService: Session attempt ${attempt} error:`, attemptError);
+          if (attempt === 3) {
+            error = attemptError;
+          }
+        }
+      }
+      
+      console.log('🔧 SupabaseService: Session retrieval result:', { 
+        hasSession: !!session, 
+        sessionValid: session && session.user && !this.isSessionExpired(session),
+        error: error?.message || 'none',
+        userId: session?.user?.id || 'none',
+        expiresAt: session?.expires_at || 'none'
+      });
+      
+      // Validate session if it exists
+      if (session && this.isSessionExpired(session)) {
+        console.warn('🔧 SupabaseService: Session is expired, treating as no session');
+        return { session: null, error: null };
+      }
+      
+      return { session, error };
     } catch (error) {
-      console.error('Get session error:', error);
+      console.error('🔧 SupabaseService: Get session error:', error);
       return { session: null, error };
     }
+  }
+
+  isSessionExpired(session) {
+    if (!session || !session.expires_at) return false;
+    const now = Math.floor(Date.now() / 1000);
+    const expiryWithBuffer = session.expires_at - 300; // 5 minute buffer
+    return now > expiryWithBuffer;
   }
 }
 

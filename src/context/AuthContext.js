@@ -141,9 +141,49 @@ export function AuthProvider({ children }) {
             return;
           }
           
+          // Enhanced session debugging
+          console.log('🔧 AuthContext: Session retrieval response:', {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            userEmail: session?.user?.email,
+            userId: session?.user?.id,
+            sessionExpiry: session?.expires_at,
+            currentTime: Math.floor(Date.now() / 1000),
+            isExpired: session?.expires_at ? Math.floor(Date.now() / 1000) > session.expires_at : false,
+            error: error?.message || 'none'
+          });
+          
+          // Handle case where session exists but user is null or session is expired
+          if (session && (!session.user || (session.expires_at && Math.floor(Date.now() / 1000) > session.expires_at))) {
+            console.warn('🔧 AuthContext: Session exists but user is null or session expired, clearing auth state');
+            
+            // Try to sign out to clear the invalid session
+            try {
+              await authService.signOut();
+              console.log('🔧 AuthContext: Invalid session cleared successfully');
+            } catch (signOutError) {
+              console.warn('🔧 AuthContext: Failed to clear invalid session:', signOutError);
+              // Clear localStorage auth data manually
+              for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+                  localStorage.removeItem(key);
+                }
+              }
+            }
+            
+            setUser(null);
+            setError(null);
+            setLoading(false);
+            setIsInitialized(true);
+            initComplete = true;
+            return;
+          }
+          
           console.log('🔧 AuthContext: Setting initial auth state', { 
             hasUser: !!session?.user, 
-            email: session?.user?.email 
+            email: session?.user?.email,
+            userId: session?.user?.id
           });
           
           setUser(session?.user ?? null);
@@ -177,10 +217,21 @@ export function AuthProvider({ children }) {
       async (event, session) => {
         console.log('🔧 AuthContext: Auth state changed:', {
           event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
           userEmail: session?.user?.email,
           userId: session?.user?.id,
+          sessionExpiry: session?.expires_at,
+          isExpired: session?.expires_at ? Math.floor(Date.now() / 1000) > session.expires_at : false,
           timestamp: new Date().toISOString()
         });
+        
+        // Check for invalid session in auth state changes too
+        if (session && (!session.user || (session.expires_at && Math.floor(Date.now() / 1000) > session.expires_at))) {
+          console.warn('🔧 AuthContext: Invalid session detected in auth state change, treating as signed out');
+          event = 'SIGNED_OUT';
+          session = null;
+        }
         
         if (mounted) {
           // Handle different auth events
@@ -306,6 +357,7 @@ export function AuthProvider({ children }) {
       // Add timeout protection for the entire sync operation
       const syncOperation = async () => {
         // First, try to load existing data from cloud
+        console.log('🔧 AuthContext: Fetching user data from cloud...');
         const { data: remoteData, error: loadError } = await dataService.getUserData(user.id);
         
         if (loadError) {
@@ -315,30 +367,85 @@ export function AuthProvider({ children }) {
         } 
         
         if (remoteData && Object.keys(remoteData).length > 0) {
-          console.log('🔧 AuthContext: Remote data found, applying to local storage');
+          console.log('🔧 AuthContext: Remote data found, merging with local storage');
+          console.log('🔧 AuthContext: Remote data keys:', Object.keys(remoteData));
           
-          // Apply remote data to local storage with error handling
+          // Get current local data first
+          const currentWorkoutData = secureStorage.get('workoutState') || {};
+          const currentUserProfile = secureStorage.get('userProfile') || {};
+          const currentGamificationData = secureStorage.get('gamificationState') || {};
+          const currentNutritionData = secureStorage.get('nutritionState') || {};
+          
+          // Apply remote data to local storage with smart merging
           try {
             if (remoteData.workoutState) {
-              secureStorage.set('workoutState', remoteData.workoutState);
+              console.log('🔧 AuthContext: Applying remote workout data');
+              console.log('🔧 AuthContext: Remote workout plans:', remoteData.workoutState.workoutPlans?.length || 0);
+              console.log('🔧 AuthContext: Local workout plans:', currentWorkoutData.workoutPlans?.length || 0);
+              
+              // Merge workout data intelligently
+              const mergedWorkoutData = {
+                ...currentWorkoutData,
+                ...remoteData.workoutState,
+                // Preserve local data if remote is empty/older
+                workoutPlans: remoteData.workoutState.workoutPlans?.length > 0 
+                  ? remoteData.workoutState.workoutPlans 
+                  : currentWorkoutData.workoutPlans || [],
+                workoutHistory: [
+                  ...(currentWorkoutData.workoutHistory || []),
+                  ...(remoteData.workoutState.workoutHistory || [])
+                ].filter((workout, index, self) => 
+                  index === self.findIndex(w => w.id === workout.id)
+                ), // Remove duplicates by ID
+                exercises: remoteData.workoutState.exercises?.length > 0 
+                  ? remoteData.workoutState.exercises 
+                  : currentWorkoutData.exercises || []
+              };
+              
+              secureStorage.set('workoutState', mergedWorkoutData);
+              console.log('🔧 AuthContext: Merged workout data applied successfully');
+              console.log('🔧 AuthContext: Final workout plans count:', mergedWorkoutData.workoutPlans?.length || 0);
             }
-            if (remoteData.userProfile) {
-              secureStorage.set('userProfile', remoteData.userProfile);
+            
+            if (remoteData.userProfile && Object.keys(remoteData.userProfile).length > 0) {
+              console.log('🔧 AuthContext: Applying remote user profile');
+              secureStorage.set('userProfile', { ...currentUserProfile, ...remoteData.userProfile });
             }
-            if (remoteData.gamificationState) {
-              secureStorage.set('gamificationState', remoteData.gamificationState);
+            
+            if (remoteData.gamificationState && Object.keys(remoteData.gamificationState).length > 0) {
+              console.log('🔧 AuthContext: Applying remote gamification data');
+              secureStorage.set('gamificationState', { ...currentGamificationData, ...remoteData.gamificationState });
             }
-            if (remoteData.nutritionState) {
-              secureStorage.set('nutritionState', remoteData.nutritionState);
+            
+            if (remoteData.nutritionState && Object.keys(remoteData.nutritionState).length > 0) {
+              console.log('🔧 AuthContext: Applying remote nutrition data');
+              secureStorage.set('nutritionState', { ...currentNutritionData, ...remoteData.nutritionState });
             }
             
             secureStorage.set('lastSyncTime', new Date().toISOString());
-            console.log('🔧 AuthContext: Remote data applied successfully');
+            console.log('🔧 AuthContext: All remote data applied successfully');
+            
+            // Force a page reload to ensure all contexts pick up the new data
+            setTimeout(() => {
+              console.log('🔄 AuthContext: Reloading page to apply synced data...');
+              window.location.reload();
+            }, 1000);
+            
           } catch (storageError) {
             console.warn('🔧 AuthContext: Error applying remote data to storage (non-critical):', storageError);
           }
         } else {
           console.log('🔧 AuthContext: No remote data found (new user or clean slate)');
+          // For new users, immediately save current local data to cloud
+          setTimeout(async () => {
+            console.log('🔧 AuthContext: Saving initial local data to cloud for new user...');
+            try {
+              await saveUserDataToCloud();
+              console.log('🔧 AuthContext: Initial data saved to cloud successfully');
+            } catch (error) {
+              console.warn('🔧 AuthContext: Failed to save initial data to cloud:', error);
+            }
+          }, 2000);
         }
         
         return { success: true };
@@ -346,7 +453,7 @@ export function AuthProvider({ children }) {
       
       // Run sync operation with timeout
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sync operation timeout')), 10000)
+        setTimeout(() => reject(new Error('Sync operation timeout')), 15000)
       );
       
       const result = await Promise.race([syncOperation(), timeoutPromise]);
@@ -750,6 +857,35 @@ export function AuthProvider({ children }) {
     getBackups,
     clearError: () => setError(null)
   };
+
+  // Set up automatic sync trigger for WorkoutContext
+  useEffect(() => {
+    if (user && !isDemoMode) {
+      window.triggerCloudSync = async () => {
+        try {
+          console.log('🔄 Auto-sync: Triggering cloud save...');
+          const result = await saveUserDataToCloud();
+          if (result.success) {
+            console.log('✅ Auto-sync: Data saved to cloud successfully');
+          } else {
+            console.warn('⚠️ Auto-sync: Failed to save data to cloud:', result.error);
+          }
+        } catch (error) {
+          console.error('❌ Auto-sync: Error during cloud save:', error);
+        }
+      };
+    } else {
+      // Remove sync trigger when user is not authenticated
+      window.triggerCloudSync = null;
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (window.triggerCloudSync) {
+        window.triggerCloudSync = null;
+      }
+    };
+  }, [user, isDemoMode, saveUserDataToCloud]);
 
   return (
     <AuthContext.Provider value={value}>

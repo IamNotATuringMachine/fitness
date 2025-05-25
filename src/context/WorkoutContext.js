@@ -466,6 +466,13 @@ export const WorkoutProvider = ({ children }) => {
         console.error('❌ Failed to save state securely');
       } else {
         console.log('✅ State saved successfully to localStorage');
+        
+        // Mark for cloud sync (non-blocking)
+        if (window.triggerCloudSync) {
+          setTimeout(() => {
+            window.triggerCloudSync();
+          }, 1000);
+        }
       }
     } catch (error) {
       console.error('❌ Error saving state to localStorage:', error);

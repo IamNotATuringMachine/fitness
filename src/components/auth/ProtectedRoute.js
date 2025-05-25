@@ -175,6 +175,11 @@ export default function ProtectedRoute({ children }) {
               <br />Error: {error?.message || 'none'}
               <br />Renders: {renderCountRef.current}
               <br />Time: {new Date().toLocaleTimeString()}
+              <br />
+              <br /><strong>Troubleshooting:</strong>
+              <br />• Cache clear and reload will fix most auth issues
+              <br />• If still stuck, check browser console for detailed logs
+              <br />• Look for session expiry or invalid session warnings
             </DebugInfo>
           )}
         </div>
