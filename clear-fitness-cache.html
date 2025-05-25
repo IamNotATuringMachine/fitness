@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Fitness App Cache</title>
+</head>
+<body>
+    <h1>Clear Fitness App Cache</h1>
+    <button onclick="clearCache()">Clear Local Storage</button>
+    <div id="result"></div>
+
+    <script>
+        function clearCache() {
+            try {
+                // Clear all localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage  
+                sessionStorage.clear();
+                
+                // Clear IndexedDB if it exists
+                if ('indexedDB' in window) {
+                    indexedDB.deleteDatabase('fitness-app');
+                }
+                
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: green;">✅ Cache cleared successfully! Please refresh your fitness app to load the new exercise database.</p>';
+                
+                // Auto-redirect to fitness app after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000';
+                }, 3000);
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: red;">❌ Error clearing cache: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -4,6 +4,7 @@ import { useWorkout } from '../context/WorkoutContext';
 import { format, parseISO, startOfWeek, endOfWeek, eachWeekOfInterval, isWithinInterval, subWeeks } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { v4 as uuidv4 } from 'uuid';
+import { exerciseDatabase, convertToFlatExerciseList } from '../data/exerciseDatabase';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,42 +32,77 @@ ChartJS.register(
   ArcElement
 );
 
-// Muscle group weights for exercises that work multiple muscles
-const MUSCLE_GROUP_WEIGHTS = {
-  'Bankdrücken': { 'Brust': 1.0, 'Trizeps': 0.5, 'Schultern': 0.3 },
-  'Schrägbankdrücken': { 'Brust': 1.0, 'Trizeps': 0.5, 'Schultern': 0.4 },
-  'Negativbankdrücken': { 'Brust': 1.0, 'Trizeps': 0.5, 'Schultern': 0.2 },
-  'Dips': { 'Brust': 0.8, 'Trizeps': 1.0, 'Schultern': 0.3 },
-  'Liegestütze': { 'Brust': 1.0, 'Trizeps': 0.5, 'Schultern': 0.2 },
-  'Fliegende': { 'Brust': 1.0, 'Schultern': 0.1 },
-  'Klimmzüge': { 'Rücken': 1.0, 'Bizeps': 0.6, 'Schultern': 0.2 },
-  'Latziehen': { 'Rücken': 1.0, 'Bizeps': 0.4 },
-  'Rudern': { 'Rücken': 1.0, 'Bizeps': 0.5, 'Schultern': 0.3 },
-  'Vorgebeugtes Rudern': { 'Rücken': 1.0, 'Bizeps': 0.5, 'Schultern': 0.3 },
-  'Kreuzheben': { 'Rücken': 0.7, 'Beine': 1.0, 'Gesäß': 1.0, 'Unterer Rücken': 0.8 },
-  'Hyperextensions': {'Unterer Rücken': 1.0, 'Gesäß': 0.5},
-  'Kniebeugen': { 'Beine': 1.0, 'Gesäß': 0.8, 'Unterer Rücken': 0.2 },
-  'Beinpresse': { 'Beine': 1.0, 'Gesäß': 0.6 },
-  'Ausfallschritte': { 'Beine': 1.0, 'Gesäß': 0.7 },
-  'Beinstrecker': { 'Beine': 1.0 },
-  'Beinbeuger': { 'Beine': 1.0 },
-  'Wadenheben': { 'Waden': 1.0 },
-  'Schulterdrücken': { 'Schultern': 1.0, 'Trizeps': 0.4 },
-  'Seitheben': { 'Schultern': 1.0 },
-  'Frontheben': { 'Schultern': 1.0 },
-  'Reverse Butterfly': { 'Schultern': 0.8, 'Rücken': 0.3 },
-  'Bizepscurls': { 'Bizeps': 1.0 },
-  'Hammercurls': { 'Bizeps': 1.0 , 'Unterarme': 0.3},
-  'Konzentrationscurls': { 'Bizeps': 1.0 },
-  'Trizepsdrücken': { 'Trizeps': 1.0 },
-  'French Press': { 'Trizeps': 1.0 },
-  'Enge Liegestütze': {'Trizeps': 0.8, 'Brust': 0.5},
-  'Plank': { 'Bauch': 1.0 },
-  'Crunches': { 'Bauch': 1.0 },
-  'Beinheben': { 'Bauch': 1.0 },
-  'Russian Twists': { 'Bauch': 1.0 },
-  // Add more exercises as needed
+// Generate muscle group weights from the detailed exercise database
+const generateMuscleGroupWeights = () => {
+  const weights = {};
+  
+  // Convert the detailed database to the format expected by Analysis.js
+  Object.keys(exerciseDatabase).forEach(muscleGroup => {
+    exerciseDatabase[muscleGroup].forEach(exercise => {
+      // Add main exercise
+      if (exercise.gewichtete_muskelbeteiligung_pro_satz) {
+        weights[exercise.übung_name] = { ...exercise.gewichtete_muskelbeteiligung_pro_satz };
+      }
+      
+      // Add variations
+      if (exercise.variationen) {
+        exercise.variationen.forEach(variation => {
+          if (variation.gewichtete_muskelbeteiligung_pro_satz) {
+            weights[variation.name] = { ...variation.gewichtete_muskelbeteiligung_pro_satz };
+          }
+        });
+      }
+    });
+  });
+  
+  // Normalize muscle group names for compatibility with existing analysis logic
+  const normalizedWeights = {};
+  Object.keys(weights).forEach(exerciseName => {
+    const normalizedMuscleWeights = {};
+    Object.keys(weights[exerciseName]).forEach(muscleGroup => {
+      // Map detailed muscle names to simpler categories for analysis
+      let simplifiedMuscle = muscleGroup;
+      
+      // Mapping rules for better analysis compatibility
+      if (muscleGroup.includes('Brust') || muscleGroup.includes('brust')) {
+        simplifiedMuscle = 'Brust';
+      } else if (muscleGroup.includes('Schulter') || muscleGroup.includes('schulter')) {
+        simplifiedMuscle = 'Schultern';
+      } else if (muscleGroup.includes('Latissimus') || muscleGroup.includes('Trapez') || muscleGroup.includes('Rhomb') || muscleGroup.includes('Rückenstrecker')) {
+        simplifiedMuscle = 'Rücken';
+      } else if (muscleGroup.includes('Quadrizeps') || muscleGroup.includes('Beinbeuger') || muscleGroup.includes('Adduktor')) {
+        simplifiedMuscle = 'Beine';
+      } else if (muscleGroup.includes('Bizeps') || muscleGroup.includes('Brachialis')) {
+        simplifiedMuscle = 'Bizeps';
+      } else if (muscleGroup.includes('Trizeps')) {
+        simplifiedMuscle = 'Trizeps';
+      } else if (muscleGroup.includes('Gesäß') || muscleGroup.includes('gesäß')) {
+        simplifiedMuscle = 'Gesäß';
+      } else if (muscleGroup.includes('Bauch') || muscleGroup.includes('bauch') || muscleGroup.includes('Rumpf')) {
+        simplifiedMuscle = 'Bauch';
+      } else if (muscleGroup.includes('Gastrocnemius') || muscleGroup.includes('Soleus')) {
+        simplifiedMuscle = 'Waden';
+      } else if (muscleGroup.includes('Unterarme') || muscleGroup.includes('Griffkraft')) {
+        simplifiedMuscle = 'Unterarme';
+      }
+      
+      // Sum up weights for the same simplified muscle group
+      if (normalizedMuscleWeights[simplifiedMuscle]) {
+        normalizedMuscleWeights[simplifiedMuscle] = Math.max(normalizedMuscleWeights[simplifiedMuscle], weights[exerciseName][muscleGroup]);
+      } else {
+        normalizedMuscleWeights[simplifiedMuscle] = weights[exerciseName][muscleGroup];
+      }
+    });
+    
+    normalizedWeights[exerciseName] = normalizedMuscleWeights;
+  });
+  
+  console.log('🔍 Generated muscle group weights from database:', normalizedWeights);
+  return normalizedWeights;
 };
+
+// Use the new dynamic weights instead of hardcoded ones
+const MUSCLE_GROUP_WEIGHTS = generateMuscleGroupWeights();
 
 // Helper to get all unique muscle groups
 const getAllMuscleGroups = (weights) => {
@@ -75,7 +111,9 @@ const getAllMuscleGroups = (weights) => {
     Object.keys(exercise).forEach(group => allGroups.add(group));
   });
   // Ensure major muscle groups are present even if not in weights initially
-  ['Brust', 'Rücken', 'Beine', 'Schultern', 'Bizeps', 'Trizeps', 'Bauch', 'Gesäß', 'Unterer Rücken', 'Waden', 'Unterarme'].forEach(g => allGroups.add(g));
+  ['Brust', 'Rücken', 'Beine', 'Schultern', 'Bizeps', 'Trizeps', 'Bauch', 'Gesäß', 'Waden', 'Unterarme'].forEach(g => allGroups.add(g));
+  
+  console.log('🔍 All muscle groups found:', Array.from(allGroups).sort());
   return Array.from(allGroups).sort();
 };
 
@@ -890,7 +928,41 @@ const Analysis = () => {
             });
           }
 
-          const exerciseMuscleWeights = MUSCLE_GROUP_WEIGHTS[ex.name] || {};
+          // Improved exercise matching with fallback for similar names
+          const getExerciseMuscleWeights = (exerciseName) => {
+            // Direct match first
+            if (MUSCLE_GROUP_WEIGHTS[exerciseName]) {
+              return MUSCLE_GROUP_WEIGHTS[exerciseName];
+            }
+            
+            // Try to find similar exercise names (fuzzy matching)
+            const exerciseKeys = Object.keys(MUSCLE_GROUP_WEIGHTS);
+            const similarExercise = exerciseKeys.find(key => {
+              const keyLower = key.toLowerCase();
+              const nameLower = exerciseName.toLowerCase();
+              
+              // Check if either contains the other (partial match)
+              return keyLower.includes(nameLower) || nameLower.includes(keyLower) ||
+                     // Check for common abbreviations or variations
+                     (keyLower.includes('bankdrücken') && nameLower.includes('bankdrücken')) ||
+                     (keyLower.includes('klimmzug') && nameLower.includes('klimmzug')) ||
+                     (keyLower.includes('kniebeuge') && nameLower.includes('kniebeuge')) ||
+                     (keyLower.includes('kreuzheben') && nameLower.includes('kreuzheben')) ||
+                     (keyLower.includes('rudern') && nameLower.includes('rudern')) ||
+                     (keyLower.includes('seitheben') && nameLower.includes('seitheben')) ||
+                     (keyLower.includes('bizepscurl') && nameLower.includes('curl')) ||
+                     (keyLower.includes('trizepsdrücken') && nameLower.includes('trizeps'));
+            });
+            
+            if (similarExercise) {
+              console.log(`🔍 Found similar exercise: "${exerciseName}" matched to "${similarExercise}"`);
+              return MUSCLE_GROUP_WEIGHTS[similarExercise];
+            }
+            
+            return {};
+          };
+          
+          const exerciseMuscleWeights = getExerciseMuscleWeights(ex.name);
           if (Object.keys(exerciseMuscleWeights).length > 0) {
             Object.entries(exerciseMuscleWeights).forEach(([muscle, weightFactor]) => {
               if (weeklyData[weekLabel].muscleGroupSets[muscle] !== undefined) {
