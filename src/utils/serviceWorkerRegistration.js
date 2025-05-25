@@ -187,7 +187,14 @@ export function setupPWAInstallPrompt() {
 }
 
 // Background sync registration
+let backgroundSyncRegistered = false;
+
 export function registerBackgroundSync() {
+  if (backgroundSyncRegistered) {
+    console.log('Background sync already registered, skipping...');
+    return;
+  }
+  
   if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
     navigator.serviceWorker.ready.then(registration => {
       console.log('Background sync is supported');
@@ -195,6 +202,7 @@ export function registerBackgroundSync() {
       // Register background sync for workout data
       registration.sync.register('workout-sync').then(() => {
         console.log('Background sync registered for workout data');
+        backgroundSyncRegistered = true;
       }).catch(error => {
         console.error('Background sync registration failed:', error);
       });

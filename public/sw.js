@@ -1,7 +1,7 @@
-const CACHE_NAME = 'fittrack-v1.2.0';
-const STATIC_CACHE = 'fittrack-static-v1.2.0';
-const DYNAMIC_CACHE = 'fittrack-dynamic-v1.2.0';
-const API_CACHE = 'fittrack-api-v1.2.0';
+const CACHE_NAME = 'fittrack-v1.2.1';
+const STATIC_CACHE = 'fittrack-static-v1.2.1';
+const DYNAMIC_CACHE = 'fittrack-dynamic-v1.2.1';
+const API_CACHE = 'fittrack-api-v1.2.1';
 
 // Assets to cache for offline functionality
 const STATIC_ASSETS = [
@@ -9,9 +9,7 @@ const STATIC_ASSETS = [
   '/static/js/bundle.js',
   '/static/css/main.css',
   '/manifest.json',
-  '/favicon.ico',
-  '/logo192.png',
-  '/logo512.png',
+  // Note: favicon and logos are data URIs, not actual files
   // Core pages
   '/dashboard',
   '/workout-tracker',
@@ -301,26 +299,33 @@ async function updateCache(request, cache) {
 }
 
 // Background Sync for offline workout data
-self.addEventListener('sync', async (event) => {
+self.addEventListener('sync', (event) => {
   console.log('Service Worker: Background sync event received for tag:', event.tag, new Date().toISOString());
   
   if (event.tag === 'workout-sync') {
-    try {
-      console.log('Service Worker: Starting waitUntil for workout-sync');
-      await event.waitUntil(syncWorkoutData());
-      console.log('Service Worker: waitUntil for workout-sync completed.');
-    } catch (err) {
-      console.error('Service Worker: Error in waitUntil for workout-sync:', err);
-    }
+    console.log('Service Worker: Starting waitUntil for workout-sync');
+    event.waitUntil(
+      syncWorkoutData()
+        .then(() => {
+          console.log('Service Worker: waitUntil for workout-sync completed successfully.');
+        })
+        .catch((err) => {
+          console.error('Service Worker: Error in waitUntil for workout-sync:', err);
+          throw err; // Re-throw to signal failure to the browser
+        })
+    );
   } else if (event.tag === 'analytics-sync') {
-    console.log('Service Worker: Background sync event received for tag:', event.tag, new Date().toISOString());
-    try {
-      console.log('Service Worker: Starting waitUntil for analytics-sync');
-      await event.waitUntil(syncAnalyticsData());
-      console.log('Service Worker: waitUntil for analytics-sync completed.');
-    } catch (err) {
-      console.error('Service Worker: Error in waitUntil for analytics-sync:', err);
-    }
+    console.log('Service Worker: Starting waitUntil for analytics-sync');
+    event.waitUntil(
+      syncAnalyticsData()
+        .then(() => {
+          console.log('Service Worker: waitUntil for analytics-sync completed successfully.');
+        })
+        .catch((err) => {
+          console.error('Service Worker: Error in waitUntil for analytics-sync:', err);
+          throw err; // Re-throw to signal failure to the browser
+        })
+    );
   }
 });
 
