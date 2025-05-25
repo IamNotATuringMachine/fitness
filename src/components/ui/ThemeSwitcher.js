@@ -22,7 +22,7 @@ const ThemeOption = styled.div`
   background-color: ${props => props.selected ? props.theme.colors.primaryLight : 'transparent'};
   
   &:hover {
-    background-color: ${props => !props.selected ? props.theme.colors.grayLight : props.theme.colors.primaryLight};
+    background-color: ${props => !props.selected ? props.theme.colors.backgroundSecondary : props.theme.colors.primaryLight};
   }
 `;
 

@@ -65,7 +65,7 @@ const CircularSpinner = styled.div`
   }};
   border: ${props => {
     const width = props.size === 'small' ? '2px' : props.size === 'large' ? '4px' : '3px';
-    return `${width} solid ${props.theme.colors.grayLight}`;
+          return `${width} solid ${props.theme.colors.backgroundSecondary}`;
   }};
   border-top: ${props => {
     const width = props.size === 'small' ? '2px' : props.size === 'large' ? '4px' : '3px';
@@ -216,7 +216,7 @@ const SkeletonContainer = styled.div`
 `;
 
 const SkeletonBox = styled.div`
-  background-color: ${props => props.theme.colors.grayLight};
+  background-color: ${props => props.theme.colors.backgroundSecondary};
   border-radius: ${props => props.theme.borderRadius.small};
   width: ${props => props.width || '100%'};
   height: ${props => props.height || '20px'};

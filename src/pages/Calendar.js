@@ -1,11 +1,65 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 import { v4 as uuidv4 } from 'uuid';
+
+// Global styles to override react-calendar defaults for dark mode
+const CalendarGlobalStyles = createGlobalStyle`
+  .react-calendar {
+    background: ${props => props.theme.colors.cardBackground} !important;
+    color: ${props => props.theme.colors.text} !important;
+    border: 1px solid ${props => props.theme.colors.border} !important;
+  }
+  
+  .react-calendar__navigation button {
+    color: ${props => props.theme.colors.text} !important;
+    background: transparent !important;
+    
+    &:hover {
+      background-color: ${props => props.theme.colors.backgroundSecondary} !important;
+    }
+    
+    &:disabled {
+      background-color: transparent !important;
+      color: ${props => props.theme.colors.textLight} !important;
+    }
+  }
+  
+  .react-calendar__month-view__weekdays__weekday {
+    color: ${props => props.theme.colors.textLight} !important;
+  }
+  
+  .react-calendar__tile {
+    background: ${props => props.theme.colors.cardBackground} !important;
+    color: ${props => props.theme.colors.text} !important;
+    
+    &:hover {
+      background-color: ${props => props.theme.colors.backgroundSecondary} !important;
+    }
+  }
+  
+  .react-calendar__tile--active {
+    background: ${props => props.theme.colors.primary} !important;
+    color: ${props => props.theme.colors.white} !important;
+    
+    &:hover {
+      background: ${props => props.theme.colors.primaryDark} !important;
+    }
+  }
+  
+  .react-calendar__tile--now {
+    background: ${props => props.theme.colors.primary}20 !important;
+    color: ${props => props.theme.colors.primary} !important;
+  }
+  
+  .react-calendar__tile--neighboringMonth {
+    color: ${props => props.theme.colors.textLight} !important;
+  }
+`;
 
 const PageContainer = styled.div`
   display: flex;
@@ -23,9 +77,42 @@ const CalendarWrapper = styled.div`
   .react-calendar {
     width: 100%;
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: ${props => props.theme.borderRadius.medium};
+    box-shadow: ${props => props.theme.shadows.medium};
     padding: 1rem;
+    background-color: ${props => props.theme.colors.cardBackground};
+    color: ${props => props.theme.colors.text};
+  }
+  
+  .react-calendar__navigation {
+    background-color: ${props => props.theme.colors.cardBackground};
+    
+    button {
+      background-color: transparent;
+      color: ${props => props.theme.colors.text};
+      border: none;
+      font-size: 1rem;
+      padding: 0.5rem;
+      
+      &:hover {
+        background-color: ${props => props.theme.colors.backgroundSecondary};
+      }
+      
+      &:disabled {
+        color: ${props => props.theme.colors.textLight};
+      }
+    }
+  }
+  
+  .react-calendar__month-view__weekdays {
+    background-color: ${props => props.theme.colors.backgroundSecondary};
+    
+    .react-calendar__month-view__weekdays__weekday {
+      color: ${props => props.theme.colors.textLight};
+      font-weight: 500;
+      padding: 0.5rem;
+      text-align: center;
+    }
   }
   
   .react-calendar__tile {
@@ -35,15 +122,32 @@ const CalendarWrapper = styled.div`
     justify-content: center;
     align-items: center;
     position: relative;
+    background-color: ${props => props.theme.colors.cardBackground};
+    color: ${props => props.theme.colors.text};
+    border: 1px solid ${props => props.theme.colors.border};
+    
+    &:hover {
+      background-color: ${props => props.theme.colors.backgroundSecondary};
+    }
   }
   
   .react-calendar__tile--now {
-    background: #e6f7ff;
+    background-color: ${props => props.theme.colors.primary}20;
+    color: ${props => props.theme.colors.primary};
+    font-weight: bold;
   }
   
   .react-calendar__tile--active {
-    background: #1890ff;
-    color: white;
+    background-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.white};
+    
+    &:hover {
+      background-color: ${props => props.theme.colors.primaryDark};
+    }
+  }
+  
+  .react-calendar__tile--neighboringMonth {
+    color: ${props => props.theme.colors.textLight};
   }
   
   .has-workout::after {
@@ -53,7 +157,7 @@ const CalendarWrapper = styled.div`
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #ff4d4f;
+    background-color: ${props => props.theme.colors.accent};
   }
 `;
 
@@ -78,34 +182,47 @@ const Label = styled.label`
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: ${props => props.theme.colors.text};
 `;
 
 const Input = styled.input`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-size: 1rem;
+  background-color: ${props => props.theme.colors.inputBackground};
+  color: ${props => props.theme.colors.text};
   
   &:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 0.2rem ${props => props.theme.colors.focusLight};
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.textLight};
   }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.medium};
   font-size: 1rem;
-  background-color: white;
+  background-color: ${props => props.theme.colors.inputBackground};
+  color: ${props => props.theme.colors.text};
   
   &:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 0.2rem ${props => props.theme.colors.focusLight};
+  }
+  
+  option {
+    background-color: ${props => props.theme.colors.inputBackground};
+    color: ${props => props.theme.colors.text};
   }
 `;
 
@@ -115,24 +232,26 @@ const EventsList = styled.div`
 
 const EventItem = styled.div`
   padding: 1rem;
-  border: 1px solid #eee;
-  border-radius: 4px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.medium};
   margin-bottom: 0.5rem;
-  background-color: white;
+  background-color: ${props => props.theme.colors.cardBackground};
+  color: ${props => props.theme.colors.text};
   
   &:hover {
-    background-color: #f8f9fa;
+    background-color: ${props => props.theme.colors.backgroundSecondary};
   }
 `;
 
 const EventTime = styled.div`
   font-size: 0.9rem;
-  color: #6c757d;
+  color: ${props => props.theme.colors.textLight};
   margin-bottom: 0.25rem;
 `;
 
 const EventTitle = styled.div`
   font-weight: 500;
+  color: ${props => props.theme.colors.text};
 `;
 
 const ActionButtons = styled.div`
@@ -262,6 +381,7 @@ const Calendar = () => {
   
   return (
     <div>
+      <CalendarGlobalStyles />
       <h1>Trainingskalender</h1>
       <p>Plane und verfolge deine Trainingseinheiten in diesem Kalender.</p>
       

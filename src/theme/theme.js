@@ -81,15 +81,70 @@ const darkTheme = {
   ...lightTheme,
   name: 'dark',
   colors: {
-    ...lightTheme.colors,
+    // Primary colors - restored dark blue theme
     primary: '#3498db',
     primaryDark: '#2980b9',
-    primaryLight: '#2c3e50',
+    primaryLight: '#5dade2',
+    
+    // Secondary colors - keeping green for success states
+    secondary: '#00c853',
+    secondaryDark: '#00a644',
+    secondaryLight: '#4caf50',
+    
+    // Accent colors - warm contrast for dark theme
+    accent: '#f44336',
+    accentDark: '#d32f2f',
+    accentLight: '#ff5722',
+    
+    // Status colors - adjusted for dark backgrounds
+    warning: '#ff9800',
+    warningDark: '#f57c00',
+    warningLight: '#ffb74d',
+    success: '#4caf50',
+    successDark: '#388e3c',
+    successLight: '#81c784',
+    error: '#f44336',
+    errorDark: '#d32f2f',
+    errorLight: '#ef5350',
+    info: '#2196f3',
+    infoDark: '#1976d2',
+    infoLight: '#64b5f6',
+    
+    // Gray scale - carefully chosen for dark theme
+    gray: '#9e9e9e',
+    grayDark: '#616161',
+    grayLight: '#37474f',
+    
+    // Text colors - high contrast for readability
     text: '#ecf0f1',
     textLight: '#bdc3c7',
+    textDark: '#ffffff',
+    white: '#ffffff',
+    
+    // Background colors - dark blue theme
     background: '#1e272e',
+    backgroundSecondary: '#2f3640',
     cardBackground: '#2f3640',
+    
+    // Border colors - subtle but visible
     border: '#4b6584',
+    borderLight: '#57606f',
+    
+    // Input specific
+    inputBackground: '#2f3640',
+    
+    // Focus states
+    focus: '#3498db',
+    focusLight: 'rgba(52, 152, 219, 0.12)',
+  },
+  shadows: {
+    // Dark theme shadows - optimized for dark blue background
+    small: '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.5)',
+    medium: '0 3px 6px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.6)',
+    large: '0 10px 20px rgba(0, 0, 0, 0.6), 0 6px 6px rgba(0, 0, 0, 0.7)',
+    focus: '0 0 0 3px rgba(52, 152, 219, 0.3)',
+    card: '0 2px 4px rgba(0, 0, 0, 0.4)',
+    hover: '0 4px 8px rgba(0, 0, 0, 0.5)',
   },
 };
 

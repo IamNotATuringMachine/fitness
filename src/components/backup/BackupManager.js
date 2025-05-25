@@ -25,14 +25,14 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  color: #2c3e50;
+  color: ${props => props.theme.colors.text};
   margin-bottom: 0.5rem;
   font-size: 2.5rem;
   font-weight: 700;
 `;
 
 const Subtitle = styled.p`
-  color: #7f8c8d;
+  color: ${props => props.theme.colors.textLight};
   font-size: 1.1rem;
   max-width: 600px;
   margin: 0 auto;
@@ -51,21 +51,21 @@ const SectionGrid = styled.div`
 `;
 
 const Card = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.primaryDark} 100%);
   border-radius: 16px;
   padding: 2rem;
-  color: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  color: ${props => props.theme.colors.white};
+  box-shadow: ${props => props.theme.shadows.large};
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: ${props => props.theme.shadows.hover};
   }
 `;
 
 const ImportCard = styled(Card)`
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.secondary} 0%, ${props => props.theme.colors.secondaryDark} 100%);
 `;
 
 const CardIcon = styled.div`
@@ -116,15 +116,15 @@ const Button = styled.button`
 
 const StatusCard = styled.div`
   grid-column: 1 / -1;
-  background: white;
+  background: ${props => props.theme.colors.cardBackground};
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8ecef;
+  box-shadow: ${props => props.theme.shadows.medium};
+  border: 1px solid ${props => props.theme.colors.border};
 `;
 
 const StatusTitle = styled.h3`
-  color: #2c3e50;
+  color: ${props => props.theme.colors.text};
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
   display: flex;
@@ -141,20 +141,20 @@ const StatusGrid = styled.div`
 const StatItem = styled.div`
   text-align: center;
   padding: 1rem;
-  background: #f8f9fa;
+  background: ${props => props.theme.colors.backgroundSecondary};
   border-radius: 10px;
-  border: 1px solid #e9ecef;
+  border: 1px solid ${props => props.theme.colors.border};
 `;
 
 const StatValue = styled.div`
   font-size: 2rem;
   font-weight: bold;
-  color: #495057;
+  color: ${props => props.theme.colors.text};
   margin-bottom: 0.5rem;
 `;
 
 const StatLabel = styled.div`
-  color: #6c757d;
+  color: ${props => props.theme.colors.textLight};
   font-size: 0.9rem;
 `;
 

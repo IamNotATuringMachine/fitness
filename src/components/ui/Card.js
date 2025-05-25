@@ -80,7 +80,7 @@ const CardBody = styled.div`
 const CardFooter = styled.div`
   padding: ${props => props.theme.spacing.md};
   border-top: 1px solid ${props => props.theme.colors.border};
-  background-color: ${props => props.theme.colors.grayLight};
+  background-color: ${props => props.theme.colors.backgroundSecondary};
   
   @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     padding: ${props => props.theme.spacing.mobile.md};

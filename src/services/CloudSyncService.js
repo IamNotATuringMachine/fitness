@@ -1,4 +1,5 @@
 import { secureStorage } from '../utils/security';
+import { authService, dataService } from './SupabaseService';
 
 class CloudSyncService {
   constructor() {
@@ -11,7 +12,6 @@ class CloudSyncService {
     
     // Configuration
     this.config = {
-      apiBaseUrl: process.env.REACT_APP_API_URL || 'https://api.fittrack.app',
       syncInterval: 30000, // 30 seconds
       maxRetries: 3,
       retryDelay: 1000,
@@ -52,43 +52,34 @@ class CloudSyncService {
 
   async checkAuthStatus() {
     try {
-      const token = secureStorage.get('authToken');
-      if (!token) return false;
-      
-      const response = await fetch(`${this.config.apiBaseUrl}/auth/verify`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        this.userId = userData.userId;
+      const { user } = await authService.getCurrentUser();
+      if (user) {
+        this.userId = user.id;
+        this.isAuthenticated = true;
         return true;
       }
       
+      this.isAuthenticated = false;
+      this.userId = null;
       return false;
     } catch (error) {
       console.error('Auth check failed:', error);
+      this.isAuthenticated = false;
+      this.userId = null;
       return false;
     }
   }
 
   async authenticate(credentials) {
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      });
+      const { data, error } = await authService.signIn(credentials.email, credentials.password);
       
-      if (response.ok) {
-        const { token, user } = await response.json();
-        secureStorage.set('authToken', token);
-        this.userId = user.id;
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      if (data?.user) {
+        this.userId = data.user.id;
         this.isAuthenticated = true;
         
         // Start syncing after authentication
@@ -97,11 +88,10 @@ class CloudSyncService {
           this.startPeriodicSync();
         }
         
-        return { success: true, user };
+        return { success: true, user: data.user };
       }
       
-      const error = await response.json();
-      return { success: false, error: error.message };
+      return { success: false, error: 'Authentication failed' };
     } catch (error) {
       console.error('Authentication failed:', error);
       return { success: false, error: 'Network error during authentication' };
@@ -110,20 +100,10 @@ class CloudSyncService {
 
   async signOut() {
     try {
-      const token = secureStorage.get('authToken');
-      
-      if (token) {
-        await fetch(`${this.config.apiBaseUrl}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-      }
+      await authService.signOut();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      secureStorage.remove('authToken');
       this.isAuthenticated = false;
       this.userId = null;
       this.stopPeriodicSync();
@@ -237,19 +217,17 @@ class CloudSyncService {
   }
 
   async getRemoteData() {
-    const token = secureStorage.get('authToken');
-    const response = await fetch(`${this.config.apiBaseUrl}/sync/data`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch remote data: ${response.statusText}`);
+    if (!this.userId) {
+      throw new Error('User not authenticated');
     }
     
-    return await response.json();
+    const { data, error } = await dataService.getUserData(this.userId);
+    
+    if (error) {
+      throw new Error(`Failed to fetch remote data: ${error.message}`);
+    }
+    
+    return data || {};
   }
 
   async getLocalChangesSince(timestamp) {
@@ -259,22 +237,17 @@ class CloudSyncService {
   }
 
   async getRemoteChangesSince(timestamp) {
-    const token = secureStorage.get('authToken');
-    const response = await fetch(
-      `${this.config.apiBaseUrl}/sync/changes?since=${timestamp}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch remote changes: ${response.statusText}`);
+    if (!this.userId) {
+      throw new Error('User not authenticated');
     }
     
-    return await response.json();
+    const { data, error } = await dataService.getUserDataChangesSince(this.userId, timestamp);
+    
+    if (error) {
+      throw new Error(`Failed to fetch remote changes: ${error.message}`);
+    }
+    
+    return data || [];
   }
 
   async mergeData(localData, remoteData) {
@@ -419,25 +392,16 @@ class CloudSyncService {
   }
 
   async pushToRemote(changes) {
-    const token = secureStorage.get('authToken');
+    if (!this.userId) {
+      throw new Error('User not authenticated');
+    }
     
     for (const change of changes) {
       try {
-        const response = await fetch(`${this.config.apiBaseUrl}/sync/update`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: change.type,
-            data: change.data,
-            timestamp: new Date().toISOString()
-          })
-        });
+        const { error } = await dataService.saveUserData(this.userId, change.data);
         
-        if (!response.ok) {
-          throw new Error(`Failed to push change: ${response.statusText}`);
+        if (error) {
+          throw new Error(`Failed to push change: ${error.message}`);
         }
       } catch (error) {
         console.error('Failed to push change:', error);

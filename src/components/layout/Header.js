@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../../theme/ThemeProvider';
 import { Link } from 'react-router-dom';
 import { FaCog, FaSun, FaMoon, FaBars } from 'react-icons/fa';
+import UserProfile from '../auth/UserProfile';
+import { createBackup, exportBackup } from '../../utils/backupUtils';
 
 const HeaderContainer = styled.header`
   background-color: ${props => props.theme.colors.cardBackground};
@@ -108,14 +110,50 @@ const SettingsLink = styled(Link)`
   display: flex;
   align-items: center;
   min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
+`;
+
+const BackupButton = styled(IconButton)`
+  position: relative;
   
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    display: none;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  border: 2px solid ${props => props.theme.colors.border};
+  border-radius: 50%;
+  border-top: 2px solid ${props => props.theme.colors.primary};
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 `;
 
 const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
   const { theme, toggleTheme } = useTheme();
+  const [isBackingUp, setIsBackingUp] = useState(false);
+
+  const handleQuickBackup = async () => {
+    setIsBackingUp(true);
+    
+    try {
+      const backup = createBackup();
+      await exportBackup(backup);
+      
+      // Update last backup timestamp
+      localStorage.setItem('lastBackupTime', new Date().toISOString());
+    } catch (error) {
+      console.error('Fehler beim Quick-Backup:', error);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
   
   return (
     <HeaderContainer>
@@ -130,6 +168,14 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
         <HeaderTitle>FitnessPro</HeaderTitle>
       </LeftSection>
       <HeaderActions>
+        <BackupButton
+          onClick={handleQuickBackup}
+          disabled={isBackingUp}
+          title="Schnelles Backup erstellen"
+          aria-label="Schnelles Backup erstellen"
+        >
+          {isBackingUp ? <LoadingSpinner /> : '💾'}
+        </BackupButton>
         <IconButton 
           onClick={toggleTheme} 
           title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
@@ -142,6 +188,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
             <FaCog />
           </IconButton>
         </SettingsLink>
+        <UserProfile />
       </HeaderActions>
     </HeaderContainer>
   );

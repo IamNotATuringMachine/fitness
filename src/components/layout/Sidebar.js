@@ -59,7 +59,7 @@ const CollapseButton = styled.button`
   height: 32px;
   
   &:hover {
-    background-color: ${props => props.theme.colors.grayLight};
+    background-color: ${props => props.theme.colors.backgroundSecondary};
   }
   
   &:focus {
@@ -108,7 +108,7 @@ const NavLink = styled(Link)`
   border-radius: ${props => props.theme.borderRadius.small};
 
   &:hover {
-    background-color: ${props => !props.collapsed ? props.theme.colors.grayLight : 'transparent'};
+    background-color: ${props => !props.collapsed ? props.theme.colors.backgroundSecondary : 'transparent'};
     transform: ${props => !props.collapsed ? 'translateX(4px)' : 'none'};
   }
   

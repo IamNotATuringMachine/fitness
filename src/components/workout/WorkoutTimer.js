@@ -106,7 +106,7 @@ const TimerButton = styled.button`
         `;
       default:
         return css`
-          background: ${props.theme.colors.grayLight};
+          background: ${props.theme.colors.backgroundSecondary};
           color: ${props.theme.colors.text};
           &:hover { background: ${props.theme.colors.gray}; }
         `;
@@ -445,19 +445,14 @@ const WorkoutTimer = ({
         
         <SettingGroup>
           <SettingLabel>Timer Type</SettingLabel>
-          <select
+          <SettingInput
+            as="select"
             value={timerType}
             onChange={(e) => setTimerType(e.target.value)}
-            style={{
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              background: 'white'
-            }}
           >
             <option value="stopwatch">Stopwatch</option>
             <option value="countdown">Countdown</option>
-          </select>
+          </SettingInput>
         </SettingGroup>
         
         {timerType === 'countdown' && (

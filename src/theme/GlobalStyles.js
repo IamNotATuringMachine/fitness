@@ -149,6 +149,8 @@ const GlobalStyles = createGlobalStyle`
     padding: ${props => props.theme.spacing.sm};
     border: 1px solid ${props => props.theme.colors.border};
     border-radius: ${props => props.theme.borderRadius.medium};
+    background-color: ${props => props.theme.colors.inputBackground};
+    color: ${props => props.theme.colors.text};
     transition: border-color ${props => props.theme.transitions.short}, box-shadow ${props => props.theme.transitions.short};
     /* Improve touch targets */
     min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
@@ -162,6 +164,10 @@ const GlobalStyles = createGlobalStyle`
       outline: none;
       border-color: ${props => props.theme.colors.primary};
       box-shadow: 0 0 0 3px ${props => `${props.theme.colors.primary}40`}; /* Using 40 for slightly more subtle than button's 50 */
+    }
+    
+    &::placeholder {
+      color: ${props => props.theme.colors.textLight};
     }
   }
   
@@ -183,6 +189,31 @@ const GlobalStyles = createGlobalStyle`
   ::selection {
     background-color: ${props => props.theme.colors.primary};
     color: ${props => props.theme.colors.white};
+  }
+  
+  /* Custom scrollbar for dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: ${props => props.theme.colors.backgroundSecondary};
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${props => props.theme.colors.textLight};
+  }
+  
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: ${props => props.theme.colors.border} ${props => props.theme.colors.backgroundSecondary};
   }
   
   /* Mobile-specific optimizations */

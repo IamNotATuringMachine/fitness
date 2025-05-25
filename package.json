@@ -2,8 +2,9 @@
   "name": "fitness-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://IamNotATuringMachine.github.io/fitness",
+  "homepage": "https://iamnotaturingmachine.github.io",
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
     "@types/dompurify": "^3.0.5",
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
