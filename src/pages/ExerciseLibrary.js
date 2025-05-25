@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { useWorkout } from '../context/WorkoutContext';
+
 import { exerciseDatabase } from '../data/exerciseDatabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -278,11 +278,9 @@ const ResultsCounter = styled.div`
 `;
 
 const ExerciseLibrary = () => {
-  const { state, dispatch } = useWorkout();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [selectedExercise, setSelectedExercise] = useState(null);
   const [editingExercise, setEditingExercise] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -391,7 +389,6 @@ const ExerciseLibrary = () => {
   }, [exercises, searchTerm, sortBy, sortOrder]);
 
   const handleExerciseClick = (exercise) => {
-    setSelectedExercise(exercise);
     setEditingExercise({ ...exercise });
     setShowEditModal(true);
   };
@@ -405,13 +402,11 @@ const ExerciseLibrary = () => {
     ));
 
     setShowEditModal(false);
-    setSelectedExercise(null);
     setEditingExercise(null);
   };
 
   const handleCloseModal = () => {
     setShowEditModal(false);
-    setSelectedExercise(null);
     setEditingExercise(null);
   };
 

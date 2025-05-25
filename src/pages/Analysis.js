@@ -4,7 +4,7 @@ import { useWorkout } from '../context/WorkoutContext';
 import { format, parseISO, startOfWeek, endOfWeek, eachWeekOfInterval, isWithinInterval, subWeeks } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { v4 as uuidv4 } from 'uuid';
-import { exerciseDatabase, convertToFlatExerciseList } from '../data/exerciseDatabase';
+import { exerciseDatabase } from '../data/exerciseDatabase';
 import {
   Chart as ChartJS,
   CategoryScale,
