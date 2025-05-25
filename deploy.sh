@@ -38,7 +38,7 @@ npm run deploy
 
 if [ $? -eq 0 ]; then
     echo "✅ Deployment successful!"
-    echo "🌐 Your app will be available at: https://IamNotATuringMachine.github.io/fitness"
+    echo "🌐 Your app will be available at: https://IamNotATuringMachine.github.io/fitness2"
     echo ""
     echo "📋 Next steps:"
     echo "1. Configure Supabase redirect URLs"

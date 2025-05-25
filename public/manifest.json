@@ -4,24 +4,19 @@
   "description": "A comprehensive fitness tracking application with AI-powered insights and progressive overload optimization",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0QTkwRTIiLz4KPHRleHQgeD0iOTYiIHk9IjEwNSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkY8L3RleHQ+CjwvdGV2Zz4K",
+      "type": "image/svg+xml",
       "sizes": "192x192",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
-      "type": "image/png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiM0QTkwRTIiLz4KPHRleHQgeD0iMjU2IiB5PSIyODAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RjwvdGV4dD4KPHN2Zz4K",
+      "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#4A90E2",
@@ -41,53 +36,19 @@
       "name": "Start Workout",
       "short_name": "Workout",
       "description": "Quick start a new workout session",
-      "url": "/workout-tracker",
-      "icons": [
-        {
-          "src": "icons/workout-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/workout-tracker"
     },
     {
       "name": "Analytics",
       "short_name": "Stats",
       "description": "View your fitness analytics and progress",
-      "url": "/analytics",
-      "icons": [
-        {
-          "src": "icons/analytics-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/analytics"
     },
     {
       "name": "Exercise Library",
       "short_name": "Exercises",
       "description": "Browse exercise library",
-      "url": "/exercises",
-      "icons": [
-        {
-          "src": "icons/exercises-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/desktop-screenshot.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "FitTrack Dashboard on Desktop"
-    },
-    {
-      "src": "screenshots/mobile-screenshot.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "FitTrack Mobile Experience"
+      "url": "/exercises"
     }
   ],
   "edge_side_panel": {
