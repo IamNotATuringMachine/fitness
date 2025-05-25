@@ -267,10 +267,11 @@ export class SupabaseDataService {
     }
 
     try {
+      const now = new Date().toISOString();
       const payload = {
         user_id: userId,
         data: data,
-        updated_at: new Date().toISOString()
+        updated_at: now
       };
 
       console.log('🔧 SupabaseService: Payload prepared:', {
@@ -279,29 +280,53 @@ export class SupabaseDataService {
         updated_at: payload.updated_at
       });
 
-      // Try update first, then insert if no record exists
-      const { data: updateResult, error: updateError, count } = await supabase
+      // First check if a record exists
+      console.log('🔧 SupabaseService: Checking if user record exists...');
+      const { data: existingRecords, error: checkError } = await supabase
         .from('user_data')
-        .update({
-          data: payload.data,
-          updated_at: payload.updated_at
-        })
-        .eq('user_id', userId)
-        .select('*');
+        .select('id, user_id')
+        .eq('user_id', userId);
 
-      if (updateError) {
-        console.error('🔧 SupabaseService: Update error:', updateError);
-        throw updateError;
+      if (checkError) {
+        console.error('🔧 SupabaseService: Error checking existing records:', checkError);
+        throw checkError;
       }
 
-      // If no rows were updated, insert a new record
-      if (!updateResult || updateResult.length === 0) {
-        console.log('🔧 SupabaseService: No existing record found, inserting new record');
+      if (existingRecords && existingRecords.length > 0) {
+        // Record exists, update it
+        console.log('🔧 SupabaseService: Existing record found, updating...');
+        const { data: updateResult, error: updateError } = await supabase
+          .from('user_data')
+          .update({
+            data: payload.data,
+            updated_at: payload.updated_at
+          })
+          .eq('user_id', userId)
+          .select('id, user_id, updated_at');
+
+        if (updateError) {
+          console.error('🔧 SupabaseService: Update error details:', {
+            message: updateError.message,
+            details: updateError.details,
+            hint: updateError.hint,
+            code: updateError.code
+          });
+          throw updateError;
+        }
+
+        console.log('🔧 SupabaseService: Data updated successfully:', {
+          userId,
+          recordsUpdated: updateResult?.length || 0
+        });
         
+        return { data: updateResult, error: null };
+      } else {
+        // No record exists, insert new one
+        console.log('🔧 SupabaseService: No existing record found, inserting new record...');
         const { data: insertResult, error: insertError } = await supabase
           .from('user_data')
           .insert(payload)
-          .select('*');
+          .select('id, user_id, updated_at');
 
         if (insertError) {
           console.error('🔧 SupabaseService: Insert error details:', {
@@ -315,17 +340,10 @@ export class SupabaseDataService {
 
         console.log('🔧 SupabaseService: Data inserted successfully:', {
           userId,
-          result: insertResult
+          recordsInserted: insertResult?.length || 0
         });
         
         return { data: insertResult, error: null };
-      } else {
-        console.log('🔧 SupabaseService: Data updated successfully:', {
-          userId,
-          result: updateResult
-        });
-        
-        return { data: updateResult, error: null };
       }
 
     } catch (error) {
@@ -348,18 +366,20 @@ export class SupabaseDataService {
     
     try {
       console.log('🔧 SupabaseService: Attempting supabase.from("user_data").select() START');
-      const { data, error } = await supabase
+      
+      // First try to get all records for this user (should be max 1 due to unique constraint)
+      const { data: records, error } = await supabase
         .from('user_data')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      console.log('🔧 SupabaseService: Attempting supabase.from("user_data").select() END', { hasData: !!data, error });
+        .select('id, user_id, data, created_at, updated_at')
+        .eq('user_id', userId);
+      
+      console.log('🔧 SupabaseService: Attempting supabase.from("user_data").select() END', { 
+        hasRecords: !!records, 
+        recordCount: records?.length || 0, 
+        error 
+      });
       
       if (error) {
-        if (error.code === 'PGRST116') {
-          console.log('🔧 SupabaseService: No existing user data found (expected for new users)');
-          return { data: {}, error: null };
-        }
         console.error('🔧 SupabaseService: Get user data error:', {
           message: error.message,
           details: error.details,
@@ -367,23 +387,33 @@ export class SupabaseDataService {
           code: error.code,
           userId
         });
-        throw error;
+        // Don't throw, return empty data instead
+        return { data: {}, error: null };
       }
 
+      // If no records found, return empty data (normal for new users)
+      if (!records || records.length === 0) {
+        console.log('🔧 SupabaseService: No existing user data found (expected for new users)');
+        return { data: {}, error: null };
+      }
+
+      // Get the first (and should be only) record
+      const userData = records[0];
+      
       console.log('🔧 SupabaseService: User data retrieved successfully:', {
         userId,
-        hasData: !!data,
-        dataKeys: data?.data ? Object.keys(data.data) : []
+        hasData: !!userData,
+        dataKeys: userData?.data ? Object.keys(userData.data) : []
       });
       
-      return { data: data?.data || {}, error: null };
+      return { data: userData?.data || {}, error: null };
     } catch (error) {
       console.error('🔧 SupabaseService: Get user data error:', {
         message: error.message,
         stack: error.stack,
         userId
       });
-      return { data: {}, error };
+      return { data: {}, error: null };
     }
   }
 

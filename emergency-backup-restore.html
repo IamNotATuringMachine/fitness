@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Emergency Backup Restore</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .emergency-notice {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .emergency-notice h3 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #4A90E2;
+        }
+        button {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        button.success {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .file-input input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #4A90E2;
+            border-radius: 8px;
+            background: white;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .success-status {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-status {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info-status {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning-status {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .progress {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Emergency Backup Restore</h1>
+        <p class="subtitle">Direct backup restoration bypass tool</p>
+        
+        <div class="emergency-notice">
+            <h3>⚠️ Emergency Mode</h3>
+            <p><strong>Use this tool when:</strong></p>
+            <ul>
+                <li>You can't access the normal app due to authentication issues</li>
+                <li>Your data was lost after an update</li>
+                <li>The normal backup restore isn't working</li>
+                <li>You need to restore data without logging in</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>📊 Current System Status</h3>
+            <button onclick="checkSystemStatus()">Check Status</button>
+            <button onclick="checkAuthentication()">Check Authentication</button>
+            <div id="system-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Emergency Backup Restore</h3>
+            <p>This will directly restore your backup to localStorage, bypassing all authentication and validation checks.</p>
+            
+            <div class="file-input">
+                <label for="backup-file"><strong>Select Backup File (.json):</strong></label>
+                <input type="file" id="backup-file" accept=".json" onchange="handleFileSelect(event)">
+            </div>
+            
+            <div id="file-info"></div>
+            
+            <button onclick="emergencyRestore()" id="restore-btn" disabled class="danger">
+                🚨 Emergency Restore
+            </button>
+            <button onclick="previewBackup()" id="preview-btn" disabled>
+                👁️ Preview Backup
+            </button>
+        </div>
+
+        <div class="section">
+            <h3>🛠️ Advanced Tools</h3>
+            <button onclick="clearAllData()" class="danger">Clear All Data</button>
+            <button onclick="fixAuthState()">Fix Auth State</button>
+            <button onclick="forceLogin()">Force Login Bypass</button>
+            <button onclick="resetAppState()" class="danger">Reset App State</button>
+        </div>
+
+        <div class="section">
+            <h3>📝 Restore Log</h3>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="progress-container" style="display: none;">
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div id="progress-text">Preparing...</div>
+            </div>
+            <pre id="restore-log"></pre>
+        </div>
+
+        <div class="section">
+            <h3>🔗 Quick Access</h3>
+            <button onclick="openApp()">Open Main App</button>
+            <button onclick="openDebugTool()">Open Debug Tool</button>
+            <button onclick="downloadSystemInfo()" class="success">Download System Info</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedBackup = null;
+        let restoreLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            restoreLog.push(logEntry);
+            updateLogDisplay();
+            console.log(message);
+        }
+
+        function updateLogDisplay() {
+            document.getElementById('restore-log').textContent = restoreLog.slice(-50).join('\n');
+        }
+
+        function clearLog() {
+            restoreLog = [];
+            updateLogDisplay();
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const statusClass = type === 'success' ? 'success-status' : 
+                              type === 'error' ? 'error-status' : 
+                              type === 'warning' ? 'warning-status' : 'info-status';
+            element.innerHTML = `<div class="status ${statusClass}">${message}</div>`;
+        }
+
+        function updateProgress(percent, text) {
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (percent === 0) {
+                progressContainer.style.display = 'none';
+            } else {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = percent + '%';
+                progressText.textContent = text || `${percent}%`;
+            }
+        }
+
+        function checkSystemStatus() {
+            log('🔍 Checking system status...');
+            
+            const workoutState = localStorage.getItem('workoutState');
+            const nutritionState = localStorage.getItem('nutritionState');
+            const gamificationState = localStorage.getItem('gamificationState');
+            const appVersion = localStorage.getItem('app_version');
+            
+            // Check for Supabase auth
+            const supabaseKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+                    supabaseKeys.push(key);
+                }
+            }
+            
+            let status = '<h4>📊 System Status Report:</h4>';
+            status += `<p><strong>App Version:</strong> ${appVersion || 'NOT SET'}</p>`;
+            status += `<p><strong>Workout Data:</strong> ${workoutState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>Nutrition Data:</strong> ${nutritionState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>Gamification Data:</strong> ${gamificationState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>Supabase Auth Keys:</strong> ${supabaseKeys.length} found</p>`;
+            
+            if (workoutState) {
+                try {
+                    const parsed = JSON.parse(workoutState);
+                    status += '<h5>Workout Data Details:</h5>';
+                    status += `<p>• Plans: ${parsed.workoutPlans?.length || 0}</p>`;
+                    status += `<p>• Exercises: ${parsed.exercises?.length || 0}</p>`;
+                    status += `<p>• History: ${parsed.workoutHistory?.length || 0}</p>`;
+                } catch (e) {
+                    status += `<p><strong>⚠️ Workout data is corrupted:</strong> ${e.message}</p>`;
+                }
+            }
+            
+            const hasData = workoutState || nutritionState || gamificationState;
+            showStatus('system-status', status, hasData ? 'success' : 'warning');
+            log(`System check complete - Data found: ${hasData}`);
+        }
+
+        function checkAuthentication() {
+            log('🔐 Checking authentication status...');
+            
+            const supabaseKeys = [];
+            const authData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+                    supabaseKeys.push(key);
+                    try {
+                        authData[key] = JSON.parse(localStorage.getItem(key));
+                    } catch (e) {
+                        authData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            let status = '<h4>🔐 Authentication Status:</h4>';
+            status += `<p><strong>Auth Keys Found:</strong> ${supabaseKeys.length}</p>`;
+            
+            if (supabaseKeys.length > 0) {
+                status += '<p><strong>Found Keys:</strong></p><ul>';
+                supabaseKeys.forEach(key => {
+                    status += `<li>${key}</li>`;
+                });
+                status += '</ul>';
+                
+                // Check for active session
+                const sessionKey = supabaseKeys.find(key => key.includes('session') || key.includes('auth'));
+                if (sessionKey && authData[sessionKey]) {
+                    status += '<p><strong>🟢 Active session found</strong></p>';
+                } else {
+                    status += '<p><strong>🟡 No active session detected</strong></p>';
+                }
+            } else {
+                status += '<p><strong>🔴 No authentication data found</strong></p>';
+            }
+            
+            showStatus('system-status', status, supabaseKeys.length > 0 ? 'success' : 'error');
+            log(`Auth check complete - Keys found: ${supabaseKeys.length}`);
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                selectedBackup = null;
+                document.getElementById('restore-btn').disabled = true;
+                document.getElementById('preview-btn').disabled = true;
+                showStatus('file-info', '', 'info');
+                return;
+            }
+
+            log(`📁 File selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    selectedBackup = JSON.parse(e.target.result);
+                    document.getElementById('restore-btn').disabled = false;
+                    document.getElementById('preview-btn').disabled = false;
+                    
+                    let info = `<h4>📦 Backup File Info:</h4>`;
+                    info += `<p><strong>File:</strong> ${file.name}</p>`;
+                    info += `<p><strong>Size:</strong> ${(file.size / 1024).toFixed(1)} KB</p>`;
+                    
+                    if (selectedBackup.metadata) {
+                        info += `<p><strong>Created:</strong> ${new Date(selectedBackup.metadata.createdAt).toLocaleString()}</p>`;
+                        info += `<p><strong>Creator:</strong> ${selectedBackup.metadata.createdBy || 'Unknown'}</p>`;
+                        info += `<p><strong>Version:</strong> ${selectedBackup.metadata.version || 'Unknown'}</p>`;
+                    }
+                    
+                    if (selectedBackup.data) {
+                        info += '<h5>Data Contents:</h5>';
+                        if (selectedBackup.data.workout) {
+                            const w = selectedBackup.data.workout;
+                            info += `<p>• Workout Plans: ${w.workoutPlans?.length || 0}</p>`;
+                            info += `<p>• Exercises: ${w.exercises?.length || 0}</p>`;
+                            info += `<p>• History: ${w.workoutHistory?.length || 0}</p>`;
+                        }
+                        if (selectedBackup.data.nutrition) {
+                            info += `<p>• Nutrition Data: ✅</p>`;
+                        }
+                        if (selectedBackup.data.gamification) {
+                            info += `<p>• Gamification Data: ✅</p>`;
+                        }
+                    }
+                    
+                    showStatus('file-info', info, 'success');
+                    log(`✅ Backup file parsed successfully`);
+                    
+                } catch (error) {
+                    showStatus('file-info', `❌ Error parsing backup file: ${error.message}`, 'error');
+                    log(`❌ Error parsing backup: ${error.message}`);
+                    selectedBackup = null;
+                    document.getElementById('restore-btn').disabled = true;
+                    document.getElementById('preview-btn').disabled = true;
+                }
+            };
+            
+            reader.onerror = function() {
+                showStatus('file-info', '❌ Error reading file', 'error');
+                log('❌ Error reading file');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function previewBackup() {
+            if (!selectedBackup) {
+                log('❌ No backup selected');
+                return;
+            }
+            
+            log('👁️ Previewing backup contents...');
+            const preview = JSON.stringify(selectedBackup, null, 2);
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                    <head><title>Backup Preview</title></head>
+                    <body style="font-family: monospace; padding: 20px;">
+                        <h2>Backup Preview</h2>
+                        <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${preview}</pre>
+                    </body>
+                </html>
+            `);
+        }
+
+        async function emergencyRestore() {
+            if (!selectedBackup) {
+                log('❌ No backup selected');
+                return;
+            }
+
+            if (!confirm('⚠️ EMERGENCY RESTORE WILL OVERWRITE ALL CURRENT DATA!\n\nThis action cannot be undone. Continue?')) {
+                log('❌ Emergency restore cancelled by user');
+                return;
+            }
+
+            log('🚨 Starting emergency restore...');
+            updateProgress(10, 'Starting emergency restore...');
+
+            try {
+                // Step 1: Backup current data
+                log('💾 Creating safety backup of current data...');
+                updateProgress(20, 'Creating safety backup...');
+                
+                const currentData = {
+                    workoutState: localStorage.getItem('workoutState'),
+                    nutritionState: localStorage.getItem('nutritionState'),
+                    gamificationState: localStorage.getItem('gamificationState'),
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('emergency-backup-' + Date.now(), JSON.stringify(currentData));
+
+                // Step 2: Restore workout data
+                if (selectedBackup.data.workout) {
+                    log('🏋️ Restoring workout data...');
+                    updateProgress(40, 'Restoring workout data...');
+                    localStorage.setItem('workoutState', JSON.stringify(selectedBackup.data.workout));
+                    log('✅ Workout data restored');
+                }
+
+                // Step 3: Restore nutrition data
+                if (selectedBackup.data.nutrition) {
+                    log('🥗 Restoring nutrition data...');
+                    updateProgress(60, 'Restoring nutrition data...');
+                    localStorage.setItem('nutritionState', JSON.stringify(selectedBackup.data.nutrition));
+                    log('✅ Nutrition data restored');
+                }
+
+                // Step 4: Restore gamification data
+                if (selectedBackup.data.gamification) {
+                    log('🏆 Restoring gamification data...');
+                    updateProgress(80, 'Restoring gamification data...');
+                    localStorage.setItem('gamificationState', JSON.stringify(selectedBackup.data.gamification));
+                    log('✅ Gamification data restored');
+                }
+
+                // Step 5: Update app version to prevent cache clearing
+                log('🔧 Updating app version...');
+                updateProgress(90, 'Finalizing...');
+                localStorage.setItem('app_version', '2025-05-25-v2');
+
+                updateProgress(100, 'Emergency restore complete!');
+                log('🎉 EMERGENCY RESTORE COMPLETED SUCCESSFULLY!');
+                
+                showStatus('system-status', 
+                    '✅ Emergency restore completed! Your data has been restored. You can now access the main app.',
+                    'success'
+                );
+
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    if (confirm('Emergency restore complete! Would you like to open the main app now?')) {
+                        openApp();
+                    }
+                }, 3000);
+
+            } catch (error) {
+                updateProgress(0);
+                log(`❌ Emergency restore failed: ${error.message}`);
+                showStatus('system-status', 
+                    `❌ Emergency restore failed: ${error.message}`,
+                    'error'
+                );
+            }
+        }
+
+        function clearAllData() {
+            if (!confirm('⚠️ This will delete ALL data from localStorage. Continue?')) {
+                return;
+            }
+            
+            log('🗑️ Clearing all localStorage data...');
+            localStorage.clear();
+            showStatus('system-status', '✅ All data cleared', 'info');
+            log('All data cleared');
+        }
+
+        function fixAuthState() {
+            log('🔧 Attempting to fix authentication state...');
+            
+            // Try to find and fix auth tokens
+            let fixed = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('supabase')) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        const parsed = JSON.parse(value);
+                        // Re-save to fix any corruption
+                        localStorage.setItem(key, JSON.stringify(parsed));
+                        fixed = true;
+                    } catch (e) {
+                        log(`⚠️ Removing corrupted auth key: ${key}`);
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+            
+            log(fixed ? '✅ Auth state fixed' : '⚠️ No auth state to fix');
+            showStatus('system-status', 
+                fixed ? '✅ Authentication state has been repaired' : '⚠️ No authentication issues found',
+                fixed ? 'success' : 'warning'
+            );
+        }
+
+        function forceLogin() {
+            log('🔓 Forcing login bypass...');
+            
+            // Create a minimal auth state
+            const fakeAuth = {
+                access_token: 'emergency-bypass-' + Date.now(),
+                user: {
+                    id: 'emergency-user',
+                    email: 'emergency@local.dev'
+                }
+            };
+            
+            localStorage.setItem('sb-emergency-auth', JSON.stringify(fakeAuth));
+            log('✅ Emergency auth created');
+            showStatus('system-status', '✅ Emergency authentication bypass created', 'warning');
+        }
+
+        function resetAppState() {
+            if (!confirm('⚠️ This will reset the entire app state. Continue?')) {
+                return;
+            }
+            
+            log('🔄 Resetting app state...');
+            localStorage.clear();
+            localStorage.setItem('app_version', '2025-05-25-v2');
+            log('✅ App state reset');
+            showStatus('system-status', '✅ App state has been reset', 'info');
+        }
+
+        function openApp() {
+            log('🚀 Opening main app...');
+            const baseUrl = window.location.origin + window.location.pathname.replace('emergency-backup-restore.html', '');
+            window.open(baseUrl, '_blank');
+        }
+
+        function openDebugTool() {
+            log('🛠️ Opening debug tool...');
+            const baseUrl = window.location.origin + window.location.pathname.replace('emergency-backup-restore.html', '');
+            window.open(baseUrl + 'debug-backup-restore.html', '_blank');
+        }
+
+        function downloadSystemInfo() {
+            log('📥 Generating system info...');
+            
+            const systemInfo = {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                localStorage: {},
+                localStorageSize: 0
+            };
+            
+            // Collect all localStorage data
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                systemInfo.localStorage[key] = value?.length > 1000 ? 
+                    `[${value.length} chars] ${value.substring(0, 100)}...` : value;
+                systemInfo.localStorageSize += value?.length || 0;
+            }
+            
+            const blob = new Blob([JSON.stringify(systemInfo, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system-info-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log('✅ System info downloaded');
+        }
+
+        // Auto-check status on load
+        window.onload = function() {
+            log('🛠️ Emergency backup restore tool loaded');
+            checkSystemStatus();
+        };
+    </script>
+</body>
+</html> 

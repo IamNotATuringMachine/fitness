@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup Restore Debug Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4A90E2;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #357ABD;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Backup Restore Debug Tool</h1>
+        
+        <div class="section">
+            <h3>📊 Current LocalStorage Status</h3>
+            <button onclick="checkLocalStorage()">Check Current State</button>
+            <div id="localStorage-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔄 Version Information</h3>
+            <button onclick="checkVersions()">Check App Versions</button>
+            <div id="version-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>🧪 Test Backup Creation</h3>
+            <button onclick="createTestBackup()">Create Test Backup</button>
+            <button onclick="downloadTestBackup()">Download Test Backup</button>
+            <div id="backup-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Utility Functions</h3>
+            <button onclick="clearAllData()">Clear All Data</button>
+            <button onclick="resetAppVersion()">Reset App Version</button>
+            <button onclick="openFitnessApp()">Open Fitness App</button>
+        </div>
+
+        <div class="section">
+            <h3>📝 Debug Log</h3>
+            <button onclick="clearLog()">Clear Log</button>
+            <pre id="debug-log"></pre>
+        </div>
+    </div>
+
+    <script>
+        let debugLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${message}`);
+            updateDebugLog();
+            console.log(message);
+        }
+
+        function updateDebugLog() {
+            document.getElementById('debug-log').textContent = debugLog.slice(-20).join('\n');
+        }
+
+        function clearLog() {
+            debugLog = [];
+            updateDebugLog();
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkLocalStorage() {
+            log('🔍 Checking localStorage status...');
+            
+            const workoutState = localStorage.getItem('workoutState');
+            const nutritionState = localStorage.getItem('nutritionState');
+            const gamificationState = localStorage.getItem('gamificationState');
+            const appVersion = localStorage.getItem('app_version');
+            const beforeRestore = localStorage.getItem('fitness-backup-before-restore');
+            
+            let status = '<h4>LocalStorage Contents:</h4>';
+            status += `<p><strong>workoutState:</strong> ${workoutState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>nutritionState:</strong> ${nutritionState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>gamificationState:</strong> ${gamificationState ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            status += `<p><strong>app_version:</strong> ${appVersion || 'NOT SET'}</p>`;
+            status += `<p><strong>before-restore backup:</strong> ${beforeRestore ? '✅ EXISTS' : '❌ MISSING'}</p>`;
+            
+            if (workoutState) {
+                try {
+                    const parsed = JSON.parse(workoutState);
+                    status += `<p><strong>Workout Plans:</strong> ${parsed.workoutPlans?.length || 0}</p>`;
+                    status += `<p><strong>Exercises:</strong> ${parsed.exercises?.length || 0}</p>`;
+                    status += `<p><strong>Workout History:</strong> ${parsed.workoutHistory?.length || 0}</p>`;
+                } catch (e) {
+                    status += `<p><strong>⚠️ Error parsing workoutState:</strong> ${e.message}</p>`;
+                }
+            }
+            
+            showStatus('localStorage-status', status, workoutState ? 'success' : 'error');
+            log(`LocalStorage check complete - workoutState: ${!!workoutState}`);
+        }
+
+        function checkVersions() {
+            log('🔍 Checking version information...');
+            
+            const storedVersion = localStorage.getItem('app_version');
+            const currentVersion = '2025-05-25-v2'; // This should match your app
+            
+            let status = '<h4>Version Information:</h4>';
+            status += `<p><strong>Stored Version:</strong> ${storedVersion || 'NOT SET'}</p>`;
+            status += `<p><strong>Expected Version:</strong> ${currentVersion}</p>`;
+            status += `<p><strong>Versions Match:</strong> ${storedVersion === currentVersion ? '✅ YES' : '❌ NO'}</p>`;
+            
+            if (storedVersion !== currentVersion) {
+                status += '<p><strong>⚠️ Version mismatch detected!</strong> This would trigger cache clearing.</p>';
+            }
+            
+            showStatus('version-status', status, storedVersion === currentVersion ? 'success' : 'error');
+            log(`Version check complete - match: ${storedVersion === currentVersion}`);
+        }
+
+        function createTestBackup() {
+            log('🧪 Creating test backup...');
+            
+            try {
+                // Create minimal test data
+                const testData = {
+                    workoutPlans: [
+                        {
+                            id: 'test-plan-1',
+                            name: 'Test Trainingsplan',
+                            days: [
+                                {
+                                    id: 'day-1',
+                                    name: 'Tag 1',
+                                    exercises: [],
+                                    advancedMethods: []
+                                }
+                            ]
+                        }
+                    ],
+                    exercises: [
+                        {
+                            id: 'test-exercise-1',
+                            name: 'Test Übung',
+                            muscleGroups: ['Brust']
+                        }
+                    ],
+                    workoutHistory: [],
+                    bodyMeasurements: [],
+                    userProfile: {
+                        name: 'Test User'
+                    }
+                };
+                
+                const backup = {
+                    metadata: {
+                        version: '1.0.0',
+                        appVersion: '2025-05-25-v2',
+                        createdAt: new Date().toISOString(),
+                        createdBy: 'Debug Tool',
+                        description: 'Test backup created by debug tool'
+                    },
+                    data: {
+                        workout: testData,
+                        nutrition: {},
+                        gamification: {}
+                    }
+                };
+                
+                localStorage.setItem('debug-test-backup', JSON.stringify(backup));
+                showStatus('backup-status', '✅ Test backup created successfully!', 'success');
+                log('Test backup created and stored in localStorage');
+                
+            } catch (error) {
+                showStatus('backup-status', `❌ Error creating test backup: ${error.message}`, 'error');
+                log(`Error creating test backup: ${error.message}`);
+            }
+        }
+
+        function downloadTestBackup() {
+            log('📥 Downloading test backup...');
+            
+            const backup = localStorage.getItem('debug-test-backup');
+            if (!backup) {
+                showStatus('backup-status', '❌ No test backup found. Create one first.', 'error');
+                return;
+            }
+            
+            try {
+                const blob = new Blob([backup], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-backup-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus('backup-status', '✅ Test backup downloaded!', 'success');
+                log('Test backup downloaded successfully');
+                
+            } catch (error) {
+                showStatus('backup-status', `❌ Error downloading: ${error.message}`, 'error');
+                log(`Error downloading test backup: ${error.message}`);
+            }
+        }
+
+        function clearAllData() {
+            if (!confirm('Are you sure you want to clear ALL localStorage data?')) {
+                return;
+            }
+            
+            log('🗑️ Clearing all localStorage data...');
+            localStorage.clear();
+            showStatus('localStorage-status', '✅ All data cleared!', 'info');
+            log('All localStorage data cleared');
+        }
+
+        function resetAppVersion() {
+            log('🔄 Resetting app version...');
+            localStorage.setItem('app_version', '2025-05-25-v2');
+            showStatus('version-status', '✅ App version reset to current!', 'success');
+            log('App version reset to current');
+        }
+
+        function openFitnessApp() {
+            log('🚀 Opening fitness app...');
+            const baseUrl = window.location.origin + window.location.pathname.replace('debug-backup-restore.html', '');
+            const fitnessUrl = baseUrl + 'data-import-export';
+            window.open(fitnessUrl, '_blank');
+            log('Fitness app opened in new tab');
+        }
+
+        // Auto-run initial checks
+        window.onload = function() {
+            log('🛠️ Debug tool loaded');
+            checkLocalStorage();
+            checkVersions();
+        };
+    </script>
+</body>
+</html> 

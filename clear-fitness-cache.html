@@ -1,40 +1,316 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Clear Fitness App Cache</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Fitness App Cache Cleaner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .cache-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cache-item strong {
+            font-size: 1.1rem;
+        }
+        .status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .cleared { background: #4CAF50; color: white; }
+        .not-found { background: #FF9800; color: white; }
+        .error { background: #f44336; color: white; }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #4ECDC4;
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Clear Fitness App Cache</h1>
-    <button onclick="clearCache()">Clear Local Storage</button>
-    <div id="result"></div>
+    <div class="container">
+        <h1>🧹 Cache Cleaner</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Wichtig:</strong> Dieser Cache-Cleaner löscht alle lokalen Daten der Fitness-App. 
+            Stelle sicher, dass deine Daten in der Cloud gespeichert sind!
+        </div>
+
+        <button onclick="clearAllCache()">🔥 Alles löschen und neu starten</button>
+
+        <div class="info">
+            <h3>🔧 Was wird gelöscht:</h3>
+            <div id="cache-status">
+                <div class="cache-item">
+                    <strong>LocalStorage (Trainingsdaten)</strong>
+                    <span id="localStorage-status" class="status">Nicht geprüft</span>
+                </div>
+                <div class="cache-item">
+                    <strong>SessionStorage</strong>
+                    <span id="sessionStorage-status" class="status">Nicht geprüft</span>
+                </div>
+                <div class="cache-item">
+                    <strong>Browser Cache</strong>
+                    <span id="browserCache-status" class="status">Nicht geprüft</span>
+                </div>
+                <div class="cache-item">
+                    <strong>Service Worker</strong>
+                    <span id="serviceWorker-status" class="status">Nicht geprüft</span>
+                </div>
+                <div class="cache-item">
+                    <strong>IndexedDB</strong>
+                    <span id="indexedDB-status" class="status">Nicht geprüft</span>
+                </div>
+                <div class="cache-item">
+                    <strong>Cookies</strong>
+                    <span id="cookies-status" class="status">Nicht geprüft</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="result-message"></div>
+    </div>
 
     <script>
-        function clearCache() {
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${status}`;
+            element.textContent = text;
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result-message');
+            resultDiv.innerHTML = `<div class="${type}"><strong>${message}</strong></div>`;
+        }
+
+        async function clearAllCache() {
+            let allCleared = true;
+            let report = [];
+
             try {
-                // Clear all localStorage
-                localStorage.clear();
-                
-                // Clear sessionStorage  
-                sessionStorage.clear();
-                
-                // Clear IndexedDB if it exists
-                if ('indexedDB' in window) {
-                    indexedDB.deleteDatabase('fitness-app');
+                // 1. Clear LocalStorage
+                try {
+                    const localStorageKeys = Object.keys(localStorage);
+                    const fitnessKeys = localStorageKeys.filter(key => 
+                        key.includes('workout') || 
+                        key.includes('user') || 
+                        key.includes('fitness') || 
+                        key.includes('training') ||
+                        key.includes('gamification') ||
+                        key.includes('nutrition') ||
+                        key.includes('auth') ||
+                        key.includes('sync')
+                    );
+                    
+                    if (fitnessKeys.length > 0) {
+                        fitnessKeys.forEach(key => localStorage.removeItem(key));
+                        updateStatus('localStorage-status', 'cleared', `${fitnessKeys.length} Einträge gelöscht`);
+                        report.push(`✅ LocalStorage: ${fitnessKeys.length} Fitness-Einträge gelöscht`);
+                    } else {
+                        updateStatus('localStorage-status', 'not-found', 'Keine Daten gefunden');
+                        report.push('ℹ️ LocalStorage: Keine Fitness-Daten gefunden');
+                    }
+                } catch (e) {
+                    updateStatus('localStorage-status', 'error', 'Fehler');
+                    report.push('❌ LocalStorage: Fehler beim Löschen');
+                    allCleared = false;
                 }
-                
-                document.getElementById('result').innerHTML = 
-                    '<p style="color: green;">✅ Cache cleared successfully! Please refresh your fitness app to load the new exercise database.</p>';
-                
-                // Auto-redirect to fitness app after 3 seconds
+
+                // 2. Clear SessionStorage
+                try {
+                    sessionStorage.clear();
+                    updateStatus('sessionStorage-status', 'cleared', 'Gelöscht');
+                    report.push('✅ SessionStorage: Komplett gelöscht');
+                } catch (e) {
+                    updateStatus('sessionStorage-status', 'error', 'Fehler');
+                    report.push('❌ SessionStorage: Fehler beim Löschen');
+                    allCleared = false;
+                }
+
+                // 3. Clear Service Worker and Cache
+                try {
+                    if ('serviceWorker' in navigator) {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                        }
+                        updateStatus('serviceWorker-status', 'cleared', `${registrations.length} SW gelöscht`);
+                        report.push(`✅ Service Worker: ${registrations.length} Registrierungen entfernt`);
+                    } else {
+                        updateStatus('serviceWorker-status', 'not-found', 'Nicht unterstützt');
+                        report.push('ℹ️ Service Worker: Nicht unterstützt');
+                    }
+                } catch (e) {
+                    updateStatus('serviceWorker-status', 'error', 'Fehler');
+                    report.push('❌ Service Worker: Fehler beim Entfernen');
+                    allCleared = false;
+                }
+
+                // 4. Clear Cache API
+                try {
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
+                        updateStatus('browserCache-status', 'cleared', `${cacheNames.length} Caches gelöscht`);
+                        report.push(`✅ Browser Cache: ${cacheNames.length} Caches gelöscht`);
+                    } else {
+                        updateStatus('browserCache-status', 'not-found', 'Nicht unterstützt');
+                        report.push('ℹ️ Browser Cache: Cache API nicht unterstützt');
+                    }
+                } catch (e) {
+                    updateStatus('browserCache-status', 'error', 'Fehler');
+                    report.push('❌ Browser Cache: Fehler beim Löschen');
+                    allCleared = false;
+                }
+
+                // 5. Clear IndexedDB
+                try {
+                    if ('indexedDB' in window) {
+                        // Try to delete common fitness app databases
+                        const dbNames = ['fitness-app', 'workouts', 'user-data'];
+                        let deletedCount = 0;
+                        
+                        for (const dbName of dbNames) {
+                            try {
+                                const deleteRequest = indexedDB.deleteDatabase(dbName);
+                                await new Promise((resolve, reject) => {
+                                    deleteRequest.onsuccess = () => { deletedCount++; resolve(); };
+                                    deleteRequest.onerror = () => resolve(); // Continue even if DB doesn't exist
+                                    deleteRequest.onblocked = () => resolve();
+                                });
+                            } catch (e) {
+                                // Continue with other databases
+                            }
+                        }
+                        
+                        updateStatus('indexedDB-status', 'cleared', `${deletedCount} DBs versucht`);
+                        report.push(`✅ IndexedDB: ${deletedCount} Datenbanken versucht zu löschen`);
+                    } else {
+                        updateStatus('indexedDB-status', 'not-found', 'Nicht unterstützt');
+                        report.push('ℹ️ IndexedDB: Nicht unterstützt');
+                    }
+                } catch (e) {
+                    updateStatus('indexedDB-status', 'error', 'Fehler');
+                    report.push('❌ IndexedDB: Fehler beim Löschen');
+                    allCleared = false;
+                }
+
+                // 6. Clear Cookies
+                try {
+                    const cookies = document.cookie.split(';');
+                    let deletedCookies = 0;
+                    
+                    for (let cookie of cookies) {
+                        const eqPos = cookie.indexOf('=');
+                        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                        if (name) {
+                            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+                            deletedCookies++;
+                        }
+                    }
+                    
+                    updateStatus('cookies-status', 'cleared', `${deletedCookies} Cookies gelöscht`);
+                    report.push(`✅ Cookies: ${deletedCookies} Cookies gelöscht`);
+                } catch (e) {
+                    updateStatus('cookies-status', 'error', 'Fehler');
+                    report.push('❌ Cookies: Fehler beim Löschen');
+                    allCleared = false;
+                }
+
+                // Show final result
+                if (allCleared) {
+                    showResult('🎉 Cache erfolgreich gelöscht! Lade die Seite neu für einen frischen Start.', 'success');
+                } else {
+                    showResult('⚠️ Cache teilweise gelöscht. Einige Bereiche konnten nicht vollständig geleert werden.', 'warning');
+                }
+
+                // Add detailed report
+                const detailDiv = document.createElement('div');
+                detailDiv.className = 'info';
+                detailDiv.innerHTML = '<h4>📋 Detaillierter Bericht:</h4>' + 
+                    report.map(item => `<div style="margin: 5px 0;">${item}</div>`).join('');
+                document.getElementById('result-message').appendChild(detailDiv);
+
+                // Auto-reload after 3 seconds
                 setTimeout(() => {
-                    window.location.href = 'http://localhost:3000';
+                    showResult('🔄 Seite wird neu geladen...', 'info');
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 1000);
                 }, 3000);
-                
+
             } catch (error) {
-                document.getElementById('result').innerHTML = 
-                    '<p style="color: red;">❌ Error clearing cache: ' + error.message + '</p>';
+                showResult(`❌ Unerwarteter Fehler: ${error.message}`, 'error');
+                console.error('Cache clearing error:', error);
             }
         }
+
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            console.log('🧹 Fitness App Cache Cleaner geladen');
+            console.log('📊 Aktuelle Storage-Größen:');
+            console.log('- LocalStorage Einträge:', Object.keys(localStorage).length);
+            console.log('- SessionStorage Einträge:', Object.keys(sessionStorage).length);
+        });
     </script>
 </body>
 </html> 

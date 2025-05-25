@@ -412,21 +412,42 @@ const BackupManager = () => {
     setIsLoading(true);
 
     try {
+      console.log('🔄 Starting backup restoration process...');
+      console.log('📦 Backup to restore:', backupToRestore);
+      console.log('⚙️ Restore options:', restoreOptions);
+      
+      // Log current localStorage state before restore
+      console.log('📊 Current localStorage before restore:');
+      console.log('- workoutState exists:', !!localStorage.getItem('workoutState'));
+      console.log('- nutritionState exists:', !!localStorage.getItem('nutritionState'));
+      console.log('- gamificationState exists:', !!localStorage.getItem('gamificationState'));
+      console.log('- app_version:', localStorage.getItem('app_version'));
+      
       const result = await restoreFromBackup(backupToRestore, restoreOptions);
+      
+      // Log localStorage state after restore
+      console.log('📊 localStorage after restore:');
+      console.log('- workoutState exists:', !!localStorage.getItem('workoutState'));
+      console.log('- nutritionState exists:', !!localStorage.getItem('nutritionState'));
+      console.log('- gamificationState exists:', !!localStorage.getItem('gamificationState'));
+      console.log('- app_version:', localStorage.getItem('app_version'));
       
       if (result.success) {
         addAlert(`Wiederherstellung erfolgreich! Wiederhergestellt: ${result.restored.join(', ')}`, 'success');
         setShowRestoreModal(false);
         
+        console.log('✅ Backup restoration successful, reloading page in 2 seconds...');
+        
         // Reload the page to refresh all contexts
         setTimeout(() => {
+          console.log('🔄 Reloading page to apply restored data...');
           window.location.reload();
         }, 2000);
       } else {
         addAlert(`Wiederherstellung teilweise fehlgeschlagen. Fehler: ${result.errors.join(', ')}`, 'warning');
       }
     } catch (error) {
-      console.error('Fehler bei der Wiederherstellung:', error);
+      console.error('❌ Fehler bei der Wiederherstellung:', error);
       addAlert('Fehler bei der Wiederherstellung: ' + error.message, 'error');
     } finally {
       setIsLoading(false);

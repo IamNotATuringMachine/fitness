@@ -287,22 +287,45 @@ export const restoreFromBackup = (backup, options = {}) => {
   };
 
   try {
+    console.log('🔄 restoreFromBackup: Starting restore process...');
+    console.log('📦 Backup data keys:', Object.keys(backup.data || {}));
+    console.log('⚙️ Restore options:', options);
+    
     // Backup current data before restore
     const currentBackup = createBackup();
     localStorage.setItem('fitness-backup-before-restore', JSON.stringify(currentBackup));
+    console.log('💾 Created safety backup before restore');
 
     // Restore workout data
     if (restoreWorkout && backup.data.workout) {
       try {
+        console.log('🏋️ Restoring workout data...');
+        console.log('📊 Workout data keys:', Object.keys(backup.data.workout || {}));
+        
         if (mergeData) {
           const currentWorkout = JSON.parse(localStorage.getItem('workoutState') || '{}');
           const mergedWorkout = mergeWorkoutData(currentWorkout, backup.data.workout);
           localStorage.setItem('workoutState', JSON.stringify(mergedWorkout));
+          console.log('🔀 Merged workout data with existing data');
         } else {
           localStorage.setItem('workoutState', JSON.stringify(backup.data.workout));
+          console.log('💾 Replaced workout data completely');
         }
+        
+        // Verify data was saved
+        const savedData = localStorage.getItem('workoutState');
+        console.log('✅ Workout data saved to localStorage:', !!savedData);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          console.log('📊 Restored workout data contains:');
+          console.log('- workoutPlans:', parsedData.workoutPlans?.length || 0);
+          console.log('- exercises:', parsedData.exercises?.length || 0);
+          console.log('- workoutHistory:', parsedData.workoutHistory?.length || 0);
+        }
+        
         results.restored.push('Trainingsdaten');
       } catch (error) {
+        console.error('❌ Error restoring workout data:', error);
         results.errors.push('Fehler beim Wiederherstellen der Trainingsdaten: ' + error.message);
         results.success = false;
       }
@@ -341,6 +364,24 @@ export const restoreFromBackup = (backup, options = {}) => {
         results.success = false;
       }
     }
+
+    // Update app version to prevent cache clearing on next reload
+    if (results.success && results.restored.length > 0) {
+      const APP_VERSION = '2025-05-25-v2'; // Should match the version in index.js
+      localStorage.setItem('app_version', APP_VERSION);
+      console.log('✅ Updated app version after successful backup restore to prevent cache clearing');
+    }
+
+    // Final summary
+    console.log('🎯 Backup restore complete!');
+    console.log('✅ Success:', results.success);
+    console.log('📦 Restored components:', results.restored);
+    console.log('❌ Errors:', results.errors);
+    console.log('🔍 Final localStorage check:');
+    console.log('- workoutState:', !!localStorage.getItem('workoutState'));
+    console.log('- nutritionState:', !!localStorage.getItem('nutritionState'));
+    console.log('- gamificationState:', !!localStorage.getItem('gamificationState'));
+    console.log('- app_version:', localStorage.getItem('app_version'));
 
     return results;
   } catch (error) {
