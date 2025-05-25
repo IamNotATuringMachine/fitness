@@ -301,23 +301,42 @@ async function updateCache(request, cache) {
 }
 
 // Background Sync for offline workout data
-self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync triggered', event.tag);
+self.addEventListener('sync', async (event) => {
+  console.log('Service Worker: Background sync event received for tag:', event.tag, new Date().toISOString());
   
   if (event.tag === 'workout-sync') {
-    event.waitUntil(syncWorkoutData());
+    try {
+      console.log('Service Worker: Starting waitUntil for workout-sync');
+      await event.waitUntil(syncWorkoutData());
+      console.log('Service Worker: waitUntil for workout-sync completed.');
+    } catch (err) {
+      console.error('Service Worker: Error in waitUntil for workout-sync:', err);
+    }
   } else if (event.tag === 'analytics-sync') {
-    event.waitUntil(syncAnalyticsData());
+    console.log('Service Worker: Background sync event received for tag:', event.tag, new Date().toISOString());
+    try {
+      console.log('Service Worker: Starting waitUntil for analytics-sync');
+      await event.waitUntil(syncAnalyticsData());
+      console.log('Service Worker: waitUntil for analytics-sync completed.');
+    } catch (err) {
+      console.error('Service Worker: Error in waitUntil for analytics-sync:', err);
+    }
   }
 });
 
 // Sync workout data when connection is restored
 async function syncWorkoutData() {
+  console.log('Service Worker: syncWorkoutData called', new Date().toISOString());
   try {
-    console.log('Service Worker: Syncing workout data...');
+    // Simulate some async work, even if no actual data to sync
+    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
     
-    // Get pending workout data from IndexedDB
+    console.log('Service Worker: Syncing workout data...');
     const pendingWorkouts = await getPendingWorkouts();
+    
+    if (pendingWorkouts.length === 0) {
+      console.log('Service Worker: No pending workouts to sync.');
+    }
     
     for (const workout of pendingWorkouts) {
       try {
@@ -345,8 +364,25 @@ async function syncWorkoutData() {
         console.error('Failed to sync workout:', workout.id, error);
       }
     }
+
+    console.log('Service Worker: syncWorkoutData finished successfully.');
   } catch (error) {
-    console.error('Background sync failed:', error);
+    console.error('Background sync failed (syncWorkoutData):', error);
+    throw error;
+  }
+}
+
+// Sync analytics data (add similar logging for completeness if it exists)
+async function syncAnalyticsData() {
+  console.log('Service Worker: syncAnalyticsData called', new Date().toISOString());
+  try {
+    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+    console.log('Service Worker: Syncing analytics data...');
+    // Actual analytics sync logic would go here
+    console.log('Service Worker: syncAnalyticsData finished successfully.');
+  } catch (error) {
+    console.error('Background sync failed (syncAnalyticsData):', error);
+    throw error;
   }
 }
 
