@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supabase Connection Test</h1>
+        <p>Dieses Tool testet deine Supabase-Konfiguration für die Fitness-App.</p>
+        
+        <div id="status-container"></div>
+        
+        <div>
+            <button onclick="testEnvironmentVariables()">1. Environment Variablen prüfen</button>
+            <button onclick="testSupabaseConnection()">2. Supabase Verbindung testen</button>
+            <button onclick="testAuthentication()">3. Authentifizierung testen</button>
+            <button onclick="testDatabaseTables()">4. Datenbank-Tabellen prüfen</button>
+            <button onclick="testFullFlow()">5. Kompletten Flow testen</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const statusContainer = document.getElementById('status-container');
+        const resultsContainer = document.getElementById('results');
+        
+        // Diese Variablen sollten aus deiner .env.production Datei kommen
+        const SUPABASE_URL = 'https://osbkihliyfepgithobdx.supabase.co'; // Ersetze mit deiner URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmtpaGxpeWZlcGdpdGhvYmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2NzM4MTcsImV4cCI6MjA1MTI0OTgxN30.xFpj7XPU1RNXa_96_bA1WGMlUSwSKHftI-8UiMuIyqA'; // Ersetze mit deinem Key
+        
+        let supabase;
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            statusContainer.appendChild(div);
+        }
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre class="${type}">${JSON.stringify(content, null, 2)}</pre>
+            `;
+            resultsContainer.appendChild(div);
+        }
+        
+        function clearResults() {
+            statusContainer.innerHTML = '';
+            resultsContainer.innerHTML = '';
+        }
+        
+        async function testEnvironmentVariables() {
+            clearResults();
+            addStatus('Teste Environment Variablen...', 'info');
+            
+            const results = {
+                supabase_url: SUPABASE_URL,
+                supabase_key_length: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0,
+                url_valid: SUPABASE_URL && SUPABASE_URL.includes('supabase.co'),
+                key_valid: SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 50
+            };
+            
+            if (results.url_valid && results.key_valid) {
+                addStatus('✅ Environment Variablen sind konfiguriert', 'success');
+            } else {
+                addStatus('❌ Environment Variablen sind nicht korrekt konfiguriert', 'error');
+            }
+            
+            addResult('Environment Variablen', results);
+        }
+        
+        async function testSupabaseConnection() {
+            clearResults();
+            addStatus('Teste Supabase Verbindung...', 'info');
+            
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // Test basic connection
+                const { data, error } = await supabase.from('user_data').select('count').limit(1);
+                
+                if (error) {
+                    addStatus(`❌ Verbindungsfehler: ${error.message}`, 'error');
+                    addResult('Verbindungsfehler', error, 'error');
+                } else {
+                    addStatus('✅ Supabase Verbindung erfolgreich', 'success');
+                    addResult('Verbindungstest', { success: true, data });
+                }
+            } catch (error) {
+                addStatus(`❌ Kritischer Verbindungsfehler: ${error.message}`, 'error');
+                addResult('Kritischer Fehler', error, 'error');
+            }
+        }
+        
+        async function testAuthentication() {
+            clearResults();
+            addStatus('Teste Authentifizierung...', 'info');
+            
+            if (!supabase) {
+                addStatus('❌ Bitte zuerst Verbindung testen', 'error');
+                return;
+            }
+            
+            try {
+                // Test current session
+                const { data: session, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError) {
+                    addStatus(`❌ Session Fehler: ${sessionError.message}`, 'error');
+                    addResult('Session Fehler', sessionError, 'error');
+                } else {
+                    addStatus(`✅ Auth System verfügbar. Aktuell ${session?.session ? 'angemeldet' : 'nicht angemeldet'}`, 'success');
+                    addResult('Session Status', {
+                        has_session: !!session?.session,
+                        user: session?.session?.user ? {
+                            id: session.session.user.id,
+                            email: session.session.user.email
+                        } : null
+                    });
+                }
+            } catch (error) {
+                addStatus(`❌ Auth Fehler: ${error.message}`, 'error');
+                addResult('Auth Fehler', error, 'error');
+            }
+        }
+        
+        async function testDatabaseTables() {
+            clearResults();
+            addStatus('Teste Datenbank-Tabellen...', 'info');
+            
+            if (!supabase) {
+                addStatus('❌ Bitte zuerst Verbindung testen', 'error');
+                return;
+            }
+            
+            const tables = ['user_data', 'user_backups'];
+            const results = {};
+            
+            for (const table of tables) {
+                try {
+                    const { data, error } = await supabase.from(table).select('count').limit(1);
+                    
+                    if (error) {
+                        results[table] = { error: error.message, exists: false };
+                        addStatus(`❌ Tabelle "${table}" nicht verfügbar: ${error.message}`, 'error');
+                    } else {
+                        results[table] = { exists: true, accessible: true };
+                        addStatus(`✅ Tabelle "${table}" verfügbar`, 'success');
+                    }
+                } catch (error) {
+                    results[table] = { error: error.message, exists: false };
+                    addStatus(`❌ Fehler bei Tabelle "${table}": ${error.message}`, 'error');
+                }
+            }
+            
+            addResult('Tabellen Status', results);
+        }
+        
+        async function testFullFlow() {
+            clearResults();
+            addStatus('Teste kompletten Datenfluss...', 'info');
+            
+            if (!supabase) {
+                addStatus('❌ Bitte zuerst Verbindung testen', 'error');
+                return;
+            }
+            
+            // Check if user is authenticated
+            const { data: session } = await supabase.auth.getSession();
+            
+            if (!session?.session) {
+                addStatus('⚠️ Nicht authentifiziert - simuliere Test mit anonymen Daten', 'warning');
+                addResult('Test Status', { note: 'Für vollständigen Test bitte anmelden' });
+                return;
+            }
+            
+            const userId = session.session.user.id;
+            const testData = {
+                workoutState: { test: true, timestamp: new Date().toISOString() },
+                userProfile: { name: 'Test User' },
+                gamificationState: { level: 1 },
+                nutritionState: { calories: 2000 }
+            };
+            
+            try {
+                // Test saving data
+                addStatus('Teste Daten speichern...', 'info');
+                const { data: saveResult, error: saveError } = await supabase
+                    .from('user_data')
+                    .upsert({
+                        user_id: userId,
+                        data: testData,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        ignoreDuplicates: false
+                    });
+                
+                if (saveError) {
+                    addStatus(`❌ Fehler beim Speichern: ${saveError.message}`, 'error');
+                    addResult('Speichern Fehler', saveError, 'error');
+                    return;
+                }
+                
+                addStatus('✅ Daten erfolgreich gespeichert', 'success');
+                
+                // Test loading data
+                addStatus('Teste Daten laden...', 'info');
+                const { data: loadResult, error: loadError } = await supabase
+                    .from('user_data')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+                
+                if (loadError) {
+                    addStatus(`❌ Fehler beim Laden: ${loadError.message}`, 'error');
+                    addResult('Laden Fehler', loadError, 'error');
+                    return;
+                }
+                
+                addStatus('✅ Daten erfolgreich geladen', 'success');
+                addStatus('✅ Kompletter Datenfluss funktioniert!', 'success');
+                
+                addResult('Vollständiger Test', {
+                    save_success: true,
+                    load_success: true,
+                    data_integrity: JSON.stringify(loadResult.data) === JSON.stringify(testData)
+                });
+                
+            } catch (error) {
+                addStatus(`❌ Kritischer Fehler: ${error.message}`, 'error');
+                addResult('Kritischer Fehler', error, 'error');
+            }
+        }
+        
+        // Auto-run environment test on load
+        document.addEventListener('DOMContentLoaded', testEnvironmentVariables);
+    </script>
+</body>
+</html> 

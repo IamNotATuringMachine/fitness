@@ -279,30 +279,55 @@ export class SupabaseDataService {
         updated_at: payload.updated_at
       });
 
-      // Use the correct upsert syntax for Supabase
-      const { data: result, error } = await supabase
+      // Try update first, then insert if no record exists
+      const { data: updateResult, error: updateError, count } = await supabase
         .from('user_data')
-        .upsert(payload, {
-          onConflict: 'user_id',
-          returning: 'minimal'
-        });
-      
-      if (error) {
-        console.error('🔧 SupabaseService: Supabase error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        throw error;
+        .update({
+          data: payload.data,
+          updated_at: payload.updated_at
+        })
+        .eq('user_id', userId)
+        .select('*');
+
+      if (updateError) {
+        console.error('🔧 SupabaseService: Update error:', updateError);
+        throw updateError;
       }
 
-      console.log('🔧 SupabaseService: Data saved successfully:', {
-        userId,
-        result: result
-      });
-      
-      return { data: result, error: null };
+      // If no rows were updated, insert a new record
+      if (!updateResult || updateResult.length === 0) {
+        console.log('🔧 SupabaseService: No existing record found, inserting new record');
+        
+        const { data: insertResult, error: insertError } = await supabase
+          .from('user_data')
+          .insert(payload)
+          .select('*');
+
+        if (insertError) {
+          console.error('🔧 SupabaseService: Insert error details:', {
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint,
+            code: insertError.code
+          });
+          throw insertError;
+        }
+
+        console.log('🔧 SupabaseService: Data inserted successfully:', {
+          userId,
+          result: insertResult
+        });
+        
+        return { data: insertResult, error: null };
+      } else {
+        console.log('🔧 SupabaseService: Data updated successfully:', {
+          userId,
+          result: updateResult
+        });
+        
+        return { data: updateResult, error: null };
+      }
+
     } catch (error) {
       console.error('🔧 SupabaseService: Save user data error:', {
         message: error.message,

@@ -505,9 +505,13 @@ const CreatePlan = () => {
       advancedMethods: []
     };
     
+    // Explizit neuen Tag am Ende hinzufügen
+    const updatedDays = [...plan.days, newDay];
+    console.log(`Neuer Trainingstag "${newDay.name}" hinzugefügt. Position: ${updatedDays.length} von ${updatedDays.length}`);
+    
     setPlan({
       ...plan,
-      days: [...plan.days, newDay]
+      days: updatedDays
     });
     
     setCurrentDay({
@@ -517,6 +521,15 @@ const CreatePlan = () => {
     });
     
     setShowDayForm(false);
+    
+    // Nach kurzem Delay zum neuen Tag scrollen
+    setTimeout(() => {
+      const dayCards = document.querySelectorAll('[data-day-card]');
+      if (dayCards.length > 0) {
+        const lastCard = dayCards[dayCards.length - 1];
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
   
     const handleDeleteDay = (dayId) => {    setPlan({      ...plan,      days: plan.days.filter(day => day.id !== dayId)    });  };  const moveDayUp = (dayIndex) => {    if (dayIndex > 0) {      const newDays = [...plan.days];      [newDays[dayIndex - 1], newDays[dayIndex]] = [newDays[dayIndex], newDays[dayIndex - 1]];      setPlan({        ...plan,        days: newDays      });    }  };  const moveDayDown = (dayIndex) => {    if (dayIndex < plan.days.length - 1) {      const newDays = [...plan.days];      [newDays[dayIndex], newDays[dayIndex + 1]] = [newDays[dayIndex + 1], newDays[dayIndex]];      setPlan({        ...plan,        days: newDays      });    }  };
@@ -783,7 +796,7 @@ const CreatePlan = () => {
             </Card>
           )}
           
-                    {plan.days.length > 0 ? (            plan.days.map((day, dayIndex) => (              <DayCard key={day.id}>                <Card.Header>                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>                    <span>{day.name}</span>                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>                      <button                        type="button"                        onClick={() => moveDayUp(dayIndex)}                        disabled={dayIndex === 0}                        style={{                          background: 'none',                          border: 'none',                          color: dayIndex === 0 ? '#dee2e6' : '#6c757d',                          cursor: dayIndex === 0 ? 'not-allowed' : 'pointer',                          fontSize: '1.2rem',                          padding: '0.25rem',                          borderRadius: '4px',                          display: 'flex',                          alignItems: 'center',                          justifyContent: 'center'                        }}                        title="Nach oben verschieben"                      >                        ↑                      </button>                      <button                        type="button"                        onClick={() => moveDayDown(dayIndex)}                        disabled={dayIndex === plan.days.length - 1}                        style={{                          background: 'none',                          border: 'none',                          color: dayIndex === plan.days.length - 1 ? '#dee2e6' : '#6c757d',                          cursor: dayIndex === plan.days.length - 1 ? 'not-allowed' : 'pointer',                          fontSize: '1.2rem',                          padding: '0.25rem',                          borderRadius: '4px',                          display: 'flex',                          alignItems: 'center',                          justifyContent: 'center'                        }}                        title="Nach unten verschieben"                      >                        ↓                      </button>                      <RemoveButton onClick={() => handleDeleteDay(day.id)}>                        ✕                      </RemoveButton>                    </div>                  </div>                </Card.Header>
+                    {plan.days.length > 0 ? (            plan.days.map((day, dayIndex) => (              <DayCard key={day.id} data-day-card>                <Card.Header>                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>                    <span>{day.name}</span>                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>                      <button                        type="button"                        onClick={() => moveDayUp(dayIndex)}                        disabled={dayIndex === 0}                        style={{                          background: 'none',                          border: 'none',                          color: dayIndex === 0 ? '#dee2e6' : '#6c757d',                          cursor: dayIndex === 0 ? 'not-allowed' : 'pointer',                          fontSize: '1.2rem',                          padding: '0.25rem',                          borderRadius: '4px',                          display: 'flex',                          alignItems: 'center',                          justifyContent: 'center'                        }}                        title="Nach oben verschieben"                      >                        ↑                      </button>                      <button                        type="button"                        onClick={() => moveDayDown(dayIndex)}                        disabled={dayIndex === plan.days.length - 1}                        style={{                          background: 'none',                          border: 'none',                          color: dayIndex === plan.days.length - 1 ? '#dee2e6' : '#6c757d',                          cursor: dayIndex === plan.days.length - 1 ? 'not-allowed' : 'pointer',                          fontSize: '1.2rem',                          padding: '0.25rem',                          borderRadius: '4px',                          display: 'flex',                          alignItems: 'center',                          justifyContent: 'center'                        }}                        title="Nach unten verschieben"                      >                        ↓                      </button>                      <RemoveButton onClick={() => handleDeleteDay(day.id)}>                        ✕                      </RemoveButton>                    </div>                  </div>                </Card.Header>
                 <Card.Body>
                   <FormGroup>
                     <Label htmlFor={`dayNotes-${day.id}`}>Notizen zum Trainingstag</Label>

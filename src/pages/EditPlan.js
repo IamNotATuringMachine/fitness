@@ -590,7 +590,9 @@ const EditPlan = () => {
     
     console.log('Adding new day:', newDay);
     
+    // Explizit neuen Tag am Ende hinzufügen
     const updatedDays = Array.isArray(plan.days) ? [...plan.days, newDay] : [newDay];
+    console.log(`Neuer Trainingstag "${newDay.name}" hinzugefügt. Position: ${updatedDays.length} von ${updatedDays.length}`);
     
     setPlan({
       ...plan,
@@ -605,6 +607,15 @@ const EditPlan = () => {
     });
     
     setShowDayForm(false);
+    
+    // Nach kurzem Delay zum neuen Tag scrollen
+    setTimeout(() => {
+      const dayCards = document.querySelectorAll('[data-day-card]');
+      if (dayCards.length > 0) {
+        const lastCard = dayCards[dayCards.length - 1];
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
   
   const handleDeleteDay = (dayId) => {
@@ -939,7 +950,7 @@ const EditPlan = () => {
           
           {plan.days.length > 0 ? (
             plan.days.map((day, dayIndex) => (
-              <DayCard key={day.id}>
+              <DayCard key={day.id} data-day-card>
                 <Card.Body>
                   <DayCardHeader>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
