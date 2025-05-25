@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/fitness2/static/css/main.1eec203c.css",
-    "main.js": "/fitness2/static/js/main.5170ac7a.js",
-    "static/js/952.716abd42.chunk.js": "/fitness2/static/js/952.716abd42.chunk.js",
-    "index.html": "/fitness2/index.html",
-    "main.1eec203c.css.map": "/fitness2/static/css/main.1eec203c.css.map",
-    "main.5170ac7a.js.map": "/fitness2/static/js/main.5170ac7a.js.map",
-    "952.716abd42.chunk.js.map": "/fitness2/static/js/952.716abd42.chunk.js.map"
+    "main.css": "/fitness/static/css/main.1eec203c.css",
+    "main.js": "/fitness/static/js/main.5d75f075.js",
+    "static/js/952.716abd42.chunk.js": "/fitness/static/js/952.716abd42.chunk.js",
+    "index.html": "/fitness/index.html",
+    "main.1eec203c.css.map": "/fitness/static/css/main.1eec203c.css.map",
+    "main.5d75f075.js.map": "/fitness/static/js/main.5d75f075.js.map",
+    "952.716abd42.chunk.js.map": "/fitness/static/js/952.716abd42.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1eec203c.css",
-    "static/js/main.5170ac7a.js"
+    "static/js/main.5d75f075.js"
   ]
 }
