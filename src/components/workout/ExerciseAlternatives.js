@@ -133,7 +133,7 @@ const NoResultsMessage = styled.p`
 
 const ExerciseAlternatives = ({ onReplaceExercise }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [exercises, setExercises] = useState([
+  const exercises = [
     {
       id: 1,
       name: 'Klassisches Bankdrücken',
@@ -167,7 +167,7 @@ const ExerciseAlternatives = ({ onReplaceExercise }) => {
         { id: 303, name: 'Assisted Pull-Ups', reason: 'Ähnliche Bewegung, aber mit Unterstützung' }
       ]
     }
-  ]);
+  ];
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);

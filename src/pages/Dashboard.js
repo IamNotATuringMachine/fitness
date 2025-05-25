@@ -12,10 +12,25 @@ const DashboardContainer = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    grid-template-columns: 1fr;
+    gap: ${props => props.theme.spacing.mobile.lg};
+    margin-bottom: ${props => props.theme.spacing.mobile.xl};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    gap: ${props => props.theme.spacing.mobile.md};
+    margin-bottom: ${props => props.theme.spacing.mobile.lg};
+  }
 `;
 
 const WelcomeCard = styled(Card)`
   grid-column: 1 / -1;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    grid-column: 1;
+  }
 `;
 
 const StatsContainer = styled.div`
@@ -24,6 +39,16 @@ const StatsContainer = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   margin-top: 1rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    gap: ${props => props.theme.spacing.mobile.md};
+    margin-top: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    flex-direction: column;
+    gap: ${props => props.theme.spacing.mobile.sm};
+  }
 `;
 
 const StatItem = styled.div`
@@ -33,22 +58,53 @@ const StatItem = styled.div`
   border-radius: ${props => props.theme.borderRadius.small};
   padding: ${props => props.theme.spacing.md};
   text-align: center;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.md};
+    min-width: 100px;
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    min-width: auto;
+    padding: ${props => props.theme.spacing.mobile.sm};
+  }
 `;
 
 const StatValue = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
   color: ${props => props.theme.colors.primary};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    font-size: ${props => props.theme.typography.fontSizes.mobile.xl};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    font-size: ${props => props.theme.typography.fontSizes.mobile.lg};
+  }
 `;
 
 const StatLabel = styled.div`
   font-size: 0.875rem;
   color: ${props => props.theme.colors.textLight};
   margin-top: 0.25rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    font-size: ${props => props.theme.typography.fontSizes.mobile.sm};
+    margin-top: ${props => props.theme.spacing.mobile.xs};
+  }
 `;
 
 const RecentWorkoutsContainer = styled.div`
   margin-top: 2rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    margin-top: ${props => props.theme.spacing.mobile.xl};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    margin-top: ${props => props.theme.spacing.mobile.lg};
+  }
 `;
 
 /*
@@ -88,6 +144,25 @@ const RecentWorkoutsRow = styled.div`
     flex-shrink: 0;
     width: 280px;
   }
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    gap: ${props => props.theme.spacing.mobile.lg};
+    margin-top: ${props => props.theme.spacing.mobile.md};
+    padding: ${props => props.theme.spacing.mobile.sm} ${props => props.theme.spacing.mobile.md};
+    
+    > * {
+      width: 250px;
+    }
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    gap: ${props => props.theme.spacing.mobile.md};
+    padding: ${props => props.theme.spacing.mobile.xs} ${props => props.theme.spacing.mobile.sm};
+    
+    > * {
+      width: 220px;
+    }
+  }
 `;
 
 const ListLayoutContainer = styled.div`
@@ -96,6 +171,15 @@ const ListLayoutContainer = styled.div`
   gap: ${props => props.theme.spacing.md};
   margin-top: ${props => props.theme.spacing.md};
   color: ${props => props.theme.colors.textLight};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    gap: ${props => props.theme.spacing.mobile.md};
+    margin-top: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    gap: ${props => props.theme.spacing.mobile.sm};
+  }
 `;
 
 const ClickableCard = styled(Card)`
@@ -114,6 +198,19 @@ const ClickableCard = styled(Card)`
     box-shadow: 0 0 0 2px ${props => props.theme.colors.primary}, 0 8px 16px rgba(0,0,0,0.1);
     transform: translateY(-5px);
   }
+  
+  /* Remove hover effects on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    &:hover {
+      transform: none;
+      box-shadow: ${props => props.theme.shadows.card};
+    }
+  }
+  
+  /* Add touch feedback */
+  &:active {
+    transform: translateY(-2px);
+  }
 `;
 
 const ClickableListItem = styled(Card)`
@@ -123,6 +220,7 @@ const ClickableListItem = styled(Card)`
   padding: ${props => props.theme.spacing.md};
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
   
   &:hover {
     background-color: ${props => props.theme.colors.grayLight};
@@ -133,37 +231,76 @@ const ClickableListItem = styled(Card)`
     background-color: ${props => props.theme.colors.grayLight};
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     flex-direction: column;
     align-items: flex-start;
+    padding: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: ${props => props.theme.spacing.mobile.sm};
+  }
+  
+  /* Remove hover effects on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    &:hover {
+      background-color: transparent;
+    }
   }
 `;
 
 const WorkoutInfo = styled.div`
   flex: 1;
   padding: 0 ${props => props.theme.spacing.md};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: 0;
+    width: 100%;
+  }
 `;
 
 const WorkoutTitle = styled.h3`
   margin: 0;
   margin-bottom: ${props => props.theme.spacing.xs};
   color: ${props => props.theme.colors.text};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    font-size: ${props => props.theme.typography.fontSizes.mobile.lg};
+    margin-bottom: ${props => props.theme.spacing.mobile.xs};
+  }
 `;
 
 const WorkoutDescription = styled.p`
   margin: 0;
   color: ${props => props.theme.colors.textLight};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    font-size: ${props => props.theme.typography.fontSizes.mobile.sm};
+  }
 `;
 
 const ExerciseList = styled.ul`
   list-style-type: none;
   padding: 0;
   margin: ${props => props.theme.spacing.md} 0;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    margin: ${props => props.theme.spacing.mobile.md} 0;
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    margin: ${props => props.theme.spacing.mobile.sm} 0;
+  }
 `;
 
 const ExerciseItem = styled.li`
   padding: ${props => props.theme.spacing.xs} 0;
   font-size: 0.9rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.xs} 0;
+    font-size: ${props => props.theme.typography.fontSizes.mobile.sm};
+  }
 `;
 
 const Badge = styled.span`
@@ -175,6 +312,12 @@ const Badge = styled.span`
   background-color: ${props => props.theme.colors.primaryLight};
   color: ${props => props.theme.colors.primary};
   margin-right: ${props => props.theme.spacing.xs};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: 1px 4px;
+    font-size: ${props => props.theme.typography.fontSizes.mobile.xs};
+    margin-right: ${props => props.theme.spacing.mobile.xs};
+  }
 `;
 
 const Dashboard = () => {

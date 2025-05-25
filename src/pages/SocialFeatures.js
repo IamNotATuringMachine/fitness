@@ -66,25 +66,9 @@ const FeatureTitle = styled.h3`
 
 const FeatureDescription = styled.p`
   color: ${props => props.theme.colors.textLight};
-  text-align: center;
+  font-size: ${props => props.theme.typography.fontSizes.sm};
   margin-bottom: ${props => props.theme.spacing.md};
   line-height: 1.6;
-`;
-
-const LeaderboardCard = styled(Card)`
-  padding: ${props => props.theme.spacing.lg};
-`;
-
-const LeaderboardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${props => props.theme.spacing.lg};
-`;
-
-const LeaderboardTitle = styled.h3`
-  color: ${props => props.theme.colors.text};
-  font-size: ${props => props.theme.typography.fontSizes.lg};
 `;
 
 const LeaderboardList = styled.ul`
@@ -192,10 +176,6 @@ const ProgressText = styled.span`
   color: ${props => props.theme.colors.textLight};
   margin-top: ${props => props.theme.spacing.xs};
   display: block;
-`;
-
-const ShareCard = styled(Card)`
-  padding: ${props => props.theme.spacing.lg};
 `;
 
 const ShareForm = styled.form`

@@ -32,14 +32,6 @@ const PeriodizationInfo = styled.div`
   margin-top: 1rem;
 `;
 
-const CycleCard = styled.div`
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  background-color: white;
-`;
-
 const WeekBadge = styled.div`
   display: inline-block;
   background-color: ${props => props.currentWeek ? '#007bff' : '#6c757d'};
@@ -61,7 +53,6 @@ const PeriodizationApplicator = ({ planId }) => {
   const { state, dispatch } = useWorkout();
   const [selectedPeriodizationId, setSelectedPeriodizationId] = useState('');
   const [currentPlan, setCurrentPlan] = useState(null);
-  const [currentWeek, setCurrentWeek] = useState(1);
   
   // Find the current plan and its periodization data
   useEffect(() => {
@@ -98,26 +89,7 @@ const PeriodizationApplicator = ({ planId }) => {
       }
     });
     
-    setCurrentWeek(1);
     alert('Periodisierungsplan erfolgreich angewendet!');
-  };
-  
-  // Update current week in periodization
-  const handleUpdateWeek = (week) => {
-    dispatch({
-      type: 'APPLY_PERIODIZATION_TO_PLAN',
-      payload: {
-        planId,
-        periodizationId: selectedPeriodizationId,
-        periodizationData: {
-          ...(currentPlan.periodizationData || {}),
-          currentWeek: week,
-          updatedAt: new Date().toISOString()
-        }
-      }
-    });
-    
-    setCurrentWeek(week);
   };
   
   // Remove periodization from the workout plan
@@ -132,7 +104,6 @@ const PeriodizationApplicator = ({ planId }) => {
     });
     
     setSelectedPeriodizationId('');
-    setCurrentWeek(1);
   };
   
   // Get current week details
@@ -266,7 +237,6 @@ const PeriodizationApplicator = ({ planId }) => {
                         <WeekBadge 
                           key={i} 
                           currentWeek={(currentPlan?.periodizationData?.currentWeek || 1) === i + 1}
-                          onClick={() => handleUpdateWeek(i + 1)}
                           style={{ cursor: 'pointer' }}
                         >
                           Woche {i + 1}

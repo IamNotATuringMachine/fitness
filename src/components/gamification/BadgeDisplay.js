@@ -60,12 +60,6 @@ const BadgePoints = styled.div`
     : props.theme.colors.textSecondary};
 `;
 
-const SectionTitle = styled.h3`
-  color: ${props => props.theme.colors.primary};
-  margin-top: 20px;
-  margin-bottom: 10px;
-`;
-
 const Badge404 = styled.div`
   padding: 20px;
   text-align: center;

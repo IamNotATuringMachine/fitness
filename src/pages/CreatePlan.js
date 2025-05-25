@@ -68,7 +68,9 @@ const AddDayButton = styled(Button)`
   margin-bottom: 1.5rem;
 `;
 
-const DayCard = styled(Card)`  margin-bottom: 1.5rem;`;const DayHeader = styled.div`  display: flex;  justify-content: space-between;  align-items: center;`;const DayControls = styled.div`  display: flex;  align-items: center;  gap: 0.5rem;`;const ReorderButton = styled.button`  background: none;  border: none;  color: #6c757d;  cursor: pointer;  font-size: 1.2rem;  padding: 0.25rem;  border-radius: 4px;  display: flex;  align-items: center;  justify-content: center;    &:hover {    color: #495057;    background-color: #f8f9fa;  }    &:disabled {    color: #dee2e6;    cursor: not-allowed;  }`;
+const DayCard = styled(Card)`
+  margin-bottom: 1.5rem;
+`;
 
 const ExerciseList = styled.div`
   margin-top: 1rem;

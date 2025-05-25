@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
+import MobileNavigation from './components/layout/MobileNavigation';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import Dashboard from './pages/Dashboard';
 import WorkoutPlans from './pages/WorkoutPlans';
@@ -48,7 +49,7 @@ const MainContainer = styled.div`
   flex: 1;
   position: relative;
 
-  @media (max-width: 768px) {
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     flex-direction: column;
   }
 `;
@@ -57,10 +58,19 @@ const ContentContainer = styled.main`
   flex: 1;
   padding: ${props => props.theme.spacing.md};
   overflow-y: auto;
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: ${props => props.theme.spacing.mobile.sm};
+  }
 `;
 
 function App() {
   const [debugPanelVisible, setDebugPanelVisible] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleDebugPanel = () => {
     setDebugPanelVisible(!debugPanelVisible);
@@ -70,6 +80,14 @@ function App() {
     setDebugPanelVisible(false);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <ThemeProvider>
       <ToastProvider>
@@ -77,9 +95,16 @@ function App() {
           <ErrorBoundary>
             <Router>
               <AppContainer>
-                <Header />
+                <Header 
+                  onMenuToggle={toggleMobileMenu} 
+                  isMobileMenuOpen={mobileMenuOpen}
+                />
                 <MainContainer>
                   <Sidebar />
+                  <MobileNavigation 
+                    isOpen={mobileMenuOpen} 
+                    onClose={closeMobileMenu}
+                  />
                   <ContentContainer>
                     <Routes>
                       <Route path="/" element={<Dashboard />} />

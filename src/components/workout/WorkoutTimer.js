@@ -208,7 +208,6 @@ const WorkoutTimer = ({
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isResting, setIsResting] = useState(false);
-  const [restTime, setRestTime] = useState(90); // default rest time in seconds
   const [workTime, setWorkTime] = useState(0); // work time for timed exercises
   const [currentRestTime, setCurrentRestTime] = useState(0);
   const [timerType, setTimerType] = useState('stopwatch'); // 'stopwatch', 'countdown', 'rest'

@@ -12,6 +12,14 @@ const SidebarContainer = styled.aside`
   transition: all ${props => props.theme.transitions.medium};
   position: relative;
   z-index: ${props => props.theme.zIndices.sticky};
+  
+  /* Hide sidebar on mobile devices */
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    display: none;
+  }
+  
+  /* Optimize scrolling on touch devices */
+  -webkit-overflow-scrolling: touch;
 `;
 
 const SidebarHeader = styled.div`

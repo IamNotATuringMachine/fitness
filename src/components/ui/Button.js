@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 const ButtonStyles = styled.button`
   display: inline-flex;
@@ -41,6 +41,23 @@ const ButtonStyles = styled.button`
   text-align: center;
   text-decoration: none;
   transition: all ${props => props.theme.transitions.short};
+  /* Ensure buttons are touch-friendly */
+  min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
+  
+  /* Mobile-specific styling */
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    font-size: ${props => {
+      if (props.$size === 'small') return props.theme.typography.fontSizes.mobile.sm;
+      if (props.$size === 'large') return props.theme.typography.fontSizes.mobile.lg;
+      return props.theme.typography.fontSizes.mobile.md;
+    }};
+    padding: ${props => props.$size === 'small' 
+      ? `${props.theme.spacing.mobile.xs} ${props.theme.spacing.mobile.sm}` 
+      : props.$size === 'large' 
+        ? `${props.theme.spacing.mobile.md} ${props.theme.spacing.mobile.lg}` 
+        : `${props.theme.spacing.mobile.sm} ${props.theme.spacing.mobile.md}`
+    };
+  }
   
   &:hover {
     background: ${props => {
@@ -80,12 +97,39 @@ const ButtonStyles = styled.button`
     box-shadow: none;
   }
   
+  /* Remove hover effects on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    &:hover {
+      background: ${props => {
+        if (props.$variant === 'primary' && props.theme.name === 'blue') {
+          return `linear-gradient(to bottom, ${props.theme.colors.primaryLight}, ${props.theme.colors.primary})`;
+        }
+        if (props.$variant === 'primary') return props.theme.colors.primary;
+        if (props.$variant === 'secondary') return props.theme.colors.secondary;
+        if (props.$variant === 'accent') return props.theme.colors.accent;
+        if (props.$variant === 'warning') return props.theme.colors.warning;
+        if (props.$variant === 'outlined') return 'transparent';
+        return props.theme.colors.primary;
+      }};
+      color: ${props => {
+        if (props.$variant === 'outlined') return props.theme.colors.primary;
+        return props.theme.colors.white;
+      }};
+      transform: none;
+      box-shadow: none;
+    }
+  }
+  
   ${props => props.$fullWidth && `
     width: 100%;
   `}
   
   svg {
     margin-right: ${props => props.$iconOnly ? '0' : props.theme.spacing.xs};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      margin-right: ${props => props.$iconOnly ? '0' : props.theme.spacing.mobile.xs};
+    }
   }
 `;
 

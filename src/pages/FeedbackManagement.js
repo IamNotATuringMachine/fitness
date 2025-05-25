@@ -32,11 +32,6 @@ const SectionTitle = styled.h2`
   margin-bottom: ${props => props.theme.spacing.md};
 `;
 
-const SectionDescription = styled.p`
-  margin-bottom: ${props => props.theme.spacing.md};
-  color: ${props => props.theme.colors.textLight};
-`;
-
 const FiltersContainer = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.md};

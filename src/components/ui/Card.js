@@ -23,6 +23,16 @@ const CardContainer = styled.div`
   ${props => props.$bordered && `
     border: 1px solid ${props.theme.colors.border};
   `}
+  
+  /* Remove hover effects on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    ${props => props.$hoverable && `
+      &:hover {
+        transform: none;
+        box-shadow: ${props.theme.shadows.small};
+      }
+    `}
+  }
 `;
 
 const CardHeader = styled.div`
@@ -30,6 +40,16 @@ const CardHeader = styled.div`
   border-bottom: 1px solid ${props => props.theme.colors.border};
   font-weight: ${props => props.theme.typography.fontWeights.bold};
   font-size: ${props => props.theme.typography.fontSizes.lg};
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.md};
+    font-size: ${props => props.theme.typography.fontSizes.mobile.lg};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: ${props => props.theme.spacing.mobile.sm};
+    font-size: ${props => props.theme.typography.fontSizes.mobile.md};
+  }
   
   ${props => props.center && `
     text-align: center;
@@ -44,6 +64,14 @@ const CardHeader = styled.div`
 const CardBody = styled.div`
   padding: ${props => props.theme.spacing.md};
   
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: ${props => props.theme.spacing.mobile.sm};
+  }
+  
   ${props => props.center && `
     text-align: center;
   `}
@@ -54,6 +82,14 @@ const CardFooter = styled.div`
   border-top: 1px solid ${props => props.theme.colors.border};
   background-color: ${props => props.theme.colors.grayLight};
   
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    padding: ${props => props.theme.spacing.mobile.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: ${props => props.theme.spacing.mobile.sm};
+  }
+  
   ${props => props.center && `
     text-align: center;
   `}
@@ -62,6 +98,19 @@ const CardFooter = styled.div`
     display: flex;
     justify-content: flex-end;
     gap: ${props.theme.spacing.sm};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      gap: ${props.theme.spacing.mobile.sm};
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+      gap: ${props.theme.spacing.mobile.xs};
+    }
   `}
 `;
 

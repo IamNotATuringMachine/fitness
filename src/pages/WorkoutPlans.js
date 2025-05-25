@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -114,13 +114,6 @@ const ActionsContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const ActionButtons = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: ${props => props.theme.spacing.md};
-  margin-top: ${props => props.theme.spacing.xl};
-`;
-
 const WorkoutPlans = () => {
   const { state, dispatch } = useWorkout();
   const [searchTerm, setSearchTerm] = useState('');
@@ -153,120 +146,11 @@ const WorkoutPlans = () => {
     }
   };
 
-  const fixLocalStorage = () => {
-    try {
-      const savedState = localStorage.getItem('workoutState');
-      if (!savedState) {
-        alert('Keine Daten in localStorage gefunden.');
-        return;
-      }
-      
-      const parsedState = JSON.parse(savedState);
-      
-      if (parsedState.workoutPlans && Array.isArray(parsedState.workoutPlans)) {
-        let fixedPlans = parsedState.workoutPlans.map(plan => {
-          // Ensure days array exists and is an array
-          if (!plan.days || !Array.isArray(plan.days)) {
-            console.warn(`Fixing plan ${plan.id} - ${plan.name} - days array is invalid`);
-            return { ...plan, days: [] };
-          }
-          
-          // Ensure each day has valid exercises and advancedMethods arrays
-          const fixedDays = plan.days.map(day => {
-            const fixedDay = { ...day };
-            if (!fixedDay.exercises || !Array.isArray(fixedDay.exercises)) {
-              console.warn(`Fixing day ${day.id} - exercises array is invalid`);
-              fixedDay.exercises = [];
-            }
-            if (!fixedDay.advancedMethods || !Array.isArray(fixedDay.advancedMethods)) {
-              console.warn(`Fixing day ${day.id} - advancedMethods array is invalid`);
-              fixedDay.advancedMethods = [];
-            }
-            return fixedDay;
-          });
-          
-          return { ...plan, days: fixedDays };
-        });
-        
-        // Save the fixed state back to localStorage
-        parsedState.workoutPlans = fixedPlans;
-        localStorage.setItem('workoutState', JSON.stringify(parsedState));
-        alert('localStorage-Daten wurden repariert. Bitte lade die Seite neu.');
-        window.location.reload();
-      } else {
-        alert('workoutPlans nicht gefunden oder kein Array.');
-      }
-    } catch (error) {
-      console.error('Error fixing localStorage:', error);
-      alert(`Fehler beim Reparieren: ${error.message}`);
-    }
-  };
-  
   const filteredPlans = state.workoutPlans.filter(plan => 
     plan.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (plan.description && plan.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
-  // Add debug function to verify all plans are valid
-  const verifyPlanIntegrity = () => {
-    try {
-      console.log('Verifying plan integrity...');
-      
-      if (!state.workoutPlans || !Array.isArray(state.workoutPlans)) {
-        alert('Fehler: workoutPlans ist kein Array.');
-        return false;
-      }
-      
-      let allValid = true;
-      
-      state.workoutPlans.forEach((plan, index) => {
-        // Check if plan has an ID
-        if (!plan.id) {
-          console.error(`Plan at index ${index} has no ID`);
-          allValid = false;
-        }
-        
-        // Check if days is an array
-        if (!plan.days || !Array.isArray(plan.days)) {
-          console.error(`Plan ${plan.id} (${plan.name}) has invalid days array`);
-          allValid = false;
-        } else {
-          // Check each day
-          plan.days.forEach((day, dayIndex) => {
-            if (!day.id) {
-              console.error(`Day at index ${dayIndex} in plan ${plan.id} has no ID`);
-              allValid = false;
-            }
-            
-            // Check exercises
-            if (!day.exercises || !Array.isArray(day.exercises)) {
-              console.error(`Day ${day.id} in plan ${plan.id} has invalid exercises array`);
-              allValid = false;
-            }
-            
-            // Check advancedMethods
-            if (!day.advancedMethods || !Array.isArray(day.advancedMethods)) {
-              console.error(`Day ${day.id} in plan ${plan.id} has invalid advancedMethods array`);
-              allValid = false;
-            }
-          });
-        }
-      });
-      
-      if (allValid) {
-        alert('Alle Pläne sind gültig!');
-        return true;
-      } else {
-        alert('Einige Pläne haben Probleme. Details in der Konsole.');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error verifying plans:', error);
-      alert(`Fehler bei der Überprüfung: ${error.message}`);
-      return false;
-    }
-  };
-
   const handleNavigateToEditPlan = (planId) => {
     try {
       console.log('Attempting to edit plan with ID:', planId);

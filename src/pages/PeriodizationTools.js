@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useWorkout } from '../context/WorkoutContext';
 import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -178,7 +177,7 @@ const PeriodizationTools = () => {
   
   // Initialize weeks for a new meso cycle
   useEffect(() => {
-    if (currentMesoCycle.weekCount > 0 && currentMesoCycle.weeks.length === 0) {
+    if (currentMesoCycle.weekCount > 0 && currentMesoCycle.weeks.length !== currentMesoCycle.weekCount) {
       const initialWeeks = [];
       for (let i = 0; i < currentMesoCycle.weekCount; i++) {
         initialWeeks.push({
@@ -193,7 +192,7 @@ const PeriodizationTools = () => {
         weeks: initialWeeks
       }));
     }
-  }, [currentMesoCycle.weekCount]);
+  }, [currentMesoCycle.weekCount, currentMesoCycle.weeks.length]);
   
   // Handle periodization plan change
   const handlePlanChange = (e) => {

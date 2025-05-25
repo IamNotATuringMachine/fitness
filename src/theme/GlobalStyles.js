@@ -9,6 +9,14 @@ const GlobalStyles = createGlobalStyle`
     padding: 0;
   }
   
+  html {
+    /* Improve text rendering on mobile */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    /* Enable smooth scrolling */
+    scroll-behavior: smooth;
+  }
+  
   body {
     font-family: ${props => props.theme.typography.fontFamily};
     font-size: ${props => props.theme.typography.fontSizes.md};
@@ -18,6 +26,13 @@ const GlobalStyles = createGlobalStyle`
     transition: background-color ${props => props.theme.transitions.medium};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.md};
+      line-height: 1.5;
+    }
   }
   
   code {
@@ -29,36 +44,69 @@ const GlobalStyles = createGlobalStyle`
     font-weight: ${props => props.theme.typography.fontWeights.bold};
     margin-bottom: ${props => props.theme.spacing.md};
     color: ${props => props.theme.colors.text};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      margin-bottom: ${props => props.theme.spacing.mobile.md};
+    }
   }
   
   h1 {
     font-size: ${props => props.theme.typography.fontSizes.xxxl};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.xxxl};
+    }
   }
   
   h2 {
     font-size: ${props => props.theme.typography.fontSizes.xxl};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.xxl};
+    }
   }
   
   h3 {
     font-size: ${props => props.theme.typography.fontSizes.xl};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.xl};
+    }
   }
   
   h4 {
     font-size: ${props => props.theme.typography.fontSizes.lg};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.lg};
+    }
   }
   
   h5 {
     font-size: ${props => props.theme.typography.fontSizes.md};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.md};
+    }
   }
   
   p {
     margin-bottom: ${props => props.theme.spacing.md};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      margin-bottom: ${props => props.theme.spacing.mobile.md};
+      font-size: ${props => props.theme.typography.fontSizes.mobile.md};
+    }
   }
   
   a {
     color: ${props => props.theme.colors.primary};
     text-decoration: none;
     transition: color ${props => props.theme.transitions.short};
+    /* Improve touch targets on mobile */
+    min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
+    display: inline-flex;
+    align-items: center;
     
     &:hover {
       color: ${props => props.theme.colors.primaryDark};
@@ -68,10 +116,31 @@ const GlobalStyles = createGlobalStyle`
       outline: 2px solid ${props => props.theme.colors.primary};
       outline-offset: 2px;
     }
+    
+    /* Remove hover effects on touch devices */
+    @media (hover: none) and (pointer: coarse) {
+      &:hover {
+        color: ${props => props.theme.colors.primary};
+      }
+    }
   }
   
   button {
     font-family: ${props => props.theme.typography.fontFamily};
+    /* Ensure buttons are touch-friendly */
+    min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
+    cursor: pointer;
+    
+    /* Remove default button styling on iOS */
+    -webkit-appearance: none;
+    border-radius: ${props => props.theme.borderRadius.medium};
+    
+    /* Remove hover effects on touch devices */
+    @media (hover: none) and (pointer: coarse) {
+      &:hover {
+        transform: none;
+      }
+    }
   }
   
   input, select, textarea {
@@ -81,6 +150,13 @@ const GlobalStyles = createGlobalStyle`
     border: 1px solid ${props => props.theme.colors.border};
     border-radius: ${props => props.theme.borderRadius.medium};
     transition: border-color ${props => props.theme.transitions.short}, box-shadow ${props => props.theme.transitions.short};
+    /* Improve touch targets */
+    min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      font-size: ${props => props.theme.typography.fontSizes.mobile.md};
+      padding: ${props => props.theme.spacing.mobile.sm};
+    }
 
     &:focus {
       outline: none;
@@ -92,6 +168,11 @@ const GlobalStyles = createGlobalStyle`
   ul, ol {
     margin-bottom: ${props => props.theme.spacing.md};
     padding-left: ${props => props.theme.spacing.xl};
+    
+    @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+      margin-bottom: ${props => props.theme.spacing.mobile.md};
+      padding-left: ${props => props.theme.spacing.mobile.xl};
+    }
   }
   
   img {
@@ -104,41 +185,103 @@ const GlobalStyles = createGlobalStyle`
     color: ${props => props.theme.colors.white};
   }
   
+  /* Mobile-specific optimizations */
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    /* Improve tap targets */
+    * {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Optimize for mobile scrolling */
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better mobile form styling */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="search"],
+    textarea,
+    select {
+      -webkit-appearance: none;
+      border-radius: ${props => props.theme.borderRadius.medium};
+      background-color: ${props => props.theme.colors.inputBackground};
+    }
+  }
+
   /* Compact Mode Styles */
   .compact-mode {
     h1 {
       font-size: ${props => props.theme.typography.fontSizes.xxl};
       margin-bottom: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        font-size: ${props => props.theme.typography.fontSizes.mobile.xxl};
+        margin-bottom: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     h2 {
       font-size: ${props => props.theme.typography.fontSizes.xl};
       margin-bottom: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        font-size: ${props => props.theme.typography.fontSizes.mobile.xl};
+        margin-bottom: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     h3 {
       font-size: ${props => props.theme.typography.fontSizes.lg};
       margin-bottom: ${props => props.theme.spacing.xs};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        font-size: ${props => props.theme.typography.fontSizes.mobile.lg};
+        margin-bottom: ${props => props.theme.spacing.mobile.xs};
+      }
     }
     
     p {
       margin-bottom: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        margin-bottom: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     .card {
       padding: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        padding: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     .card-header {
       padding: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        padding: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     .card-body {
       padding: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        padding: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     .card-footer {
       padding: ${props => props.theme.spacing.sm};
+      
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        padding: ${props => props.theme.spacing.mobile.sm};
+      }
     }
     
     /* Reduce spacing in all components */
@@ -146,8 +289,17 @@ const GlobalStyles = createGlobalStyle`
       gap: ${props => props.theme.spacing.sm} !important;
       margin-bottom: ${props => props.theme.spacing.sm};
       
+      @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+        gap: ${props => props.theme.spacing.mobile.sm} !important;
+        margin-bottom: ${props => props.theme.spacing.mobile.sm};
+      }
+      
       & > * {
         margin-bottom: ${props => props.theme.spacing.xs};
+        
+        @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+          margin-bottom: ${props => props.theme.spacing.mobile.xs};
+        }
       }
     }
   }

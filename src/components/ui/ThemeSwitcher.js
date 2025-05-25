@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../../theme/ThemeProvider';
-import Button from './Button';
 
 const ThemeSwitcherContainer = styled.div`
   display: flex;
