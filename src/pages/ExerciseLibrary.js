@@ -158,46 +158,6 @@ const EquipmentTag = styled.span`
   margin-bottom: ${props => props.theme.spacing.sm};
 `;
 
-const DifficultyTag = styled.span`
-  display: inline-block;
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-size: ${props => props.theme.typography.fontSizes.sm};
-  margin-right: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  background-color: ${props => {
-    switch (props.level) {
-      case 'Leicht': return `${props.theme.colors.secondary}33`;
-      case 'Mittel': return `${props.theme.colors.warning}33`;
-      case 'Schwer': return `${props.theme.colors.accent}33`;
-      default: return props.theme.colors.grayLight;
-    }
-  }};
-  color: ${props => {
-    switch (props.level) {
-      case 'Leicht': return props.theme.colors.secondaryDark;
-      case 'Mittel': return props.theme.colors.warningDark;
-      case 'Schwer': return props.theme.colors.accentDark;
-      default: return props.theme.colors.textLight;
-    }
-  }};
-`;
-
-const Select = styled.select`
-  padding: ${props => props.theme.typography.fontSizes.xs};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-size: ${props => props.theme.typography.fontSizes.md};
-  margin-right: ${props => props.theme.spacing.md};
-  background-color: ${props => props.theme.colors.cardBackground};
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 0.2rem ${props => `${props.theme.colors.primary}40`};
-  }
-`;
-
 const ClearFiltersButton = styled(Button)`
   background-color: ${props => props.theme.colors.background};
   color: ${props => props.theme.colors.text};
@@ -227,328 +187,272 @@ const equipmentTypes = [
   'Reverse Butterfly-Maschine'
 ];
 
-// Difficulty levels
-const difficultyLevels = ['Leicht', 'Mittel', 'Schwer'];
-
 // Liste der neuen Übungen
 const newExercises = [
   {
     name: 'Bankdrücken mit der Langhantel',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Langhantel', 'Hantelbank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Hantelbank']
   },
   {
     name: 'Schrägbankdrücken mit der Langhantel',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Langhantel', 'Schrägbank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Schrägbank']
   },
   {
     name: 'Negativbankdrücken mit der Langhantel',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Langhantel', 'Negativ-Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Negativ-Bank']
   },
   {
     name: 'Kurzhantel-Bankdrücken',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kurzhanteln', 'Hantelbank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln', 'Hantelbank']
   },
   {
     name: 'Kurzhantel-Schrägbankdrücken',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kurzhanteln', 'Schrägbank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln', 'Schrägbank']
   },
   {
     name: 'Kurzhantel-Negativbankdrücken',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kurzhanteln', 'Negativ-Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln', 'Negativ-Bank']
   },
   {
     name: 'Fliegende Bewegung auf der Flachbank',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kurzhanteln', 'Hantelbank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln', 'Hantelbank']
   },
   {
     name: 'Fliegende Bewegung auf der Schrägbank',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kurzhanteln', 'Schrägbank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln', 'Schrägbank']
   },
   {
     name: 'Cable Crossovers / Fliegende am Kabelzug',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Mittel'
+    equipment: ['Kabelzug']
   },
   {
     name: 'Dips',
     muscleGroups: ['Brustmuskulatur', 'Trizeps', 'Schultern'],
-    equipment: ['Dip-Station'],
-    difficulty: 'Schwer'
+    equipment: ['Dip-Station']
   },
   {
     name: 'Brustpresse an der Maschine',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Brustpressmaschine'],
-    difficulty: 'Mittel'
+    equipment: ['Brustpressmaschine']
   },
   {
     name: 'Butterfly / Peck Deck Maschine',
     muscleGroups: ['Brustmuskulatur'],
-    equipment: ['Butterfly-Maschine'],
-    difficulty: 'Leicht'
+    equipment: ['Butterfly-Maschine']
   },
   {
     name: 'Latzug zur Brust',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Latzugmaschine'],
-    difficulty: 'Mittel'
+    equipment: ['Latzugmaschine']
   },
   {
     name: 'Langhantelrudern vorgebeugt',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Langhantel'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel']
   },
   {
     name: 'Kurzhantelrudern einarmig',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Kurzhantel', 'Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhantel', 'Bank']
   },
   {
     name: 'T-Bar Rudern',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['T-Bar'],
-    difficulty: 'Mittel'
+    equipment: ['T-Bar']
   },
   {
     name: 'Rudern am Kabelzug sitzend',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Mittel'
+    equipment: ['Kabelzug']
   },
   {
     name: 'Rudern an der Maschine',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Rudermaschine'],
-    difficulty: 'Mittel'
+    equipment: ['Rudermaschine']
   },
   {
     name: 'Überzüge mit Kurzhantel oder am Kabel',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Kurzhantel', 'Kabelzug'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhantel', 'Kabelzug']
   },
   {
     name: 'Hyperextensions / Rückenstrecker',
     muscleGroups: ['Rückenmuskulatur'],
-    equipment: ['Hyperextension-Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Hyperextension-Bank']
   },
   {
     name: 'Good Mornings',
     muscleGroups: ['Rückenmuskulatur', 'Beinmuskulatur'],
-    equipment: ['Langhantel'],
-    difficulty: 'Schwer'
+    equipment: ['Langhantel']
   },
   {
     name: 'Frontkniebeugen mit der Langhantel',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Langhantel'],
-    difficulty: 'Schwer'
+    equipment: ['Langhantel']
   },
   {
     name: 'Beinpresse',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Beinpressmaschine'],
-    difficulty: 'Mittel'
+    equipment: ['Beinpressmaschine']
   },
   {
     name: 'Bulgarian Split Squats',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Bank', 'Kurzhanteln'],
-    difficulty: 'Schwer'
+    equipment: ['Bank', 'Kurzhanteln']
   },
   {
     name: 'Rumänisches Kreuzheben',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Langhantel'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel']
   },
   {
     name: 'Gestrecktes Kreuzheben',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Langhantel'],
-    difficulty: 'Schwer'
+    equipment: ['Langhantel']
   },
   {
     name: 'Hüftheben / Glute Bridges',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Langhantel', 'Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Bank']
   },
   {
     name: 'Hip Thrusts',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Langhantel', 'Bank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Bank']
   },
   {
     name: 'Wadenheben sitzend',
     muscleGroups: ['Beinmuskulatur'],
-    equipment: ['Sitzcalves-Maschine'],
-    difficulty: 'Leicht'
+    equipment: ['Sitzcalves-Maschine']
   },
   {
     name: 'Schulterdrücken mit Kurzhanteln',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Arnold Press',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Mittel'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Seitheben mit Kurzhanteln',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Seitheben am Kabelzug',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Leicht'
+    equipment: ['Kabelzug']
   },
   {
     name: 'Vorgebeugtes Seitheben mit Kurzhanteln',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Reverse Butterfly / Reverse Peck Deck',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Reverse Butterfly-Maschine'],
-    difficulty: 'Leicht'
+    equipment: ['Reverse Butterfly-Maschine']
   },
   {
     name: 'Frontheben mit Kurzhanteln oder Hantelscheibe',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Kurzhanteln', 'Hantelscheibe'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhanteln', 'Hantelscheibe']
   },
   {
     name: 'Aufrechtes Rudern',
     muscleGroups: ['Schultermuskulatur'],
-    equipment: ['Langhantel', 'Kurzhanteln'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Kurzhanteln']
   },
   {
     name: 'Langhantel-Curls',
     muscleGroups: ['Bizeps'],
-    equipment: ['Langhantel'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel']
   },
   {
     name: 'Hammercurls',
     muscleGroups: ['Bizeps'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Konzentrationscurls',
     muscleGroups: ['Bizeps'],
-    equipment: ['Kurzhantel'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhantel']
   },
   {
     name: 'Scottcurls / Preacher Curls',
     muscleGroups: ['Bizeps'],
-    equipment: ['Scott-Bank', 'Langhantel', 'Kurzhanteln'],
-    difficulty: 'Mittel'
+    equipment: ['Scott-Bank', 'Langhantel', 'Kurzhanteln']
   },
   {
     name: 'Bizepscurls am Kabelzug',
     muscleGroups: ['Bizeps'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Leicht'
+    equipment: ['Kabelzug']
   },
   {
     name: 'Reverse Curls',
     muscleGroups: ['Bizeps'],
-    equipment: ['Langhantel', 'SZ-Stange'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'SZ-Stange']
   },
   {
     name: 'Enges Bankdrücken',
     muscleGroups: ['Trizeps'],
-    equipment: ['Langhantel', 'Hantelbank'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'Hantelbank']
   },
   {
     name: 'Stirndrücken / French Press',
     muscleGroups: ['Trizeps'],
-    equipment: ['Langhantel', 'SZ-Stange', 'Kurzhanteln'],
-    difficulty: 'Mittel'
+    equipment: ['Langhantel', 'SZ-Stange', 'Kurzhanteln']
   },
   {
     name: 'Überkopf-Trizepsdrücken mit Kurzhantel',
     muscleGroups: ['Trizeps'],
-    equipment: ['Kurzhantel'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhantel']
   },
   {
     name: 'Kickbacks mit Kurzhanteln',
     muscleGroups: ['Trizeps'],
-    equipment: ['Kurzhanteln'],
-    difficulty: 'Leicht'
+    equipment: ['Kurzhanteln']
   },
   {
     name: 'Crunches',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Körpergewicht'],
-    difficulty: 'Leicht'
+    equipment: ['Körpergewicht']
   },
   {
     name: 'Beinheben',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Körpergewicht', 'Klimmzugstange'],
-    difficulty: 'Mittel'
+    equipment: ['Körpergewicht', 'Klimmzugstange']
   },
   {
     name: 'Plank / Unterarmstütz',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Körpergewicht'],
-    difficulty: 'Mittel'
+    equipment: ['Körpergewicht']
   },
   {
     name: 'Russian Twists',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Körpergewicht', 'Gewichtsscheibe'],
-    difficulty: 'Mittel'
+    equipment: ['Körpergewicht', 'Gewichtsscheibe']
   },
   {
     name: 'Kabel-Crunches',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Mittel'
+    equipment: ['Kabelzug']
   },
   {
     name: 'Wood Chops / Holzfäller am Kabelzug',
     muscleGroups: ['Bauchmuskulatur'],
-    equipment: ['Kabelzug'],
-    difficulty: 'Mittel'
+    equipment: ['Kabelzug']
   }
 ];
 
@@ -561,14 +465,12 @@ const ExerciseLibrary = () => {
   // Filter states
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState([]);
   const [selectedEquipment, setSelectedEquipment] = useState([]);
-  const [selectedDifficulty, setSelectedDifficulty] = useState('');
   
   // New exercise state
   const [newExercise, setNewExercise] = useState({
     name: '',
     muscleGroups: [],
-    equipment: [],
-    difficulty: 'Mittel'
+    equipment: []
   });
   
   // Filtered exercises
@@ -641,15 +543,8 @@ const ExerciseLibrary = () => {
       );
     }
     
-    // Apply difficulty filter
-    if (selectedDifficulty) {
-      filtered = filtered.filter(exercise => 
-        exercise.difficulty === selectedDifficulty
-      );
-    }
-    
     setFilteredExercises(filtered);
-  }, [state.exercises, searchTerm, selectedMuscleGroups, selectedEquipment, selectedDifficulty]);
+  }, [state.exercises, searchTerm, selectedMuscleGroups, selectedEquipment]);
   
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -720,7 +615,6 @@ const ExerciseLibrary = () => {
     setSearchTerm('');
     setSelectedMuscleGroups([]);
     setSelectedEquipment([]);
-    setSelectedDifficulty('');
   };
   
   // Add new exercise
@@ -746,8 +640,7 @@ const ExerciseLibrary = () => {
       id: uuidv4(),
       name: newExercise.name.trim(),
       muscleGroups: newExercise.muscleGroups,
-      equipment: newExercise.equipment,
-      difficulty: newExercise.difficulty
+      equipment: newExercise.equipment
     };
     
     dispatch({
@@ -759,8 +652,7 @@ const ExerciseLibrary = () => {
     setNewExercise({
       name: '',
       muscleGroups: [],
-      equipment: [],
-      difficulty: 'Mittel'
+      equipment: []
     });
     
     setShowAddForm(false);
@@ -830,19 +722,6 @@ const ExerciseLibrary = () => {
               ))}
             </div>
           </FilterGroup>
-          
-          <FilterGroup>
-            <Label>Nach Schwierigkeit filtern</Label>
-            <Select 
-              value={selectedDifficulty} 
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-            >
-              <option value="">Alle Schwierigkeitsgrade</option>
-              {difficultyLevels.map(level => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </Select>
-          </FilterGroup>
         </FilterSection>
       )}
       
@@ -892,20 +771,6 @@ const ExerciseLibrary = () => {
             </MuscleGroupSelector>
           </FormGroup>
           
-          <FormGroup>
-            <Label htmlFor="difficulty">Schwierigkeitsgrad</Label>
-            <Select 
-              id="difficulty" 
-              name="difficulty" 
-              value={newExercise.difficulty}
-              onChange={handleInputChange}
-            >
-              {difficultyLevels.map(level => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </Select>
-          </FormGroup>
-          
           <Button type="submit">Übung speichern</Button>
         </AddExerciseForm>
       )}
@@ -928,23 +793,12 @@ const ExerciseLibrary = () => {
                   </div>
                   
                   {exercise.equipment && exercise.equipment.length > 0 && (
-                    <div style={{ marginBottom: '1rem' }}>
+                    <div>
                       <strong>Ausrüstung:</strong>
                       <div style={{ marginTop: '0.5rem' }}>
                         {exercise.equipment.map(eq => (
                           <EquipmentTag key={eq}>{eq}</EquipmentTag>
                         ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {exercise.difficulty && (
-                    <div>
-                      <strong>Schwierigkeit:</strong>
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <DifficultyTag level={exercise.difficulty}>
-                          {exercise.difficulty}
-                        </DifficultyTag>
                       </div>
                     </div>
                   )}
