@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { useWorkout } from '../context/WorkoutContext';
@@ -179,33 +179,7 @@ const FilterDropdown = styled.select`
   }
 `;
 
-// Selection controls
-const SelectionBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 8px;
-  margin-bottom: ${props => props.theme.spacing.lg};
-  animation: ${slideIn} 0.3s ease-out;
-`;
-
-const SelectAllCheckbox = styled.label`
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing.sm};
-  cursor: pointer;
-  font-weight: 500;
-  color: #24292e;
-  
-  input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-  }
-`;
+// Selection controls (removed unused styled components)
 
 // Workout cards with clean design
 const WorkoutList = styled.div`
@@ -332,10 +306,7 @@ const ActionRow = styled.div`
   border-top: 1px solid #f6f8fa;
 `;
 
-const ActionButton = styled(Button)`
-  font-size: 0.875rem;
-  padding: 8px 16px;
-`;
+
 
 // Empty state
 const EmptyState = styled.div`
@@ -487,25 +458,6 @@ const BulkActions = styled.div`
   }
 `;
 
-const WorkoutCardContent = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${props => props.theme.spacing.lg};
-  padding: ${props => props.theme.spacing.lg};
-`;
-
-const CheckboxContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding-top: 4px;
-`;
-
-const WorkoutContent = styled.div`
-  flex: 1;
-`;
-
-const WorkoutTitle = styled(WorkoutName)``;
-
 const WorkoutStats = styled(StatsRow)``;
 const StatBox = styled(StatItem)`
   background: #f6f8fa;
@@ -534,7 +486,6 @@ const WorkoutHistory = () => {
   const workoutHistory = state.workoutHistory || [];
   const [selectedWorkouts, setSelectedWorkouts] = useState(new Set());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
 
@@ -654,15 +605,7 @@ const WorkoutHistory = () => {
     setSelectedWorkouts(new Set());
   };
 
-  // Handle scroll event for sticky buttons
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolling(scrollY > 200);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Handle scroll event for sticky buttons removed (not needed)
 
   if (!Array.isArray(workoutHistory) || workoutHistory.length === 0) {
     return (

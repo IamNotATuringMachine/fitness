@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useTheme } from '../../theme/ThemeProvider';
 import { FaTimes } from 'react-icons/fa';
 
 const Overlay = styled.div`
@@ -137,7 +136,6 @@ const NavLink = styled(Link)`
 
 const MobileNavigation = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const { theme } = useTheme();
   
   const isActive = (path) => {
     return location.pathname === path;
@@ -148,7 +146,7 @@ const MobileNavigation = ({ isOpen, onClose }) => {
     if (isOpen) {
       onClose();
     }
-  }, [location.pathname]);
+  }, [location.pathname, isOpen, onClose]);
   
   // Prevent body scroll when menu is open
   useEffect(() => {
