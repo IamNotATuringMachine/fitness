@@ -9,6 +9,7 @@
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.6",
+    "dotenv": "^16.5.0",
     "react": "^18.2.0",
     "react-calendar": "^4.6.1",
     "react-chartjs-2": "^5.3.0",

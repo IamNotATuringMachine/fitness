@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
@@ -31,12 +31,55 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Check for .env.production
+      run: |
+        if [ -f ".env.production" ]; then
+          echo "✅ Found .env.production file"
+          echo "Loading environment variables from .env.production"
+          # Don't cat the file to avoid exposing secrets in logs
+          echo "Environment file exists and will be used during build"
+        else
+          echo "⚠️ No .env.production file found"
+          echo "Will use GitHub secrets or fallback to offline mode"
+        fi
+    
+    - name: Load .env.production if exists
+      run: |
+        if [ -f ".env.production" ]; then
+          echo "Loading .env.production into GitHub environment"
+          # Export variables from .env.production to GitHub environment
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            # Skip comments and empty lines
+            if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
+              continue
+            fi
+            # Export to GitHub environment
+            if [[ "$line" =~ ^[A-Z_]+=.* ]]; then
+              echo "$line" >> $GITHUB_ENV
+              echo "✅ Loaded: ${line%%=*}"
+            fi
+          done < .env.production
+        else
+          echo "No .env.production file to load"
+          # Set fallback values if no .env.production
+          echo "REACT_APP_SUPABASE_URL=" >> $GITHUB_ENV
+          echo "REACT_APP_SUPABASE_ANON_KEY=" >> $GITHUB_ENV
+          echo "REACT_APP_DISABLE_SUPABASE=true" >> $GITHUB_ENV
+        fi
+      
     - name: Build
-      run: npm run build
+      run: |
+        # Environment variables are now guaranteed to be in GITHUB_ENV
+        npm run build
       env:
-        PUBLIC_URL: /fitness
-        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL || 'placeholder' }}
-        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY || 'placeholder' }}
+        PUBLIC_URL: /fitness2
+        
+    - name: Verify build output
+      run: |
+        echo "Build completed. Checking output..."
+        ls -la build/
+        echo "Checking for index.html..."
+        ls -la build/index.html
         
     - name: Setup Pages
       uses: actions/configure-pages@v4

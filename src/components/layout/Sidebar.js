@@ -190,7 +190,7 @@ const Sidebar = () => {
   return (
     <SidebarContainer collapsed={collapsed}>
       <SidebarHeader>
-        <Logo collapsed={collapsed}>{collapsed ? '' : 'FitTrack'}</Logo>
+        <Logo collapsed={collapsed}>{collapsed ? '' : 'FitTracker'}</Logo>
         <CollapseButton onClick={toggleSidebar} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
           {collapsed ? '→' : '←'}
         </CollapseButton>

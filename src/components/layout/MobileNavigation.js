@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaTimes } from 'react-icons/fa';
@@ -11,9 +11,17 @@ const Overlay = styled.div`
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: ${props => props.theme.zIndices.overlay};
+  opacity: ${props => props.isOpen ? '1' : '0'};
+  visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+  pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
+  transition: opacity ${props => props.theme.transitions.medium}, visibility 0s ${props => props.isOpen ? '0s' : props.theme.transitions.medium};
+  
+  /* Ensure touch events work */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Prevent accidental visibility during theme changes */
   display: ${props => props.isOpen ? 'block' : 'none'};
-  opacity: ${props => props.isOpen ? 1 : 0};
-  transition: opacity ${props => props.theme.transitions.medium};
 `;
 
 const MobileMenu = styled.div`
@@ -21,25 +29,30 @@ const MobileMenu = styled.div`
   top: 0;
   left: 0;
   bottom: 0;
-  width: ${props => props.theme.mobile?.sidebarWidth || '280px'};
+  width: 280px;
   max-width: 85vw;
   background-color: ${props => props.theme.colors.cardBackground};
   z-index: ${props => props.theme.zIndices.mobileSidebar};
   transform: translateX(${props => props.isOpen ? '0' : '-100%'});
   transition: transform ${props => props.theme.transitions.medium};
-  box-shadow: ${props => props.theme.shadows.large};
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  box-shadow: ${props => props.theme.shadows.large};
+  
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 `;
 
-const MobileMenuHeader = styled.div`
-  padding: ${props => props.theme.spacing.md};
-  background-color: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
+const MenuHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: ${props => props.theme.mobile?.headerHeight || '60px'};
+  padding: ${props => props.theme.spacing.lg};
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  background-color: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.white};
 `;
 
 const MenuTitle = styled.h2`
@@ -140,85 +153,63 @@ const MobileNavigation = ({ isOpen, onClose }) => {
   const isActive = (path) => {
     return location.pathname === path;
   };
-  
-  // Close menu when route changes
-  useEffect(() => {
-    if (isOpen) {
+
+  const handleLinkClick = () => {
+    // Close menu when a link is clicked
+    onClose();
+  };
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
       onClose();
     }
-  }, [location.pathname, isOpen, onClose]);
-  
-  // Prevent body scroll when menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-  
-  // Close menu on Escape key
-  useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
-  
+  };
+
   return (
     <>
-      <Overlay isOpen={isOpen} onClick={onClose} />
+      <Overlay isOpen={isOpen} onClick={handleOverlayClick} />
       <MobileMenu isOpen={isOpen}>
-        <MobileMenuHeader>
-          <MenuTitle>FitTrack</MenuTitle>
+        <MenuHeader>
+          <MenuTitle>Navigation</MenuTitle>
           <CloseButton onClick={onClose} aria-label="Close navigation menu">
             <FaTimes />
           </CloseButton>
-        </MobileMenuHeader>
-        
+        </MenuHeader>
         <NavList>
           <NavSection>
             <SectionTitle>Training</SectionTitle>
             <NavItem>
-              <NavLink to="/" active={isActive('/')}>
+              <NavLink to="/" active={isActive('/')} onClick={handleLinkClick}>
                 Dashboard
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/plans" active={isActive('/plans')}>
+              <NavLink to="/plans" active={isActive('/plans')} onClick={handleLinkClick}>
                 Trainingspläne
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/templates" active={isActive('/templates')}>
+              <NavLink to="/templates" active={isActive('/templates')} onClick={handleLinkClick}>
                 Trainingsvorlagen
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/create-plan" active={isActive('/create-plan')}>
+              <NavLink to="/create-plan" active={isActive('/create-plan')} onClick={handleLinkClick}>
                 Plan erstellen
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/workout-tracker" active={isActive('/workout-tracker')}>
+              <NavLink to="/workout-tracker" active={isActive('/workout-tracker')} onClick={handleLinkClick}>
                 Workout Tracker
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/workout-history" active={isActive('/workout-history')}>
+              <NavLink to="/workout-history" active={isActive('/workout-history')} onClick={handleLinkClick}>
                 Workout Historie
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/calendar" active={isActive('/calendar')}>
+              <NavLink to="/calendar" active={isActive('/calendar')} onClick={handleLinkClick}>
                 Trainingskalender
               </NavLink>
             </NavItem>
@@ -227,17 +218,17 @@ const MobileNavigation = ({ isOpen, onClose }) => {
           <NavSection>
             <SectionTitle>KI & Personalisierung</SectionTitle>
             <NavItem>
-              <NavLink to="/personalized-plans" active={isActive('/personalized-plans')}>
+              <NavLink to="/personalized-plans" active={isActive('/personalized-plans')} onClick={handleLinkClick}>
                 Personalisierte Pläne
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/periodization" active={isActive('/periodization')}>
+              <NavLink to="/periodization" active={isActive('/periodization')} onClick={handleLinkClick}>
                 Periodisierung
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/ai-assistant" active={isActive('/ai-assistant')}>
+              <NavLink to="/ai-assistant" active={isActive('/ai-assistant')} onClick={handleLinkClick}>
                 KI-Trainingsassistent
               </NavLink>
             </NavItem>
@@ -246,17 +237,17 @@ const MobileNavigation = ({ isOpen, onClose }) => {
           <NavSection>
             <SectionTitle>Analyse & Fortschritt</SectionTitle>
             <NavItem>
-              <NavLink to="/analysis" active={isActive('/analysis') || isActive('/progress')}>
+              <NavLink to="/analysis" active={isActive('/analysis') || isActive('/progress')} onClick={handleLinkClick}>
                 Trainingsanalyse
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/nutrition" active={isActive('/nutrition')}>
+              <NavLink to="/nutrition" active={isActive('/nutrition')} onClick={handleLinkClick}>
                 Ernährung
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/gamification" active={isActive('/gamification')}>
+              <NavLink to="/gamification" active={isActive('/gamification')} onClick={handleLinkClick}>
                 Erfolge & Belohnungen
               </NavLink>
             </NavItem>
@@ -265,7 +256,7 @@ const MobileNavigation = ({ isOpen, onClose }) => {
           <NavSection>
             <SectionTitle>Ressourcen</SectionTitle>
             <NavItem>
-              <NavLink to="/exercises" active={isActive('/exercises')}>
+              <NavLink to="/exercises" active={isActive('/exercises')} onClick={handleLinkClick}>
                 Übungsbibliothek
               </NavLink>
             </NavItem>
@@ -274,22 +265,22 @@ const MobileNavigation = ({ isOpen, onClose }) => {
           <NavSection>
             <SectionTitle>System</SectionTitle>
             <NavItem>
-              <NavLink to="/settings" active={isActive('/settings')}>
+              <NavLink to="/settings" active={isActive('/settings')} onClick={handleLinkClick}>
                 Einstellungen
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/data-import-export" active={isActive('/data-import-export')}>
+              <NavLink to="/data-import-export" active={isActive('/data-import-export')} onClick={handleLinkClick}>
                 Backup & Datenmanagement
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/data-repair" active={isActive('/data-repair')}>
+              <NavLink to="/data-repair" active={isActive('/data-repair')} onClick={handleLinkClick}>
                 Datenreparatur
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/feedback" active={isActive('/feedback')}>
+              <NavLink to="/feedback" active={isActive('/feedback')} onClick={handleLinkClick}>
                 Feedback geben
               </NavLink>
             </NavItem>

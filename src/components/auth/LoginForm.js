@@ -280,6 +280,65 @@ const ForgotPassword = styled.button`
   }
 `;
 
+const DemoModeIndicator = styled.div`
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  color: #2d3436;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: 600;
+  border: 2px solid #fdcb6e;
+  
+  &::before {
+    content: '🧪';
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+`;
+
+const DemoButton = styled.button`
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 1rem;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 184, 148, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+`;
+
 export default function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -296,12 +355,14 @@ export default function LoginForm() {
   const { 
     signIn, 
     signUp, 
+    signInDemo,
     signInWithGoogle, 
     signInWithGitHub, 
     resetPassword,
     loading, 
     error,
-    clearError 
+    clearError,
+    isDemoMode 
   } = useAuth();
 
   const handleInputChange = (e) => {
@@ -408,6 +469,19 @@ export default function LoginForm() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    try {
+      setLocalError('');
+      const result = await signInDemo();
+      if (!result.success && result.error) {
+        setLocalError(result.error.message || 'Demo-Anmeldung fehlgeschlagen');
+      }
+    } catch (error) {
+      console.error('Demo login error:', error);
+      setLocalError('Demo-Anmeldung fehlgeschlagen');
+    }
+  };
+
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
     setFormData({ email: '', password: '', confirmPassword: '', name: '' });
@@ -427,9 +501,20 @@ export default function LoginForm() {
           </LogoIcon>
           <Title>FitTrack</Title>
           <Subtitle>
-            {isSignUp ? 'Erstellen Sie Ihr Konto' : 'Willkommen zurück'}
+            {isDemoMode 
+              ? 'Demo Modus - Testen Sie die App!' 
+              : (isSignUp ? 'Erstellen Sie Ihr Konto' : 'Willkommen zurück')
+            }
           </Subtitle>
         </Logo>
+
+        {isDemoMode && (
+          <DemoModeIndicator>
+            Demo Modus aktiv - Keine Registrierung erforderlich!
+            <br />
+            <small>Alle Funktionen verfügbar, Daten werden lokal gespeichert</small>
+          </DemoModeIndicator>
+        )}
 
         {displayError && (
           <ErrorMessage>{displayError}</ErrorMessage>
@@ -437,6 +522,16 @@ export default function LoginForm() {
 
         {successMessage && (
           <SuccessMessage>{successMessage}</SuccessMessage>
+        )}
+
+        {isDemoMode && (
+          <DemoButton
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={loading}
+          >
+            {loading ? 'Lädt...' : '🚀 Demo starten'}
+          </DemoButton>
         )}
 
         <Form onSubmit={handleSubmit}>
@@ -535,9 +630,17 @@ export default function LoginForm() {
 
         {!showForgotPassword && (
           <>
-            <Divider>
-              <span>oder</span>
-            </Divider>
+            {!isDemoMode && (
+              <Divider>
+                <span>oder</span>
+              </Divider>
+            )}
+
+            {isDemoMode && (
+              <Divider>
+                <span>oder traditionell anmelden</span>
+              </Divider>
+            )}
 
             <SocialButtons>
               <SocialButton
@@ -546,7 +649,7 @@ export default function LoginForm() {
                 disabled={loading}
               >
                 <FaGoogle />
-                Google
+                {isDemoMode ? 'Demo Google' : 'Google'}
               </SocialButton>
               <SocialButton
                 type="button"
@@ -554,15 +657,18 @@ export default function LoginForm() {
                 disabled={loading}
               >
                 <FaGithub />
-                GitHub
+                {isDemoMode ? 'Demo GitHub' : 'GitHub'}
               </SocialButton>
             </SocialButtons>
 
             <div style={{ textAlign: 'center' }}>
               <ToggleMode type="button" onClick={toggleMode}>
-                {isSignUp 
-                  ? 'Bereits ein Konto? Anmelden' 
-                  : 'Noch kein Konto? Registrieren'
+                {isDemoMode 
+                  ? (isSignUp ? 'Demo Login versuchen' : 'Demo Registrierung versuchen')
+                  : (isSignUp 
+                    ? 'Bereits ein Konto? Anmelden' 
+                    : 'Noch kein Konto? Registrieren'
+                  )
                 }
               </ToggleMode>
             </div>

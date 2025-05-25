@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../../theme/ThemeProvider';
-import { Link } from 'react-router-dom';
-import { FaCog, FaSun, FaMoon, FaBars } from 'react-icons/fa';
+import { FaBars } from 'react-icons/fa';
 import UserProfile from '../auth/UserProfile';
-import { createBackup, exportBackup } from '../../utils/backupUtils';
 
 const HeaderContainer = styled.header`
   background-color: ${props => props.theme.colors.cardBackground};
@@ -72,6 +69,13 @@ const IconButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: ${props => props.theme.zIndices.sticky};
+  
+  /* Prevent interference with mobile menu */
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
   &:hover {
     background-color: ${props => props.theme.colors.grayLight};
@@ -102,56 +106,47 @@ const MenuButton = styled(IconButton)`
   @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     display: flex;
   }
-`;
-
-const SettingsLink = styled(Link)`
-  text-decoration: none;
-  color: ${props => props.theme.colors.text};
-  display: flex;
-  align-items: center;
-  min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
-`;
-
-const BackupButton = styled(IconButton)`
+  
+  /* Ensure the button is clickable on mobile */
   position: relative;
+  z-index: ${props => props.theme.zIndices.sticky + 1};
   
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const LoadingSpinner = styled.div`
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: 50%;
-  border-top: 2px solid ${props => props.theme.colors.primary};
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
+  /* Improve touch target */
+  min-width: 48px;
+  min-height: 48px;
   
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  /* Prevent double-tap zoom on iOS */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Visual feedback for touch */
+  &:active {
+    background-color: ${props => props.theme.colors.grayLight};
+    transform: scale(0.95);
+    transition: transform 0.1s ease-out;
   }
+  
+  /* Ensure no pointer events are blocked */
+  pointer-events: auto;
+  
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 `;
 
 const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
-  const { theme, toggleTheme } = useTheme();
-  const [isBackingUp, setIsBackingUp] = useState(false);
-
-  const handleQuickBackup = async () => {
-    setIsBackingUp(true);
-    
-    try {
-      const backup = createBackup();
-      await exportBackup(backup);
-      
-      // Update last backup timestamp
-      localStorage.setItem('lastBackupTime', new Date().toISOString());
-    } catch (error) {
-      console.error('Fehler beim Quick-Backup:', error);
-    } finally {
-      setIsBackingUp(false);
+  const handleMenuToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onMenuToggle) {
+      onMenuToggle();
     }
   };
   
@@ -159,35 +154,15 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
     <HeaderContainer>
       <LeftSection>
         <MenuButton 
-          onClick={onMenuToggle} 
+          onClick={handleMenuToggle}
           title={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
         >
           <FaBars />
         </MenuButton>
-        <HeaderTitle>FitnessPro</HeaderTitle>
+        <HeaderTitle>FitTracker</HeaderTitle>
       </LeftSection>
       <HeaderActions>
-        <BackupButton
-          onClick={handleQuickBackup}
-          disabled={isBackingUp}
-          title="Schnelles Backup erstellen"
-          aria-label="Schnelles Backup erstellen"
-        >
-          {isBackingUp ? <LoadingSpinner /> : '💾'}
-        </BackupButton>
-        <IconButton 
-          onClick={toggleTheme} 
-          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-          aria-label={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-        >
-          {theme === 'light' ? <FaMoon /> : <FaSun />}
-        </IconButton>
-        <SettingsLink to="/settings" title="Settings">
-          <IconButton>
-            <FaCog />
-          </IconButton>
-        </SettingsLink>
         <UserProfile />
       </HeaderActions>
     </HeaderContainer>

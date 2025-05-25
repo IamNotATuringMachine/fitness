@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaUser, FaSignOutAlt, FaCog, FaCloud, FaDownload, FaChevronDown } from 'react-icons/fa';
+import { useTheme } from '../../theme/ThemeProvider';
+import { FaUser, FaSignOutAlt, FaCog, FaCloud, FaDownload, FaChevronDown, FaSun, FaMoon } from 'react-icons/fa';
 
 const ProfileContainer = styled.div`
   position: relative;
@@ -118,8 +120,17 @@ const DropdownItem = styled.button`
   &.danger {
     color: #ff4757;
     
-    &:hover {
+    &:hover:not(:disabled) {
       background: #ff475710;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    
+    &:hover {
+      background: none;
     }
   }
 `;
@@ -144,8 +155,11 @@ const SyncIndicator = styled.div`
 export default function UserProfile() {
   const [isOpen, setIsOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState('synced');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   const { user, signOut, saveUserDataToCloud, loadUserDataFromCloud } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -160,10 +174,23 @@ export default function UserProfile() {
 
   const handleSignOut = async () => {
     try {
+      setIsLoggingOut(true);
       setSyncStatus('syncing');
-      await signOut();
+      console.log('🔧 UserProfile: Starting logout process...');
+      const result = await signOut();
+      
+      if (!result.success) {
+        console.error('🔧 UserProfile: Logout failed:', result.error);
+        setIsLoggingOut(false);
+        setSyncStatus('error');
+      } else {
+        console.log('🔧 UserProfile: Logout successful');
+        // Keep isLoggingOut true until auth state changes
+      }
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('🔧 UserProfile: Sign out error:', error);
+      setIsLoggingOut(false);
+      setSyncStatus('error');
     }
   };
 
@@ -235,9 +262,20 @@ export default function UserProfile() {
           Profil bearbeiten
         </DropdownItem>
 
-        <DropdownItem onClick={() => setIsOpen(false)}>
+        <DropdownItem onClick={() => {
+          navigate('/settings');
+          setIsOpen(false);
+        }}>
           <FaCog />
           Einstellungen
+        </DropdownItem>
+
+        <DropdownItem onClick={() => {
+          toggleTheme();
+          setIsOpen(false);
+        }}>
+          {theme === 'light' ? <FaMoon /> : <FaSun />}
+          {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
         </DropdownItem>
 
         <DropdownItem onClick={handleSyncToCloud}>
@@ -250,9 +288,9 @@ export default function UserProfile() {
           Aus Cloud laden
         </DropdownItem>
 
-        <DropdownItem onClick={handleSignOut} className="danger">
+        <DropdownItem onClick={handleSignOut} className="danger" disabled={isLoggingOut}>
           <FaSignOutAlt />
-          Abmelden
+          {isLoggingOut ? 'Abmeldung läuft...' : 'Abmelden'}
         </DropdownItem>
       </DropdownMenu>
     </ProfileContainer>

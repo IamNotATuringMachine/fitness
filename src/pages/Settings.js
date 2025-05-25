@@ -2,8 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
-import ThemeSwitcher from '../components/ui/ThemeSwitcher';
-import ViewCustomizer from '../components/ui/ViewCustomizer';
 import { useTheme } from '../theme/ThemeProvider';
 
 const SettingsContainer = styled.div`
@@ -64,14 +62,6 @@ const Settings = () => {
     <div>
       <SettingsContainer className={userPreferences.compactMode ? 'compact-mode' : ''}>
         <SettingsHeader>Einstellungen</SettingsHeader>
-        
-        <SettingSection>
-          <ThemeSwitcher />
-        </SettingSection>
-        
-        <SettingSection>
-          <ViewCustomizer />
-        </SettingSection>
         
         <SettingSection>
           <SectionHeader>Administration</SectionHeader>

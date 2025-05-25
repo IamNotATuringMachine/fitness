@@ -188,6 +188,7 @@ const ClickableCard = styled(Card)`
   flex-direction: column;
   cursor: pointer;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  min-height: ${props => props.theme.mobile?.touchTarget || '44px'};
 
   &:hover {
     transform: translateY(-5px);
@@ -210,6 +211,16 @@ const ClickableCard = styled(Card)`
   /* Add touch feedback */
   &:active {
     transform: translateY(-2px);
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
+    min-height: 60px;
+    padding: ${props => props.theme.spacing.mobile.lg};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    min-height: 80px;
+    padding: ${props => props.theme.spacing.mobile.xl};
   }
 `;
 
@@ -234,11 +245,13 @@ const ClickableListItem = styled(Card)`
   @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     flex-direction: column;
     align-items: flex-start;
-    padding: ${props => props.theme.spacing.mobile.md};
+    padding: ${props => props.theme.spacing.mobile.lg};
+    min-height: 70px;
   }
   
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    padding: ${props => props.theme.spacing.mobile.sm};
+    padding: ${props => props.theme.spacing.mobile.xl};
+    min-height: 90px;
   }
   
   /* Remove hover effects on touch devices */
@@ -387,17 +400,47 @@ const Dashboard = () => {
             </StatsContainer>
           </Card.Body>
           <Card.Footer>
-            <Button as={Link} to="/create-plan">Trainingsplan erstellen</Button>
+            <Button 
+              as={Link} 
+              to="/create-plan"
+              style={{
+                minHeight: '48px',
+                fontSize: window.innerWidth <= 768 ? '1.1rem' : 'inherit',
+                padding: window.innerWidth <= 768 ? '12px 24px' : 'inherit'
+              }}
+            >
+              Trainingsplan erstellen
+            </Button>
           </Card.Footer>
         </WelcomeCard>
         
         <Card>
                     <Card.Header>Leistungsanalyse</Card.Header>          <Card.Body>            <p>Analysieren Sie Trainingsdaten, um Fortschrittsmuster und Optimierungsmöglichkeiten für eine verbesserte Leistung zu identifizieren.</p>          </Card.Body>          <Card.Footer>
-            <Button as={Link} to="/analysis">Analysen anzeigen</Button>          </Card.Footer>
+            <Button 
+              as={Link} 
+              to="/analysis"
+              style={{
+                minHeight: '48px',
+                fontSize: window.innerWidth <= 768 ? '1.1rem' : 'inherit',
+                padding: window.innerWidth <= 768 ? '12px 24px' : 'inherit'
+              }}
+            >
+              Analysen anzeigen
+            </Button>          </Card.Footer>
         </Card>
       </DashboardContainer>
       
-            <RecentWorkoutsContainer>        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>          <h2>Letzte Trainingseinheiten</h2>          {recentWorkouts.length > 0 && (            <Button as={Link} to="/workout-history" variant="outline" size="small">              Alle anzeigen            </Button>          )}        </div>
+            <RecentWorkoutsContainer>        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>          <h2>Letzte Trainingseinheiten</h2>          {recentWorkouts.length > 0 && (            <Button 
+              as={Link} 
+              to="/workout-history" 
+              variant="outline" 
+              size="small"
+              style={{
+                minHeight: '44px',
+                fontSize: window.innerWidth <= 768 ? '1rem' : 'inherit',
+                padding: window.innerWidth <= 768 ? '10px 20px' : 'inherit'
+              }}
+            >              Alle anzeigen            </Button>          )}        </div>
         {recentWorkouts.length > 0 ? (
           userPreferences.dashboardLayout === 'grid' ? (
             // Grid Layout (now a single horizontal row)
@@ -457,7 +500,17 @@ const Dashboard = () => {
         ) : (
           <Card>
             <Card.Body>
-                            <p>Noch keine Trainingseinheiten erfasst.</p>              <Button as={Link} to="/workout-tracker">Erstes Workout starten</Button>
+                            <p>Noch keine Trainingseinheiten erfasst.</p>              <Button 
+                as={Link} 
+                to="/workout-tracker"
+                style={{
+                  minHeight: '48px',
+                  fontSize: window.innerWidth <= 768 ? '1.1rem' : 'inherit',
+                  padding: window.innerWidth <= 768 ? '12px 24px' : 'inherit'
+                }}
+              >
+                Erstes Workout starten
+              </Button>
             </Card.Body>
           </Card>
         )}

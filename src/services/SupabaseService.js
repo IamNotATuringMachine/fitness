@@ -1,12 +1,44 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const disableSupabase = process.env.REACT_APP_DISABLE_SUPABASE === 'true';
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Check if Supabase is properly configured
+const isSupabaseConfigured = supabaseUrl && 
+  supabaseKey && 
+  supabaseUrl !== 'https://your-project.supabase.co' && 
+  supabaseKey !== 'your-anon-key' &&
+  !disableSupabase;
+
+if (!isSupabaseConfigured) {
+  console.warn('⚠️ Supabase not configured properly!');
+  console.warn('The app will run in offline mode without authentication.');
+  console.warn('To enable Supabase:');
+  console.warn('1. Create a .env file in your project root');
+  console.warn('2. Add: REACT_APP_SUPABASE_URL=https://your-project.supabase.co');
+  console.warn('3. Add: REACT_APP_SUPABASE_ANON_KEY=your-anon-key');
+  console.warn('4. Replace with your actual Supabase credentials');
+  console.warn('Current values:', {
+    url: supabaseUrl || 'undefined',
+    key: supabaseKey ? '***configured***' : 'undefined',
+    disabled: disableSupabase
+  });
+}
+
+export const supabase = isSupabaseConfigured ? 
+  createClient(supabaseUrl, supabaseKey) : 
+  null;
 
 export class SupabaseAuthService {
   async signUp(email, password, userData = {}) {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -29,6 +61,13 @@ export class SupabaseAuthService {
   }
 
   async signIn(email, password) {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -45,6 +84,13 @@ export class SupabaseAuthService {
   }
 
   async signInWithGoogle() {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -63,6 +109,13 @@ export class SupabaseAuthService {
   }
 
   async signInWithGitHub() {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
@@ -81,6 +134,12 @@ export class SupabaseAuthService {
   }
 
   async signOut() {
+    if (!supabase) {
+      return { 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -93,6 +152,13 @@ export class SupabaseAuthService {
   }
 
   async resetPassword(email) {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/fitness/auth/reset-password`
@@ -108,6 +174,13 @@ export class SupabaseAuthService {
   }
 
   async updatePassword(newPassword) {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data, error } = await supabase.auth.updateUser({
         password: newPassword
@@ -123,6 +196,13 @@ export class SupabaseAuthService {
   }
 
   async getCurrentUser() {
+    if (!supabase) {
+      return { 
+        user: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) throw error;
@@ -135,10 +215,30 @@ export class SupabaseAuthService {
   }
 
   onAuthStateChange(callback) {
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured - auth state changes will not be monitored');
+      // Return a mock subscription object that can be unsubscribed
+      return {
+        data: {
+          subscription: {
+            unsubscribe: () => {
+              console.log('Mock auth state subscription unsubscribed');
+            }
+          }
+        }
+      };
+    }
     return supabase.auth.onAuthStateChange(callback);
   }
 
   async getSession() {
+    if (!supabase) {
+      return { 
+        session: null, 
+        error: new Error('Supabase not configured. Please set environment variables.') 
+      };
+    }
+    
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
@@ -153,27 +253,72 @@ export class SupabaseAuthService {
 
 export class SupabaseDataService {
   async saveUserData(userId, data) {
+    console.log('🔧 SupabaseService: Attempting to save user data:', {
+      userId,
+      dataKeys: Object.keys(data),
+      timestamp: new Date().toISOString()
+    });
+
+    if (!supabase) {
+      console.error('🔧 SupabaseService: Supabase not configured');
+      return { data: null, error: new Error('Supabase not configured') };
+    }
+
     try {
+      const payload = {
+        user_id: userId,
+        data: data,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('🔧 SupabaseService: Payload prepared:', {
+        user_id: payload.user_id,
+        dataSize: JSON.stringify(payload.data).length,
+        updated_at: payload.updated_at
+      });
+
+      // Use the correct upsert syntax for Supabase
       const { data: result, error } = await supabase
         .from('user_data')
-        .upsert({
-          user_id: userId,
-          data: data,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id'
+        .upsert(payload, {
+          onConflict: 'user_id',
+          returning: 'minimal'
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error('🔧 SupabaseService: Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      console.log('🔧 SupabaseService: Data saved successfully:', {
+        userId,
+        result: result
+      });
       
       return { data: result, error: null };
     } catch (error) {
-      console.error('Save user data error:', error);
+      console.error('🔧 SupabaseService: Save user data error:', {
+        message: error.message,
+        stack: error.stack,
+        userId
+      });
       return { data: null, error };
     }
   }
 
   async getUserData(userId) {
+    console.log('🔧 SupabaseService: Attempting to get user data for:', userId);
+
+    if (!supabase) {
+      console.warn('🔧 SupabaseService: Supabase not configured - returning empty data');
+      return { data: {}, error: null };
+    }
+    
     try {
       const { data, error } = await supabase
         .from('user_data')
@@ -181,11 +326,34 @@ export class SupabaseDataService {
         .eq('user_id', userId)
         .single();
       
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('🔧 SupabaseService: No existing user data found (expected for new users)');
+          return { data: {}, error: null };
+        }
+        console.error('🔧 SupabaseService: Get user data error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          userId
+        });
+        throw error;
+      }
+
+      console.log('🔧 SupabaseService: User data retrieved successfully:', {
+        userId,
+        hasData: !!data,
+        dataKeys: data?.data ? Object.keys(data.data) : []
+      });
       
       return { data: data?.data || {}, error: null };
     } catch (error) {
-      console.error('Get user data error:', error);
+      console.error('🔧 SupabaseService: Get user data error:', {
+        message: error.message,
+        stack: error.stack,
+        userId
+      });
       return { data: {}, error };
     }
   }

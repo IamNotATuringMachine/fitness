@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/layout/Header';
@@ -35,8 +35,6 @@ import WorkoutHistory from './pages/WorkoutHistory';
 import AdvancedAnalytics from './pages/AdvancedAnalytics';
 import SocialFeatures from './pages/SocialFeatures';
 import AuthCallback from './pages/AuthCallback';
-import DebugPanel from './components/ui/DebugPanel';
-import FloatingActions from './components/ui/FloatingActions';
 
 const AppContainer = styled.div`
   display: flex;
@@ -73,24 +71,15 @@ const ContentContainer = styled.main`
 
 // Protected App Layout Component
 function ProtectedAppLayout({ children }) {
-  const [debugPanelVisible, setDebugPanelVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleDebugPanel = () => {
-    setDebugPanelVisible(!debugPanelVisible);
-  };
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
 
-  const closeDebugPanel = () => {
-    setDebugPanelVisible(false);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-  };
+  }, []);
 
   return (
     <AppContainer>
@@ -108,19 +97,6 @@ function ProtectedAppLayout({ children }) {
           {children}
         </ContentContainer>
       </MainContainer>
-      
-      {/* Floating Action Buttons */}
-      <FloatingActions
-        showDebug={process.env.NODE_ENV === 'development'}
-        onDebugToggle={toggleDebugPanel}
-        debugVisible={debugPanelVisible}
-      />
-      
-      {/* Debug Panel */}
-      <DebugPanel
-        isVisible={debugPanelVisible}
-        onClose={closeDebugPanel}
-      />
     </AppContainer>
   );
 }

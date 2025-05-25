@@ -241,6 +241,21 @@ const GlobalStyles = createGlobalStyle`
       border-radius: ${props => props.theme.borderRadius.medium};
       background-color: ${props => props.theme.colors.inputBackground};
     }
+    
+    /* Prevent mobile menu interference during theme changes */
+    [class*="Overlay"]:not([data-visible="true"]),
+    [class*="MobileMenu"]:not([data-visible="true"]) {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    
+    /* Ensure theme toggle doesn't trigger mobile menu */
+    button[aria-label*="Dark Mode"],
+    button[aria-label*="Light Mode"] {
+      isolation: isolate;
+      z-index: ${props => props.theme.zIndices.sticky + 1};
+    }
   }
 
   /* Compact Mode Styles */
