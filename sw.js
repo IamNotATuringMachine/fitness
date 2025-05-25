@@ -199,13 +199,8 @@ async function handleApiRequest(request) {
 async function handleNavigationRequest(request) {
   try {
     const networkResponse = await fetch(request);
-    
-    // Only cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    
+    const cache = await caches.open(DYNAMIC_CACHE);
+    cache.put(request, networkResponse.clone());
     return networkResponse;
   } catch (error) {
     console.log('Navigation failed, serving app shell');
@@ -279,8 +274,7 @@ async function handleDynamicRequest(request) {
   const cachedResponse = await cache.match(request);
   
   const fetchPromise = fetch(request).then(networkResponse => {
-    // Only cache GET requests to avoid "Request method 'POST' is unsupported" errors
-    if (networkResponse.ok && request.method === 'GET') {
+    if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
