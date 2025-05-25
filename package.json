@@ -2,7 +2,7 @@
   "name": "fitness-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://IamNotATuringMachine.github.io/fitness2",
+  "homepage": "https://iamnotaturingmachine.github.io/fitness",
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
     "@types/dompurify": "^3.0.5",

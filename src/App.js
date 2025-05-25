@@ -98,7 +98,7 @@ function App() {
           <ProtectedRoute>
             <WorkoutProvider>
               <ErrorBoundary>
-                <Router>
+                <Router basename="/fitness">
                   <AppContainer>
                     <Header 
                       onMenuToggle={toggleMobileMenu} 
