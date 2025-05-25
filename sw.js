@@ -151,47 +151,100 @@ async function handleStaticRequest(request) {
 
 // Network First strategy for API requests
 async function handleApiRequest(request) {
+  console.log('🔧 SW: Handling API request:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
+
   try {
+    // Always try network first for API requests
     const networkResponse = await fetch(request);
+    console.log('🔧 SW: Network response:', {
+      status: networkResponse.status,
+      statusText: networkResponse.statusText,
+      method: request.method,
+      url: request.url
+    });
     
-    // Only cache GET requests (not POST, PUT, DELETE, etc.)
+    // Only cache successful GET requests
     if (networkResponse.ok && request.method === 'GET') {
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(API_CACHE);
+        // Clone the response before caching
+        const responseClone = networkResponse.clone();
+        await cache.put(request, responseClone);
+        console.log('🔧 SW: Cached GET request successfully:', request.url);
+      } catch (cacheError) {
+        console.warn('🔧 SW: Failed to cache request (non-critical):', cacheError);
+      }
     }
     
     return networkResponse;
   } catch (error) {
-    console.log('Network failed, trying cache for API request');
+    console.log('🔧 SW: Network failed for API request:', {
+      error: error.message,
+      method: request.method,
+      url: request.url
+    });
     
     // Only try to get from cache for GET requests
     if (request.method === 'GET') {
-      const cache = await caches.open(API_CACHE);
-      const cachedResponse = await cache.match(request);
-      
-      if (cachedResponse) {
-        // Add offline header
-        const response = cachedResponse.clone();
-        response.headers.set('X-Served-By', 'sw-cache');
-        return response;
+      try {
+        const cache = await caches.open(API_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse) {
+          console.log('🔧 SW: Serving from cache:', request.url);
+          // Clone response and add offline header
+          const responseClone = cachedResponse.clone();
+          const headers = new Headers(responseClone.headers);
+          headers.set('X-Served-By', 'sw-cache');
+          
+          return new Response(responseClone.body, {
+            status: responseClone.status,
+            statusText: responseClone.statusText,
+            headers: headers
+          });
+        }
+      } catch (cacheError) {
+        console.error('🔧 SW: Cache lookup failed:', cacheError);
       }
     }
     
-    // Return offline API response
-    return new Response(
-      JSON.stringify({
-        error: 'Offline',
-        message: 'You are currently offline. Some features may be limited.',
-        cached: false
-      }),
-      {
-        status: 503,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Served-By': 'sw-offline'
+    // For non-GET requests or when cache fails, return appropriate offline response
+    if (request.method === 'GET') {
+      return new Response(
+        JSON.stringify({
+          error: 'Offline',
+          message: 'You are currently offline. Some features may be limited.',
+          cached: false
+        }),
+        {
+          status: 503,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Served-By': 'sw-offline'
+          }
         }
-      }
-    );
+      );
+    } else {
+      // For POST/PUT/DELETE requests, return a specific error
+      return new Response(
+        JSON.stringify({
+          error: 'Network Error',
+          message: `${request.method} request failed. Please check your connection and try again.`,
+          offline: true
+        }),
+        {
+          status: 503,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Served-By': 'sw-offline'
+          }
+        }
+      );
+    }
   }
 }
 
