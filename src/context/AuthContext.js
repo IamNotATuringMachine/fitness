@@ -44,6 +44,7 @@ export function AuthProvider({ children }) {
           setUser(session?.user ?? null);
           setLoading(false);
           setError(null);
+          setIsInitialized(true); // Ensure isInitialized is set to true on any auth state change
 
           // Handle sign out - clear local data
           if (event === 'SIGNED_OUT') {
