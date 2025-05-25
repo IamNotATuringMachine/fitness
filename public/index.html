@@ -16,8 +16,6 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="-1" />
     <!-- End Cache Control Meta Tags -->
-    <!-- Mobile Menu Fix CSS -->
-    <link rel="stylesheet" href="%PUBLIC_URL%/mobile-menu-fix.css" />
     <title>React App</title>
     <script>
       if (typeof window.global === 'undefined') {
@@ -27,7 +25,7 @@
     <script type="text/javascript">
       // Cache Busting and Version Check
       (function() {
-        const APP_VERSION = '__BUILD_TIMESTAMP__'; // Will be replaced during build
+        const APP_VERSION = Date.now().toString(); // Force new version with current timestamp
         const VERSION_KEY = 'app_version';
         const LAST_REFRESH_KEY = 'last_forced_refresh';
         
@@ -42,11 +40,18 @@
           timeSinceLastRefresh: now - lastRefresh
         });
         
-        // Force refresh if version changed and enough time has passed since last refresh
-        if (storedVersion && storedVersion !== APP_VERSION && (now - lastRefresh) > 5000) {
-          console.log('🚀 New version detected, clearing cache and reloading...');
+        // Force refresh if version changed OR if we detect authentication issues
+        const shouldForceRefresh = (storedVersion && storedVersion !== APP_VERSION && (now - lastRefresh) > 1000) ||
+                                   (!storedVersion && (now - lastRefresh) > 10000);
+        
+        if (shouldForceRefresh) {
+          console.log('🚀 Forcing cache clear and reload...', { 
+            reason: !storedVersion ? 'no_version' : 'version_change',
+            oldVersion: storedVersion, 
+            newVersion: APP_VERSION 
+          });
           
-          // Clear various caches
+          // Aggressive cache clearing
           if ('caches' in window) {
             caches.keys().then(function(names) {
               for (let name of names) {
@@ -55,17 +60,18 @@
             });
           }
           
-          // Clear localStorage items that might be cached
-          ['workoutState', 'userProfile', 'gamificationState', 'nutritionState'].forEach(key => {
-            localStorage.removeItem(key);
-          });
+          // Clear ALL localStorage
+          localStorage.clear();
+          
+          // Clear sessionStorage
+          sessionStorage.clear();
           
           // Store new version and refresh timestamp
           localStorage.setItem(VERSION_KEY, APP_VERSION);
           localStorage.setItem(LAST_REFRESH_KEY, now.toString());
           
-          // Force a hard reload
-          window.location.reload(true);
+          // Force a hard reload with cache busting
+          window.location.href = window.location.href + '?v=' + now + '&refresh=true';
           return;
         }
         

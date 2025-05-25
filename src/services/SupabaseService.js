@@ -240,7 +240,9 @@ export class SupabaseAuthService {
     }
     
     try {
+      console.log('🔧 SupabaseService: Attempting supabase.auth.getSession() START');
       const { data: { session }, error } = await supabase.auth.getSession();
+      console.log('🔧 SupabaseService: Attempting supabase.auth.getSession() END', { hasSession: !!session, error });
       if (error) throw error;
       
       return { session, error: null };
@@ -320,11 +322,13 @@ export class SupabaseDataService {
     }
     
     try {
+      console.log('🔧 SupabaseService: Attempting supabase.from("user_data").select() START');
       const { data, error } = await supabase
         .from('user_data')
         .select('*')
         .eq('user_id', userId)
         .single();
+      console.log('🔧 SupabaseService: Attempting supabase.from("user_data").select() END', { hasData: !!data, error });
       
       if (error) {
         if (error.code === 'PGRST116') {

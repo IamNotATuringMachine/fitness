@@ -27,7 +27,7 @@ if (STORED_VERSION && STORED_VERSION !== APP_VERSION) {
   if (authToken) localStorage.setItem('authToken', authToken);
   
   // Force reload
-  window.location.reload(true);
+  // window.location.reload(true); // Temporarily disabled for debugging rapid refresh
 }
 
 // Store current version

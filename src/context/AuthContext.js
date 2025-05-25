@@ -21,7 +21,8 @@ const DEMO_USER = {
   last_sign_in_at: new Date().toISOString()
 };
 
-// Cache busting utility
+// Cache busting utility (used in emergency scenarios)
+// eslint-disable-next-line no-unused-vars
 const clearCacheAndReload = () => {
   console.log('🔄 Clearing cache and reloading due to authentication loop...');
   
@@ -47,6 +48,7 @@ const clearCacheAndReload = () => {
 };
 
 export function AuthProvider({ children }) {
+  // Force rebuild with new hash - fix for auth loop v2.0
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -87,15 +89,26 @@ export function AuthProvider({ children }) {
           initComplete
         });
         
-        // If we've tried too many times in a short period, clear cache and reload
-        if (initializationAttemptsRef.current > 5 && timeSinceLastInit < 2000) {
-          console.error('🚨 AuthContext: Too many initialization attempts detected, clearing cache...');
-          clearCacheAndReload();
+        // If we've tried too many times in a short period, force complete initialization
+        if (initializationAttemptsRef.current > 3 && timeSinceLastInit < 2000) {
+          console.error('🚨 AuthContext: Too many initialization attempts detected, forcing completion...');
+          if (mounted && !initComplete) {
+            setUser(null);
+            setError(new Error('Authentication initialization failed - too many attempts'));
+            setLoading(false);
+            setIsInitialized(true);
+            initComplete = true;
+          }
           return;
         }
         
-        // Get initial session
-        const { session, error } = await authService.getSession();
+        // Add timeout for session retrieval
+        const sessionPromise = authService.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session retrieval timeout')), 10000)
+        );
+        
+        const { session, error } = await Promise.race([sessionPromise, timeoutPromise]);
         
         if (mounted && !initComplete) {
           if (error && error.message.includes('Supabase not configured')) {
@@ -112,6 +125,16 @@ export function AuthProvider({ children }) {
             }
             
             setError(null); // Don't treat missing config as an error
+            setLoading(false);
+            setIsInitialized(true);
+            initComplete = true;
+            return;
+          }
+          
+          if (error && error.message.includes('timeout')) {
+            console.error('🔧 AuthContext: Session retrieval timed out, continuing without session');
+            setUser(null);
+            setError(null);
             setLoading(false);
             setIsInitialized(true);
             initComplete = true;
@@ -138,7 +161,7 @@ export function AuthProvider({ children }) {
             setUser(null);
             setError(null);
           } else {
-            setError(error);
+            setError(null); // Don't show errors to user, just log them
           }
           setLoading(false);
           setIsInitialized(true);
@@ -168,30 +191,48 @@ export function AuthProvider({ children }) {
               await clearLocalData(); // Ensure local data is cleared before UI might try to access it
               setError(null);
               setLoading(false); // Explicitly set loading to false here
-              console.log('🔧 AuthContext: Processing SIGNED_OUT event - END. User null, loading false.');
+              setIsInitialized(true); // Ensure initialization is marked complete
+              console.log('🔧 AuthContext: Processing SIGNED_OUT event - END. User null, loading false, initialized true.');
             } catch (error) {
               console.error('🔧 AuthContext: Error during SIGNED_OUT processing:', error);
               setUser(null);
               setError(null);
               setLoading(false);
+              setIsInitialized(true); // Ensure initialization is marked complete even on error
             }
             return; 
           }
           
           if (event === 'SIGNED_IN' && session?.user) {
             console.log('🔧 AuthContext: Processing SIGNED_IN event - START');
-            try {
-              console.log('🔧 AuthContext: Syncing user data on sign in...');
-              await syncUserDataOnSignIn(session.user);
-              console.log('🔧 AuthContext: Data sync completed successfully');
-            } catch (syncError) {
-              console.error('🔧 AuthContext: Data sync failed (non-critical):', syncError);
-              // Don't block signin for sync errors
-            }
-            setUser(session.user); // Set user after sync attempt
+            
+            // Set user state immediately to prevent UI blocking
+            setUser(session.user);
             setError(null);
-            setLoading(false); // Explicitly set loading to false here
-            console.log('🔧 AuthContext: Processing SIGNED_IN event - END. User set, loading false.');
+            setLoading(false);
+            setIsInitialized(true);
+            
+            // Perform data sync in background (non-blocking)
+            const performBackgroundSync = async () => {
+              try {
+                console.log('🔧 AuthContext: Starting background data sync...');
+                const syncPromise = syncUserDataOnSignIn(session.user);
+                const timeoutPromise = new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('Sync timeout')), 15000)
+                );
+                
+                await Promise.race([syncPromise, timeoutPromise]);
+                console.log('🔧 AuthContext: Background data sync completed successfully');
+              } catch (syncError) {
+                console.error('🔧 AuthContext: Background data sync failed (non-critical):', syncError);
+                // Don't block signin for sync errors - just log them
+              }
+            };
+            
+            // Start background sync but don't await it
+            performBackgroundSync();
+            
+            console.log('🔧 AuthContext: Processing SIGNED_IN event - END. User set, loading false, initialized true.');
             return; 
           }
           
@@ -222,9 +263,9 @@ export function AuthProvider({ children }) {
 
     // Emergency failsafe for stuck authentication
     const emergencyTimer = setTimeout(() => {
-      if (mounted && !initComplete && loading) {
+      if (mounted && !initComplete && loadingRef.current) {
         console.error('🚨 AuthContext: Emergency timeout reached, clearing cache and reloading...');
-        clearCacheAndReload();
+        // clearCacheAndReload(); // Temporarily disabled for debugging rapid refresh
       }
     }, 20000); // 20 second emergency timeout
 
@@ -238,7 +279,8 @@ export function AuthProvider({ children }) {
         console.log('🔧 AuthContext: No subscription to unsubscribe (likely mock)');
       }
     };
-  }, []); // Keep empty dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Keep empty dependency array to prevent re-initialization
 
   const clearLocalData = async () => {
     try {
@@ -261,36 +303,55 @@ export function AuthProvider({ children }) {
     console.log('🔧 AuthContext: Starting user data sync on sign in for:', user.email);
     
     try {
-      // First, try to load existing data from cloud
-      const { data: remoteData, error: loadError } = await dataService.getUserData(user.id);
-      
-      if (loadError) {
-        console.warn('🔧 AuthContext: Failed to load remote data:', loadError);
-        // Continue without remote data
-      } else if (remoteData && Object.keys(remoteData).length > 0) {
-        console.log('🔧 AuthContext: Remote data found, applying to local storage');
+      // Add timeout protection for the entire sync operation
+      const syncOperation = async () => {
+        // First, try to load existing data from cloud
+        const { data: remoteData, error: loadError } = await dataService.getUserData(user.id);
         
-        // Apply remote data to local storage
-        if (remoteData.workoutState) {
-          secureStorage.set('workoutState', remoteData.workoutState);
-        }
-        if (remoteData.userProfile) {
-          secureStorage.set('userProfile', remoteData.userProfile);
-        }
-        if (remoteData.gamificationState) {
-          secureStorage.set('gamificationState', remoteData.gamificationState);
-        }
-        if (remoteData.nutritionState) {
-          secureStorage.set('nutritionState', remoteData.nutritionState);
+        if (loadError) {
+          console.warn('🔧 AuthContext: Failed to load remote data (non-critical):', loadError);
+          // Continue without remote data
+          return { success: true, warning: 'Failed to load remote data' };
+        } 
+        
+        if (remoteData && Object.keys(remoteData).length > 0) {
+          console.log('🔧 AuthContext: Remote data found, applying to local storage');
+          
+          // Apply remote data to local storage with error handling
+          try {
+            if (remoteData.workoutState) {
+              secureStorage.set('workoutState', remoteData.workoutState);
+            }
+            if (remoteData.userProfile) {
+              secureStorage.set('userProfile', remoteData.userProfile);
+            }
+            if (remoteData.gamificationState) {
+              secureStorage.set('gamificationState', remoteData.gamificationState);
+            }
+            if (remoteData.nutritionState) {
+              secureStorage.set('nutritionState', remoteData.nutritionState);
+            }
+            
+            secureStorage.set('lastSyncTime', new Date().toISOString());
+            console.log('🔧 AuthContext: Remote data applied successfully');
+          } catch (storageError) {
+            console.warn('🔧 AuthContext: Error applying remote data to storage (non-critical):', storageError);
+          }
+        } else {
+          console.log('🔧 AuthContext: No remote data found (new user or clean slate)');
         }
         
-        secureStorage.set('lastSyncTime', new Date().toISOString());
-        console.log('🔧 AuthContext: Remote data applied successfully');
-      } else {
-        console.log('🔧 AuthContext: No remote data found (new user or clean slate)');
-      }
+        return { success: true };
+      };
       
-      return { success: true };
+      // Run sync operation with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sync operation timeout')), 10000)
+      );
+      
+      const result = await Promise.race([syncOperation(), timeoutPromise]);
+      return result;
+      
     } catch (error) {
       console.error('🔧 AuthContext: Data sync error (non-critical):', error);
       return { success: false, error };

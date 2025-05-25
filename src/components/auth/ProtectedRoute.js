@@ -71,7 +71,7 @@ const clearCacheAndReload = () => {
   }
   
   // Clear relevant localStorage
-  ['workoutState', 'userProfile', 'gamificationState', 'nutritionState', 'app_version'].forEach(key => {
+  ['workoutState', 'userProfile', 'gamificationState', 'nutritionState', 'app_version', 'demoUserSession', 'authToken', 'lastSyncTime'].forEach(key => {
     localStorage.removeItem(key);
   });
   
@@ -114,17 +114,27 @@ export default function ProtectedRoute({ children }) {
       console.warn('🚨 ProtectedRoute: Potential infinite loading loop detected!');
       setShowTroubleshoot(true);
     }
-  }, [loading, renderCountRef.current]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   // Timeout mechanism to prevent infinite loading
   useEffect(() => {
-    if (loading && isInitialized) {
+    if (!isInitialized || loading) {
       const timeout = setTimeout(() => {
         console.error('🚨 ProtectedRoute: Loading timeout - showing troubleshoot option');
         setShowTroubleshoot(true);
       }, 15000); // 15 seconds timeout
 
-      return () => clearTimeout(timeout);
+      // Emergency timeout to force refresh
+      const emergencyTimeout = setTimeout(() => {
+        console.error('🚨 ProtectedRoute: Emergency timeout - forcing page reload');
+        clearCacheAndReload();
+      }, 30000); // 30 seconds emergency timeout
+
+      return () => {
+        clearTimeout(timeout);
+        clearTimeout(emergencyTimeout);
+      };
     }
   }, [loading, isInitialized]);
 
