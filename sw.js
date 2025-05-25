@@ -6,17 +6,9 @@ const API_CACHE = 'fittrack-api-v1.2.1';
 // Assets to cache for offline functionality
 const STATIC_ASSETS = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json',
-  // Note: favicon and logos are data URIs, not actual files
-  // Core pages
-  '/dashboard',
-  '/workout-tracker',
-  '/exercises',
-  '/analytics',
-  '/plans',
-  '/settings'
+  '/manifest.json'
+  // Note: Other static assets will be cached on demand
+  // Core pages will be cached during navigation
 ];
 
 // Runtime caching patterns
@@ -162,7 +154,8 @@ async function handleApiRequest(request) {
   try {
     const networkResponse = await fetch(request);
     
-    if (networkResponse.ok) {
+    // Only cache GET requests (not POST, PUT, DELETE, etc.)
+    if (networkResponse.ok && request.method === 'GET') {
       const cache = await caches.open(API_CACHE);
       cache.put(request, networkResponse.clone());
     }
@@ -170,14 +163,18 @@ async function handleApiRequest(request) {
     return networkResponse;
   } catch (error) {
     console.log('Network failed, trying cache for API request');
-    const cache = await caches.open(API_CACHE);
-    const cachedResponse = await cache.match(request);
     
-    if (cachedResponse) {
-      // Add offline header
-      const response = cachedResponse.clone();
-      response.headers.set('X-Served-By', 'sw-cache');
-      return response;
+    // Only try to get from cache for GET requests
+    if (request.method === 'GET') {
+      const cache = await caches.open(API_CACHE);
+      const cachedResponse = await cache.match(request);
+      
+      if (cachedResponse) {
+        // Add offline header
+        const response = cachedResponse.clone();
+        response.headers.set('X-Served-By', 'sw-cache');
+        return response;
+      }
     }
     
     // Return offline API response
