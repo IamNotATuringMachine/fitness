@@ -482,11 +482,14 @@ export function AuthProvider({ children }) {
             secureStorage.set('lastSyncTime', new Date().toISOString());
             console.log('🔧 AuthContext: All remote data applied successfully');
             
-            // Force a page reload to ensure all contexts pick up the new data
-            setTimeout(() => {
-              console.log('🔄 AuthContext: Reloading page to apply synced data...');
-              window.location.reload();
-            }, 1000);
+            // Dispatch a custom event to notify other components of data sync instead of reloading
+            console.log('🔄 AuthContext: Dispatching data sync event...');
+            window.dispatchEvent(new CustomEvent('userDataSynced', { 
+              detail: { 
+                timestamp: new Date().toISOString(),
+                dataKeys: Object.keys(remoteData) 
+              } 
+            }));
             
           } catch (storageError) {
             console.warn('🔧 AuthContext: Error applying remote data to storage (non-critical):', storageError);

@@ -474,7 +474,7 @@
                 // Step 5: Update app version to prevent cache clearing
                 log('🔧 Updating app version...');
                 updateProgress(90, 'Finalizing...');
-                localStorage.setItem('app_version', '2025-05-25-v2');
+                localStorage.setItem('app_version', '2025-05-25-v3-auth-fix');
 
                 updateProgress(100, 'Emergency restore complete!');
                 log('🎉 EMERGENCY RESTORE COMPLETED SUCCESSFULLY!');
@@ -564,7 +564,7 @@
             
             log('🔄 Resetting app state...');
             localStorage.clear();
-            localStorage.setItem('app_version', '2025-05-25-v2');
+            localStorage.setItem('app_version', '2025-05-25-v3-auth-fix');
             log('✅ App state reset');
             showStatus('system-status', '✅ App state has been reset', 'info');
         }

@@ -4,7 +4,7 @@ import App from './App';
 import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
 
 // Cache busting - force reload if version changed
-const APP_VERSION = '2025-05-25-v2';
+const APP_VERSION = '2025-05-25-v3-auth-fix';
 const STORED_VERSION = localStorage.getItem('app_version');
 
 if (STORED_VERSION && STORED_VERSION !== APP_VERSION) {

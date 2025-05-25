@@ -367,7 +367,7 @@ export const restoreFromBackup = (backup, options = {}) => {
 
     // Update app version to prevent cache clearing on next reload
     if (results.success && results.restored.length > 0) {
-      const APP_VERSION = '2025-05-25-v2'; // Should match the version in index.js
+      const APP_VERSION = '2025-05-25-v3-auth-fix'; // Should match the version in index.js
       localStorage.setItem('app_version', APP_VERSION);
       console.log('✅ Updated app version after successful backup restore to prevent cache clearing');
     }

@@ -171,7 +171,7 @@
             log('🔍 Checking version information...');
             
             const storedVersion = localStorage.getItem('app_version');
-            const currentVersion = '2025-05-25-v2'; // This should match your app
+            const currentVersion = '2025-05-25-v3-auth-fix'; // This should match your app
             
             let status = '<h4>Version Information:</h4>';
             status += `<p><strong>Stored Version:</strong> ${storedVersion || 'NOT SET'}</p>`;
@@ -223,7 +223,7 @@
                 const backup = {
                     metadata: {
                         version: '1.0.0',
-                        appVersion: '2025-05-25-v2',
+                        appVersion: '2025-05-25-v3-auth-fix',
                         createdAt: new Date().toISOString(),
                         createdBy: 'Debug Tool',
                         description: 'Test backup created by debug tool'
@@ -287,7 +287,7 @@
 
         function resetAppVersion() {
             log('🔄 Resetting app version...');
-            localStorage.setItem('app_version', '2025-05-25-v2');
+            localStorage.setItem('app_version', '2025-05-25-v3-auth-fix');
             showStatus('version-status', '✅ App version reset to current!', 'success');
             log('App version reset to current');
         }
