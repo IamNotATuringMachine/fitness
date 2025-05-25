@@ -36,53 +36,19 @@
       "name": "Start Workout",
       "short_name": "Workout",
       "description": "Quick start a new workout session",
-      "url": "/workout-tracker",
-      "icons": [
-        {
-          "src": "icons/workout-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/workout-tracker"
     },
     {
       "name": "Analytics",
       "short_name": "Stats",
       "description": "View your fitness analytics and progress",
-      "url": "/analytics",
-      "icons": [
-        {
-          "src": "icons/analytics-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/analytics"
     },
     {
       "name": "Exercise Library",
       "short_name": "Exercises",
       "description": "Browse exercise library",
-      "url": "/exercises",
-      "icons": [
-        {
-          "src": "icons/exercises-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/desktop-screenshot.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "FitTrack Dashboard on Desktop"
-    },
-    {
-      "src": "screenshots/mobile-screenshot.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "FitTrack Mobile Experience"
+      "url": "/exercises"
     }
   ],
   "edge_side_panel": {
