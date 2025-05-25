@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { authService, dataService } from '../services/SupabaseService';
 import { secureStorage } from '../utils/security';
 
@@ -150,12 +150,23 @@ export function AuthProvider({ children }) {
             sessionExpiry: session?.expires_at,
             currentTime: Math.floor(Date.now() / 1000),
             isExpired: session?.expires_at ? Math.floor(Date.now() / 1000) > session.expires_at : false,
-            error: error?.message || 'none'
+            expiryInMinutes: session?.expires_at ? Math.round((session.expires_at - Math.floor(Date.now() / 1000)) / 60) : 'N/A',
+            error: error?.message || 'none',
+            sessionObject: session ? Object.keys(session) : 'none'
           });
           
           // Handle case where session exists but user is null or session is expired
           if (session && (!session.user || (session.expires_at && Math.floor(Date.now() / 1000) > session.expires_at))) {
             console.warn('🔧 AuthContext: Session exists but user is null or session expired, clearing auth state');
+            
+            // Log detailed session info for debugging
+            console.log('🔧 AuthContext: Invalid session details:', {
+              hasUser: !!session.user,
+              expiresAt: session.expires_at,
+              currentTime: Math.floor(Date.now() / 1000),
+              isExpired: session.expires_at ? Math.floor(Date.now() / 1000) > session.expires_at : false,
+              timeDifferenceMinutes: session.expires_at ? Math.round((session.expires_at - Math.floor(Date.now() / 1000)) / 60) : 'N/A'
+            });
             
             // Try to sign out to clear the invalid session
             try {
@@ -164,12 +175,14 @@ export function AuthProvider({ children }) {
             } catch (signOutError) {
               console.warn('🔧 AuthContext: Failed to clear invalid session:', signOutError);
               // Clear localStorage auth data manually
-              for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
-                  localStorage.removeItem(key);
-                }
-              }
+              console.log('🔧 AuthContext: Manually clearing localStorage auth data...');
+              const authKeys = Object.keys(localStorage).filter(key => 
+                key.startsWith('sb-') || key.includes('supabase') || key.includes('auth')
+              );
+              authKeys.forEach(key => {
+                console.log('🔧 AuthContext: Removing localStorage key:', key);
+                localStorage.removeItem(key);
+              });
             }
             
             setUser(null);
@@ -350,6 +363,50 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Debug function to manually clear all auth-related data
+  const clearAllAuthData = useCallback(async () => {
+    console.log('🔧 AuthContext: Manually clearing all auth data...');
+    
+    try {
+      // Clear local app data
+      await clearLocalData();
+      
+      // Clear Supabase auth data from localStorage
+      const authKeys = Object.keys(localStorage).filter(key => 
+        key.includes('sb-') || key.includes('supabase') || key.includes('auth')
+      );
+      
+      authKeys.forEach(key => {
+        console.log('🔧 AuthContext: Clearing localStorage key:', key);
+        localStorage.removeItem(key);
+      });
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      
+      // Sign out from Supabase
+      if (!isDemoMode) {
+        try {
+          await authService.signOut();
+        } catch (error) {
+          console.warn('🔧 AuthContext: Error during signOut:', error);
+        }
+      }
+      
+      // Reset state
+      setUser(null);
+      setError(null);
+      setLoading(false);
+      setIsInitialized(true);
+      
+      console.log('🔧 AuthContext: All auth data cleared successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('🔧 AuthContext: Error clearing auth data:', error);
+      return { success: false, error };
+    }
+  }, [isDemoMode]);
+
   const syncUserDataOnSignIn = async (user) => {
     console.log('🔧 AuthContext: Starting user data sync on sign in for:', user.email);
     
@@ -465,7 +522,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const saveUserDataToCloud = async () => {
+  const saveUserDataToCloud = useCallback(async () => {
     if (!user) {
       console.log('🔧 AuthContext: No user available for cloud save');
       return { success: false, error: 'No user authenticated' };
@@ -513,7 +570,7 @@ export function AuthProvider({ children }) {
       console.error('🔧 AuthContext: Error saving user data to cloud:', error);
       return { success: false, error };
     }
-  };
+  }, [user]);
 
   // Demo mode login functions
   const signInDemo = async () => {
@@ -855,10 +912,11 @@ export function AuthProvider({ children }) {
     loadUserDataFromCloud,
     createBackup,
     getBackups,
+    clearAllAuthData,
     clearError: () => setError(null)
   };
 
-  // Set up automatic sync trigger for WorkoutContext
+  // Set up automatic sync trigger for WorkoutContext and debug functions
   useEffect(() => {
     if (user && !isDemoMode) {
       window.triggerCloudSync = async () => {
@@ -879,13 +937,28 @@ export function AuthProvider({ children }) {
       window.triggerCloudSync = null;
     }
     
+    // Always expose debug function for troubleshooting
+    window.clearAuthData = async () => {
+      console.log('🔧 Debug: Clearing all auth data from console...');
+      const result = await clearAllAuthData();
+      if (result.success) {
+        console.log('✅ Debug: Auth data cleared successfully. Please refresh the page.');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        console.error('❌ Debug: Failed to clear auth data:', result.error);
+      }
+    };
+    
     // Cleanup on unmount
     return () => {
       if (window.triggerCloudSync) {
         window.triggerCloudSync = null;
       }
+      if (window.clearAuthData) {
+        window.clearAuthData = null;
+      }
     };
-  }, [user, isDemoMode, saveUserDataToCloud]);
+  }, [user, isDemoMode, saveUserDataToCloud, clearAllAuthData]);
 
   return (
     <AuthContext.Provider value={value}>
