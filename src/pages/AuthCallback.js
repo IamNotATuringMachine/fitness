@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
@@ -32,24 +32,109 @@ const LoadingText = styled.p`
   color: ${props => props.theme.colors.textSecondary};
   font-size: 1rem;
   text-align: center;
+  margin-bottom: 1rem;
+`;
+
+const ErrorText = styled.p`
+  color: ${props => props.theme.colors.error};
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+`;
+
+const DebugInfo = styled.div`
+  background: ${props => props.theme.colors.cardBackground};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  max-width: 500px;
+  word-break: break-all;
 `;
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, isInitialized, error } = useAuth();
+  const [timeoutError, setTimeoutError] = useState(false);
+  const [debugInfo, setDebugInfo] = useState({});
 
   useEffect(() => {
+    console.log('🔄 AuthCallback mounted');
+    console.log('📊 Auth state:', { user: !!user, loading, isInitialized, error });
+    
+    // Update debug info
+    setDebugInfo({
+      user: !!user,
+      loading,
+      isInitialized,
+      error: error?.message || null,
+      url: window.location.href,
+      timestamp: new Date().toISOString()
+    });
+
+    // Set a timeout to prevent infinite waiting
+    const timeout = setTimeout(() => {
+      console.error('⏰ Auth callback timeout - redirecting to login');
+      setTimeoutError(true);
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 2000);
+    }, 10000); // 10 seconds timeout
+
     // Wait for auth state to be determined
-    if (!loading) {
+    if (isInitialized && !loading) {
+      clearTimeout(timeout);
+      
       if (user) {
-        // User is authenticated, redirect to dashboard
+        console.log('✅ User authenticated, redirecting to dashboard');
         navigate('/', { replace: true });
       } else {
-        // Authentication failed, redirect to login
-        navigate('/login', { replace: true });
+        console.log('❌ Authentication failed, redirecting to home (will show login)');
+        navigate('/', { replace: true });
       }
     }
-  }, [user, loading, navigate]);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [user, loading, isInitialized, error, navigate]);
+
+  if (timeoutError) {
+    return (
+      <CallbackContainer>
+        <ErrorText>
+          Authentifizierung dauert zu lange. Du wirst weitergeleitet...
+        </ErrorText>
+        {process.env.NODE_ENV === 'development' && (
+          <DebugInfo>
+            <strong>Debug Info:</strong>
+            <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+          </DebugInfo>
+        )}
+      </CallbackContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <CallbackContainer>
+        <ErrorText>
+          Authentifizierungsfehler: {error.message}
+        </ErrorText>
+        <LoadingText>
+          Du wirst zur Startseite weitergeleitet...
+        </LoadingText>
+        {process.env.NODE_ENV === 'development' && (
+          <DebugInfo>
+            <strong>Debug Info:</strong>
+            <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+          </DebugInfo>
+        )}
+      </CallbackContainer>
+    );
+  }
 
   return (
     <CallbackContainer>
@@ -57,6 +142,12 @@ export default function AuthCallback() {
       <LoadingText>
         Authentifizierung wird verarbeitet...
       </LoadingText>
+      {process.env.NODE_ENV === 'development' && (
+        <DebugInfo>
+          <strong>Debug Info:</strong>
+          <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+        </DebugInfo>
+      )}
     </CallbackContainer>
   );
 } 

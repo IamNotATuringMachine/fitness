@@ -35,8 +35,8 @@ jobs:
       run: npm run build
       env:
         PUBLIC_URL: /fitness
-        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
-        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL || 'placeholder' }}
+        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY || 'placeholder' }}
         
     - name: Setup Pages
       uses: actions/configure-pages@v4

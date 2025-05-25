@@ -49,7 +49,7 @@ export class SupabaseAuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}${process.env.PUBLIC_URL || ''}/auth/callback`
+          redirectTo: `${window.location.origin}/fitness/auth/callback`
         }
       });
       
@@ -67,7 +67,7 @@ export class SupabaseAuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}${process.env.PUBLIC_URL || ''}/auth/callback`
+          redirectTo: `${window.location.origin}/fitness/auth/callback`
         }
       });
       
@@ -95,7 +95,7 @@ export class SupabaseAuthService {
   async resetPassword(email) {
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}${process.env.PUBLIC_URL || ''}/auth/reset-password`
+        redirectTo: `${window.location.origin}/fitness/auth/reset-password`
       });
       
       if (error) throw error;

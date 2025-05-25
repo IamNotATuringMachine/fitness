@@ -71,7 +71,8 @@ const ContentContainer = styled.main`
   }
 `;
 
-function App() {
+// Protected App Layout Component
+function ProtectedAppLayout({ children }) {
   const [debugPanelVisible, setDebugPanelVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -92,25 +93,54 @@ function App() {
   };
 
   return (
+    <AppContainer>
+      <Header 
+        onMenuToggle={toggleMobileMenu} 
+        isMobileMenuOpen={mobileMenuOpen}
+      />
+      <MainContainer>
+        <Sidebar />
+        <MobileNavigation 
+          isOpen={mobileMenuOpen} 
+          onClose={closeMobileMenu}
+        />
+        <ContentContainer>
+          {children}
+        </ContentContainer>
+      </MainContainer>
+      
+      {/* Floating Action Buttons */}
+      <FloatingActions
+        showDebug={process.env.NODE_ENV === 'development'}
+        onDebugToggle={toggleDebugPanel}
+        debugVisible={debugPanelVisible}
+      />
+      
+      {/* Debug Panel */}
+      <DebugPanel
+        isVisible={debugPanelVisible}
+        onClose={closeDebugPanel}
+      />
+    </AppContainer>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <ProtectedRoute>
-            <WorkoutProvider>
-              <ErrorBoundary>
-                <Router basename="/fitness">
-                  <AppContainer>
-                    <Header 
-                      onMenuToggle={toggleMobileMenu} 
-                      isMobileMenuOpen={mobileMenuOpen}
-                    />
-                    <MainContainer>
-                      <Sidebar />
-                      <MobileNavigation 
-                        isOpen={mobileMenuOpen} 
-                        onClose={closeMobileMenu}
-                      />
-                      <ContentContainer>
+          <ErrorBoundary>
+            <Router basename="/fitness">
+              <Routes>
+                {/* Public route for OAuth callback - not protected */}
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                
+                {/* All other routes are protected */}
+                <Route path="/*" element={
+                  <ProtectedRoute>
+                    <WorkoutProvider>
+                      <ProtectedAppLayout>
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/plans" element={<WorkoutPlans />} />
@@ -136,28 +166,14 @@ function App() {
                           <Route path="/edit-workout/:id" element={<EditWorkoutPage />} />
                           <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
                           <Route path="/social" element={<SocialFeatures />} />
-                          <Route path="/auth/callback" element={<AuthCallback />} />
                         </Routes>
-                      </ContentContainer>
-                    </MainContainer>
-                    
-                    {/* Floating Action Buttons */}
-                    <FloatingActions
-                      showDebug={process.env.NODE_ENV === 'development'}
-                      onDebugToggle={toggleDebugPanel}
-                      debugVisible={debugPanelVisible}
-                    />
-                    
-                    {/* Debug Panel */}
-                    <DebugPanel
-                      isVisible={debugPanelVisible}
-                      onClose={closeDebugPanel}
-                    />
-                  </AppContainer>
-                </Router>
-              </ErrorBoundary>
-            </WorkoutProvider>
-          </ProtectedRoute>
+                      </ProtectedAppLayout>
+                    </WorkoutProvider>
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </Router>
+          </ErrorBoundary>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
