@@ -31,48 +31,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Check for .env.production
+    - name: Setup environment variables
       run: |
-        if [ -f ".env.production" ]; then
-          echo "✅ Found .env.production file"
-          echo "Loading environment variables from .env.production"
-          # Don't cat the file to avoid exposing secrets in logs
-          echo "Environment file exists and will be used during build"
-        else
-          echo "⚠️ No .env.production file found"
-          echo "Will use GitHub secrets or fallback to offline mode"
-        fi
-    
-    - name: Load .env.production if exists
-      run: |
-        if [ -f ".env.production" ]; then
-          echo "Loading .env.production into GitHub environment"
-          # Export variables from .env.production to GitHub environment
-          while IFS= read -r line || [[ -n "$line" ]]; do
-            # Skip comments and empty lines
-            if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
-              continue
-            fi
-            # Export to GitHub environment
-            if [[ "$line" =~ ^[A-Z_]+=.* ]]; then
-              echo "$line" >> $GITHUB_ENV
-              echo "✅ Loaded: ${line%%=*}"
-            fi
-          done < .env.production
-        else
-          echo "No .env.production file to load"
-          # Set fallback values if no .env.production
-          echo "REACT_APP_SUPABASE_URL=" >> $GITHUB_ENV
-          echo "REACT_APP_SUPABASE_ANON_KEY=" >> $GITHUB_ENV
-          echo "REACT_APP_DISABLE_SUPABASE=true" >> $GITHUB_ENV
-        fi
+        echo "Setting up environment variables for build..."
+        echo "✅ Using Supabase configuration"
       
     - name: Build
-      run: |
-        # Environment variables are now guaranteed to be in GITHUB_ENV
-        npm run build
+      run: npm run build
       env:
         PUBLIC_URL: /fitness
+        REACT_APP_SUPABASE_URL: https://osbkihliyfepgithobdx.supabase.co
+        REACT_APP_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmtpaGxieWZlcGdpdGhvYmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjE1NjEsImV4cCI6MjA2MzczNzU2MX0.sRt-kgQcDnxQKQQ4D0WGpqY8Z9Mx7B6EqFIQq8o6Y-I"
         
     - name: Verify build output
       run: |
