@@ -382,6 +382,19 @@ export const exerciseDatabase = {
       "beschreibung": "Alternative zu Klimmzügen, um die Rückenbreite zu trainieren."
     },
     {
+      "übung_name": "Rudergerät mit Bruststütze",
+      "übungstyp": "Verbundübung (maschinenbasiert)",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Latissimus dorsi": 1.0,
+        "Trapezmuskel (mittlere Fasern)": 0.8,
+        "Rhomboiden": 0.8,
+        "Hintere Schulter": 0.5,
+        "Bizeps/Brachialis": 0.4
+      },
+      "equipment": ["Rudergerät mit Bruststütze"],
+      "beschreibung": "Stabilisierte Ruderübung für optimale Rückendicke. Die Bruststütze eliminiert Schwung und ermöglicht perfekte Isolation der Rückenmuskulatur."
+    },
+    {
       "übung_name": "Kreuzheben (Konventionell)",
       "übungstyp": "Verbundübung",
       "gewichtete_muskelbeteiligung_pro_satz": {

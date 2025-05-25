@@ -831,7 +831,7 @@ const CreatePlan = () => {
                           <strong>Sätze:</strong> {exercise.sets}
                           {exercise.reps && <> | <strong>Wiederholungen:</strong> {exercise.reps}</>}
                           {exercise.weight && <> | <strong>Gewicht:</strong> {exercise.weight} kg</>}
-                          {exercise.repsInReserve && <> | <strong>RIR:</strong> {exercise.repsInReserve}</>}
+                          {exercise.repsInReserve !== null && exercise.repsInReserve !== undefined && <> | <strong>RIR:</strong> {exercise.repsInReserve}</>}
                           {exercise.rest && <> | <strong>Pause:</strong> {exercise.rest} s</>}
                         </div>
                         {exercise.equipment && exercise.equipment.length > 0 && (
@@ -1161,6 +1161,12 @@ const CreatePlan = () => {
             onClick={() => navigate('/plans')}
           >
             Abbrechen
+          </Button>
+          <Button 
+            variant="secondary"
+            onClick={() => setShowDayForm(true)}
+          >
+            + Neuer Trainingstag hinzufügen
           </Button>
           <Button 
             onClick={handleSavePlan}
