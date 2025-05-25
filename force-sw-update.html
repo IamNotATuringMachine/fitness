@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Service Worker Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Service Worker Debug Tools</h1>
+    
+    <button onclick="unregisterSW()">1. Unregister All Service Workers</button>
+    <button onclick="clearCaches()">2. Clear All Caches</button>
+    <button onclick="registerSW()">3. Register New Service Worker</button>
+    <button onclick="forceUpdate()">4. Force Service Worker Update</button>
+    
+    <div id="log"></div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += '<div class="log">' + new Date().toISOString() + ': ' + message + '</div>';
+            console.log(message);
+        }
+
+        async function unregisterSW() {
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    log('Unregistered service worker: ' + registration.scope);
+                }
+                if (registrations.length === 0) {
+                    log('No service workers found');
+                }
+            } catch (error) {
+                log('Error unregistering: ' + error.message);
+            }
+        }
+
+        async function clearCaches() {
+            try {
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                    log('Deleted cache: ' + cacheName);
+                }
+                if (cacheNames.length === 0) {
+                    log('No caches found');
+                }
+            } catch (error) {
+                log('Error clearing caches: ' + error.message);
+            }
+        }
+
+        async function registerSW() {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                log('Service worker registered: ' + registration.scope);
+                
+                registration.addEventListener('updatefound', () => {
+                    log('Update found! New service worker installing...');
+                });
+
+                if (registration.installing) {
+                    log('Service worker installing...');
+                } else if (registration.waiting) {
+                    log('Service worker waiting...');
+                } else if (registration.active) {
+                    log('Service worker active');
+                }
+            } catch (error) {
+                log('Error registering: ' + error.message);
+            }
+        }
+
+        async function forceUpdate() {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.update();
+                    log('Forced service worker update');
+                } else {
+                    log('No service worker registration found');
+                }
+            } catch (error) {
+                log('Error forcing update: ' + error.message);
+            }
+        }
+
+        // Auto-log current state
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    log('Current service worker found: ' + registration.scope);
+                    if (registration.active) {
+                        log('Active SW script URL: ' + registration.active.scriptURL);
+                    }
+                } else {
+                    log('No service worker currently registered');
+                }
+
+                const cacheNames = await caches.keys();
+                log('Current caches: ' + cacheNames.join(', '));
+            } catch (error) {
+                log('Error checking current state: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html> 
