@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import { createBackup, exportBackup } from '../../utils/backupUtils';
 
 const FloatingContainer = styled.div`
   position: fixed;
@@ -55,6 +56,20 @@ const FloatingButton = styled.button`
   }
 `;
 
+const LoadingSpinner = styled.div`
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  border-top: 2px solid #374151;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 const Tooltip = styled.div`
   position: absolute;
   bottom: 100%;
@@ -87,27 +102,52 @@ const Tooltip = styled.div`
 `;
 
 const FloatingActions = ({ showDebug = true, onDebugToggle, debugVisible }) => {
-  // Don't render anything if no buttons are shown
-  if (!showDebug) {
-    return null;
-  }
+  const [isBackingUp, setIsBackingUp] = useState(false);
+
+  const handleQuickBackup = async () => {
+    setIsBackingUp(true);
+    
+    try {
+      const backup = createBackup();
+      await exportBackup(backup);
+      
+      // Update last backup timestamp
+      localStorage.setItem('lastBackupTime', new Date().toISOString());
+    } catch (error) {
+      console.error('Fehler beim Quick-Backup:', error);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
 
   return (
     <FloatingContainer>
-      {/* Debug Button */}
+      {/* Backup Button */}
       <FloatingButton
-        onClick={onDebugToggle}
-        title="Debug Panel ein/ausblenden"
-        style={{
-          background: debugVisible 
-            ? 'rgba(59, 130, 246, 0.9)' 
-            : 'rgba(255, 255, 255, 0.9)',
-          color: debugVisible ? 'white' : '#374151'
-        }}
+        onClick={handleQuickBackup}
+        disabled={isBackingUp}
+        title="Schnelles Backup erstellen"
       >
-        <Tooltip>Debug Panel</Tooltip>
-        🔧
+        <Tooltip>Backup erstellen</Tooltip>
+        {isBackingUp ? <LoadingSpinner /> : '💾'}
       </FloatingButton>
+
+      {/* Debug Button */}
+      {showDebug && (
+        <FloatingButton
+          onClick={onDebugToggle}
+          title="Debug Panel ein/ausblenden"
+          style={{
+            background: debugVisible 
+              ? 'rgba(59, 130, 246, 0.9)' 
+              : 'rgba(255, 255, 255, 0.9)',
+            color: debugVisible ? 'white' : '#374151'
+          }}
+        >
+          <Tooltip>Debug Panel</Tooltip>
+          🔧
+        </FloatingButton>
+      )}
     </FloatingContainer>
   );
 };
