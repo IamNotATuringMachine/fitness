@@ -312,6 +312,12 @@ const workoutReducer = (state, action) => {
           workout.id === action.payload.id ? { ...workout, ...action.payload, updatedAt: new Date().toISOString() } : workout
         )
       };
+    case 'RELOAD_FROM_STORAGE':
+      console.log('🔄 WorkoutContext: Reloading state from storage after sync');
+      return {
+        ...action.payload,
+        isInitialized: true
+      };
     default:
       return state;
   }
@@ -415,6 +421,30 @@ export const WorkoutProvider = ({ children }) => {
   };
 
   const [state, dispatch] = useReducer(workoutReducer, loadState());
+
+  // Reload state from localStorage when sync events occur
+  useEffect(() => {
+    const handleSyncEvents = (event) => {
+      console.log('🔄 WorkoutContext: Sync event detected, reloading state from localStorage');
+      const newState = loadState();
+      
+      // Update the reducer state with the new data from localStorage
+      dispatch({ type: 'RELOAD_FROM_STORAGE', payload: newState });
+    };
+
+    // Listen for various sync events
+    window.addEventListener('safeDataSynced', handleSyncEvents);
+    window.addEventListener('loginDataSynced', handleSyncEvents);
+    window.addEventListener('cloudDataUpdated', handleSyncEvents);
+    window.addEventListener('autoSyncCompleted', handleSyncEvents);
+
+    return () => {
+      window.removeEventListener('safeDataSynced', handleSyncEvents);
+      window.removeEventListener('loginDataSynced', handleSyncEvents);
+      window.removeEventListener('cloudDataUpdated', handleSyncEvents);
+      window.removeEventListener('autoSyncCompleted', handleSyncEvents);
+    };
+  }, []);
 
   // Save state to localStorage when it changes (but only after initial load)
   useEffect(() => {

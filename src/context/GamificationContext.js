@@ -225,6 +225,31 @@ export function GamificationProvider({ children }) {
       dispatch({ type: 'LOAD_STATE', payload: JSON.parse(savedState) });
     }
   }, []);
+
+  // Reload state from localStorage when sync events occur
+  useEffect(() => {
+    const handleSyncEvents = (event) => {
+      console.log('🔄 GamificationContext: Sync event detected, reloading state from localStorage');
+      const savedState = localStorage.getItem('gamificationState');
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        dispatch({ type: 'LOAD_STATE', payload: parsedState });
+      }
+    };
+
+    // Listen for various sync events
+    window.addEventListener('safeDataSynced', handleSyncEvents);
+    window.addEventListener('loginDataSynced', handleSyncEvents);
+    window.addEventListener('cloudDataUpdated', handleSyncEvents);
+    window.addEventListener('autoSyncCompleted', handleSyncEvents);
+
+    return () => {
+      window.removeEventListener('safeDataSynced', handleSyncEvents);
+      window.removeEventListener('loginDataSynced', handleSyncEvents);
+      window.removeEventListener('cloudDataUpdated', handleSyncEvents);
+      window.removeEventListener('autoSyncCompleted', handleSyncEvents);
+    };
+  }, []);
   
   // Save state to localStorage whenever it changes
   useEffect(() => {

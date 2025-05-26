@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,7 +21,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -38,6 +40,14 @@ jobs:
       
     - name: Increment version
       run: npm run increment-version
+      
+    - name: Commit version update
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add public/version.json
+        git diff --staged --quiet || git commit -m "Auto-increment version [skip ci]"
+        git push origin HEAD:${{ github.ref_name }}
       
     - name: Build
       run: npm run build

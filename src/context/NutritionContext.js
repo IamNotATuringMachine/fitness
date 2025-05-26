@@ -112,6 +112,31 @@ export function NutritionProvider({ children }) {
     }
   }, []);
 
+  // Reload state from localStorage when sync events occur
+  useEffect(() => {
+    const handleSyncEvents = (event) => {
+      console.log('🔄 NutritionContext: Sync event detected, reloading state from localStorage');
+      const savedState = localStorage.getItem('nutritionState');
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        dispatch({ type: 'LOAD_STATE', payload: parsedState });
+      }
+    };
+
+    // Listen for various sync events
+    window.addEventListener('safeDataSynced', handleSyncEvents);
+    window.addEventListener('loginDataSynced', handleSyncEvents);
+    window.addEventListener('cloudDataUpdated', handleSyncEvents);
+    window.addEventListener('autoSyncCompleted', handleSyncEvents);
+
+    return () => {
+      window.removeEventListener('safeDataSynced', handleSyncEvents);
+      window.removeEventListener('loginDataSynced', handleSyncEvents);
+      window.removeEventListener('cloudDataUpdated', handleSyncEvents);
+      window.removeEventListener('autoSyncCompleted', handleSyncEvents);
+    };
+  }, []);
+
   // Save state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('nutritionState', JSON.stringify(state));
