@@ -4,8 +4,6 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 
-import { v4 as uuidv4 } from 'uuid';
-
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
