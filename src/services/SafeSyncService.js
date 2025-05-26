@@ -1,5 +1,5 @@
 import { secureStorage } from '../utils/security';
-import { authService, dataService } from './SupabaseService';
+import { dataService } from './SupabaseService';
 
 class SafeSyncService {
   constructor() {
