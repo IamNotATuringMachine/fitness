@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { authService, dataService } from '../services/SupabaseService';
 import { secureStorage } from '../utils/security';
+import autoSyncService from '../services/AutoSyncService';
 
 const AuthContext = createContext();
 
@@ -251,6 +252,10 @@ export function AuthProvider({ children }) {
           if (event === 'SIGNED_OUT') {
             console.log('🔧 AuthContext: Processing SIGNED_OUT event - START');
             try {
+              // Disable auto-sync immediately
+              autoSyncService.disable();
+              console.log('🔧 AuthContext: Auto-sync disabled on sign out');
+              
               setUser(null);
               await clearLocalData(); // Ensure local data is cleared before UI might try to access it
               setError(null);
@@ -275,6 +280,12 @@ export function AuthProvider({ children }) {
             setError(null);
             setLoading(false);
             setIsInitialized(true);
+            
+            // Enable auto-sync for authenticated users (not demo mode)
+            if (!isDemoMode) {
+              autoSyncService.enable();
+              console.log('🔧 AuthContext: Auto-sync enabled for authenticated user');
+            }
             
             // Perform data sync in background (non-blocking)
             const performBackgroundSync = async () => {
@@ -336,6 +347,11 @@ export function AuthProvider({ children }) {
     return () => {
       mounted = false;
       clearTimeout(emergencyTimer);
+      
+      // Cleanup auto-sync service
+      autoSyncService.destroy();
+      console.log('🔧 AuthContext: Auto-sync service cleaned up');
+      
       // Handle both real and mock subscriptions
       if (authStateChangeResult?.data?.subscription?.unsubscribe) {
         authStateChangeResult.data.subscription.unsubscribe();
@@ -591,6 +607,10 @@ export function AuthProvider({ children }) {
       
       // Set demo user
       setUser(DEMO_USER);
+      
+      // Disable auto-sync for demo mode
+      autoSyncService.disable();
+      console.log('🔧 AuthContext: Auto-sync disabled for demo mode');
       
       console.log('🔧 AuthContext: Demo login successful');
       return { success: true, data: { user: DEMO_USER } };
@@ -919,28 +939,33 @@ export function AuthProvider({ children }) {
     clearError: () => setError(null)
   };
 
-  // Set up automatic sync trigger for WorkoutContext and debug functions
+  // Set up debug functions for console access
   useEffect(() => {
+    // Force immediate sync debug function (uses AutoSyncService)
     if (user && !isDemoMode) {
-      window.triggerCloudSync = async () => {
+      window.forceSyncNow = async () => {
         try {
-          console.log('🔄 Auto-sync: Triggering cloud save...');
-          const result = await saveUserDataToCloud();
-          if (result.success) {
-            console.log('✅ Auto-sync: Data saved to cloud successfully');
-          } else {
-            console.warn('⚠️ Auto-sync: Failed to save data to cloud:', result.error);
-          }
+          console.log('🔄 Debug: Forcing immediate sync via AutoSyncService...');
+          await autoSyncService.forceSyncNow();
+          console.log('✅ Debug: Immediate sync completed');
         } catch (error) {
-          console.error('❌ Auto-sync: Error during cloud save:', error);
+          console.error('❌ Debug: Error during forced sync:', error);
         }
       };
+      
+      // Get auto-sync status
+      window.getAutoSyncStatus = () => {
+        const status = autoSyncService.getStatus();
+        console.log('📊 Auto-sync status:', status);
+        return status;
+      };
     } else {
-      // Remove sync trigger when user is not authenticated
-      window.triggerCloudSync = null;
+      // Remove debug functions when user is not authenticated
+      window.forceSyncNow = null;
+      window.getAutoSyncStatus = null;
     }
     
-    // Always expose debug function for troubleshooting
+    // Always expose auth debug function for troubleshooting
     window.clearAuthData = async () => {
       console.log('🔧 Debug: Clearing all auth data from console...');
       const result = await clearAllAuthData();
@@ -954,14 +979,17 @@ export function AuthProvider({ children }) {
     
     // Cleanup on unmount
     return () => {
-      if (window.triggerCloudSync) {
-        window.triggerCloudSync = null;
+      if (window.forceSyncNow) {
+        window.forceSyncNow = null;
+      }
+      if (window.getAutoSyncStatus) {
+        window.getAutoSyncStatus = null;
       }
       if (window.clearAuthData) {
         window.clearAuthData = null;
       }
     };
-  }, [user, isDemoMode, saveUserDataToCloud, clearAllAuthData]);
+  }, [user, isDemoMode, clearAllAuthData]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -35,6 +35,8 @@ import WorkoutHistory from './pages/WorkoutHistory';
 import AdvancedAnalytics from './pages/AdvancedAnalytics';
 import SocialFeatures from './pages/SocialFeatures';
 import AuthCallback from './pages/AuthCallback';
+import VersionCounter from './components/ui/VersionCounter';
+import AutoSyncIndicator from './components/ui/AutoSyncIndicator';
 
 const AppContainer = styled.div`
   display: flex;
@@ -97,6 +99,8 @@ function ProtectedAppLayout({ children }) {
           {children}
         </ContentContainer>
       </MainContainer>
+      <VersionCounter />
+      <AutoSyncIndicator />
     </AppContainer>
   );
 }

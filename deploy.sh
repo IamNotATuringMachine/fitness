@@ -75,9 +75,32 @@ if [ ! -f ".env.production" ]; then
     fi
 fi
 
-# Step 3: Build Process
+# Step 3: Version Management
 echo ""
-echo "🔨 Step 3: Building the application..."
+echo "📋 Step 3: Updating version..."
+
+# Use Node.js script for version increment (supports semantic versioning)
+if command -v node >/dev/null 2>&1 && [ -f "increment-version.js" ]; then
+    node increment-version.js
+else
+    # Fallback: manual semantic version increment
+    if [ -f "public/version.json" ]; then
+        echo "⚠️ Node.js not available, using fallback versioning"
+        echo "{" > public/version.json
+        echo "  \"version\": \"0.0.0.1\"" >> public/version.json
+        echo "}" >> public/version.json
+        echo "✅ Version reset to v0.0.0.1"
+    else
+        echo "{" > public/version.json
+        echo "  \"version\": \"0.0.0.1\"" >> public/version.json
+        echo "}" >> public/version.json
+        echo "✅ Version file created with v0.0.0.1"
+    fi
+fi
+
+# Step 4: Build Process
+echo ""
+echo "🔨 Step 4: Building the application..."
 
 # Install dependencies if node_modules doesn't exist
 if [ ! -d "node_modules" ]; then
@@ -95,9 +118,9 @@ fi
 
 echo "✅ Build completed successfully!"
 
-# Step 4: Deployment
+# Step 5: Deployment
 echo ""
-echo "🚀 Step 4: Deploying to GitHub Pages..."
+echo "🚀 Step 5: Deploying to GitHub Pages..."
 npm run deploy
 
 if [ $? -eq 0 ]; then

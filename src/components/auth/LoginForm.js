@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import { FaGoogle, FaGithub, FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
+import VersionCounter from '../ui/VersionCounter';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -494,6 +495,7 @@ export default function LoginForm() {
 
   return (
     <LoginContainer>
+      <VersionCounter />
       <LoginCard>
         <Logo>
           <LogoIcon>
