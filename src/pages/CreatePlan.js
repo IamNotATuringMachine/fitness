@@ -69,10 +69,6 @@ const DaysContainer = styled.div`
   margin-top: 2rem;
 `;
 
-const AddDayButton = styled(Button)`
-  margin-bottom: 1.5rem;
-`;
-
 const DayCard = styled(Card)`
   margin-bottom: 1.5rem;
 `;
