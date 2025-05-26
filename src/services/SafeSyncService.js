@@ -246,13 +246,16 @@ class SafeSyncService {
         return;
       }
       
-      // Push if local data is newer
+      // Push if local data is newer OR if timestamps are identical but content differs
       const localFreshness = this.getDataFreshness(localValue);
       const remoteFreshness = this.getDataFreshness(remoteValue);
       
-      if (localFreshness.timestamp > remoteFreshness.timestamp) {
+      if (localFreshness.timestamp > remoteFreshness.timestamp ||
+          (localFreshness.timestamp === remoteFreshness.timestamp && JSON.stringify(localValue) !== JSON.stringify(remoteValue))
+      ) {
+        // Always update lastModified for the data being pushed to ensure it's the newest on next sync
         dataToPush[key] = { ...localValue, lastModified: new Date().toISOString() };
-        reasons.push(`${key}: local newer`);
+        reasons.push(`${key}: local newer or content changed`);
       }
     });
     
