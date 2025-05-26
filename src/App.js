@@ -37,6 +37,7 @@ import SocialFeatures from './pages/SocialFeatures';
 import AuthCallback from './pages/AuthCallback';
 import VersionCounter from './components/ui/VersionCounter';
 import AutoSyncIndicator from './components/ui/AutoSyncIndicator';
+import SyncNotification from './components/ui/SyncNotification';
 
 const AppContainer = styled.div`
   display: flex;
@@ -101,6 +102,7 @@ function ProtectedAppLayout({ children }) {
       </MainContainer>
       <VersionCounter />
       <AutoSyncIndicator />
+      <SyncNotification />
     </AppContainer>
   );
 }

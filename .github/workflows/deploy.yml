@@ -36,6 +36,9 @@ jobs:
         echo "Setting up environment variables for build..."
         echo "✅ Using Supabase configuration"
       
+    - name: Increment version
+      run: npm run increment-version
+      
     - name: Build
       run: npm run build
       env:

@@ -1,5 +1,6 @@
 import { secureStorage } from '../utils/security';
 import cloudSyncService from './CloudSyncService';
+import safeSyncService from './SafeSyncService';
 
 class AutoSyncService {
   constructor() {
@@ -105,12 +106,20 @@ class AutoSyncService {
     console.log('🚀 AutoSyncService: Starting auto-sync for keys:', changedKeys);
     
     try {
-      // Use the existing cloud sync service
-      const result = await cloudSyncService.triggerSync();
+      // Use the safe sync service for auto-sync operations
+      const result = await safeSyncService.forceSync();
       
       if (result && result.success) {
         console.log('✅ AutoSyncService: Auto-sync completed successfully');
-        this.showSyncNotification('success', 'Automatically synced to cloud');
+        
+        // Show appropriate notification based on what happened
+        if (result.localUpdates && result.localUpdates.length > 0) {
+          this.showSyncNotification('success', `Data updated: ${result.localUpdates.join(', ')}`);
+        } else if (result.cloudUpdates) {
+          this.showSyncNotification('success', 'Data saved to cloud');
+        } else {
+          this.showSyncNotification('success', 'Data synchronized');
+        }
       } else {
         console.warn('⚠️ AutoSyncService: Auto-sync completed with warnings:', result?.error);
         this.showSyncNotification('warning', 'Sync completed with warnings');

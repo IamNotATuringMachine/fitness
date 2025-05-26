@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef, useCallb
 import { authService, dataService } from '../services/SupabaseService';
 import { secureStorage } from '../utils/security';
 import autoSyncService from '../services/AutoSyncService';
+import safeSyncService from '../services/SafeSyncService';
 
 const AuthContext = createContext();
 
@@ -287,25 +288,38 @@ export function AuthProvider({ children }) {
               console.log('🔧 AuthContext: Auto-sync enabled for authenticated user');
             }
             
-            // Perform data sync in background (non-blocking)
-            const performBackgroundSync = async () => {
+            // Perform immediate safe sync (pull data immediately, never overwrite cloud with defaults)
+            const performImmediateSync = async () => {
               try {
-                console.log('🔧 AuthContext: Starting background data sync...');
-                const syncPromise = syncUserDataOnSignIn(session.user);
-                const timeoutPromise = new Promise((_, reject) => 
-                  setTimeout(() => reject(new Error('Sync timeout')), 15000)
-                );
+                console.log('🔄 AuthContext: Starting immediate safe sync...');
+                const syncResult = await safeSyncService.performLoginSync(session.user);
                 
-                await Promise.race([syncPromise, timeoutPromise]);
-                console.log('🔧 AuthContext: Background data sync completed successfully');
+                if (syncResult.success) {
+                  console.log('✅ AuthContext: Immediate sync completed successfully');
+                  if (syncResult.hasUpdates) {
+                    console.log('📥 AuthContext: Data updated from cloud:', syncResult.updatedKeys);
+                    // Show notification that data was updated
+                    window.dispatchEvent(new CustomEvent('loginDataSynced', {
+                      detail: {
+                        message: 'Your data has been synced from the cloud',
+                        updatedKeys: syncResult.updatedKeys
+                      }
+                    }));
+                  }
+                  if (syncResult.pushedToCloud) {
+                    console.log('📤 AuthContext: Local data pushed to cloud');
+                  }
+                } else {
+                  console.warn('⚠️ AuthContext: Immediate sync failed (non-critical):', syncResult.error);
+                }
               } catch (syncError) {
-                console.error('🔧 AuthContext: Background data sync failed (non-critical):', syncError);
+                console.error('❌ AuthContext: Immediate sync failed (non-critical):', syncError);
                 // Don't block signin for sync errors - just log them
               }
             };
             
-            // Start background sync but don't await it
-            performBackgroundSync();
+            // Start immediate sync but don't await it to avoid blocking UI
+            performImmediateSync();
             
             console.log('🔧 AuthContext: Processing SIGNED_IN event - END. User set, loading false, initialized true.');
             return; 
@@ -941,7 +955,7 @@ export function AuthProvider({ children }) {
 
   // Set up debug functions for console access
   useEffect(() => {
-    // Force immediate sync debug function (uses AutoSyncService)
+    // Force immediate sync debug functions
     if (user && !isDemoMode) {
       window.forceSyncNow = async () => {
         try {
@@ -953,15 +967,30 @@ export function AuthProvider({ children }) {
         }
       };
       
-      // Get auto-sync status
+      window.forceSafeSync = async () => {
+        try {
+          console.log('🔄 Debug: Forcing safe sync...');
+          const result = await safeSyncService.forceSync();
+          console.log('✅ Debug: Safe sync completed:', result);
+          return result;
+        } catch (error) {
+          console.error('❌ Debug: Error during safe sync:', error);
+          return { success: false, error: error.message };
+        }
+      };
+      
+      // Get sync status
       window.getAutoSyncStatus = () => {
-        const status = autoSyncService.getStatus();
-        console.log('📊 Auto-sync status:', status);
-        return status;
+        const autoStatus = autoSyncService.getStatus();
+        const safeStatus = safeSyncService.getStatus();
+        console.log('📊 Auto-sync status:', autoStatus);
+        console.log('📊 Safe-sync status:', safeStatus);
+        return { autoSync: autoStatus, safeSync: safeStatus };
       };
     } else {
       // Remove debug functions when user is not authenticated
       window.forceSyncNow = null;
+      window.forceSafeSync = null;
       window.getAutoSyncStatus = null;
     }
     
@@ -981,6 +1010,9 @@ export function AuthProvider({ children }) {
     return () => {
       if (window.forceSyncNow) {
         window.forceSyncNow = null;
+      }
+      if (window.forceSafeSync) {
+        window.forceSafeSync = null;
       }
       if (window.getAutoSyncStatus) {
         window.getAutoSyncStatus = null;
