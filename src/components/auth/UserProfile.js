@@ -313,7 +313,7 @@ export default function UserProfile() {
           title="Aktuelle Daten in die Cloud hochladen"
         >
           <FaCloud />
-          {syncStatus === 'syncing' ? '⬆️ Speichere...' : '⬆️ In Cloud speichern'}
+          {syncStatus === 'syncing' ? 'Speichere...' : 'In Cloud speichern'}
         </DropdownItem>
 
         <DropdownItem 
@@ -322,7 +322,7 @@ export default function UserProfile() {
           title="Daten aus der Cloud herunterladen und lokale Daten ersetzen"
         >
           <FaDownload />
-          {syncStatus === 'syncing' ? '⬇️ Lade...' : '⬇️ Aus Cloud laden'}
+          {syncStatus === 'syncing' ? 'Lade...' : 'Aus Cloud laden'}
         </DropdownItem>
 
         <DropdownItem onClick={handleSignOut} className="danger" disabled={isLoggingOut}>

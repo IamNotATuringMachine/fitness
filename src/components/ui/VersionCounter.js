@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const VersionContainer = styled.div`
   position: fixed;
   bottom: 16px;
-  right: 16px;
+  left: 16px;
   background-color: ${props => props.theme.colors.background};
   color: ${props => props.theme.colors.textSecondary};
   border: 1px solid ${props => props.theme.colors.border};
@@ -22,7 +22,7 @@ const VersionContainer = styled.div`
   
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
     bottom: 80px; /* Above mobile navigation */
-    right: 12px;
+    left: 12px;
   }
 `;
 
