@@ -58,7 +58,6 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const userRef = useRef(user);
   const isSyncing = useRef(false);
   const supabaseSubscription = useRef(null);
@@ -552,7 +551,6 @@ export function AuthProvider({ children }) {
             setLoading(false);
             setIsInitialized(true);
             setAppRebuildHash(Math.random().toString(36).substring(7));
-            setIsLoggingOut(false);
 
           } else if (event === 'SIGNED_IN' && session?.user) {
             console.log('🔧 AuthContext: Processing SIGNED_IN event - START');
@@ -562,7 +560,6 @@ export function AuthProvider({ children }) {
             setLoading(false);
             setIsInitialized(true);
             setIsDemoMode(false);
-            setIsLoggingOut(false);
 
             if (!isDemoMode) {
               autoSyncService.enable();
@@ -638,12 +635,14 @@ export function AuthProvider({ children }) {
             setUser(newUser);
           }
           
-          if (loadingRef.current) {
+          // Ensure loading is false if it's still true and we have a session or no session (initial load)
+          // This also covers the case where initializeAuth might not have set loading to false
+          if (loading) { // Use direct state 'loading'
              console.log('🔧 AuthContext: Auth state change (other event), setting loading to false.');
              setLoading(false);
           }
 
-          if (!isInitializedRef.current) {
+          if (!isInitialized) { // Use direct state 'isInitialized'
             console.log('🔧 AuthContext: Auth state change (other event), setting isInitialized to true.');
             setIsInitialized(true);
           }
@@ -653,9 +652,17 @@ export function AuthProvider({ children }) {
 
     // Emergency failsafe for stuck authentication
     const emergencyTimer = setTimeout(() => {
-      if (mounted && !initComplete && loadingRef.current) {
-        console.error('🚨 AuthContext: Emergency timeout reached, clearing cache and reloading...');
-        // clearCacheAndReload(); // Temporarily disabled for debugging rapid refresh
+      // use 'mounted' to ensure this doesn't run after unmount, and 'loading' state variable
+      if (mounted && !initComplete && loading) { 
+        console.error('🚨 AuthContext: Emergency timeout reached while still loading, clearing cache and reloading...');
+        // clearCacheAndReload(); // Temporarily disabled for debugging rapid refresh. Review if needed.
+        // As a less drastic measure, ensure loading is false and user is null.
+        if (mounted) {
+            setUser(null);
+            setError(new Error('Authentication emergency timeout'));
+            setLoading(false);
+            setIsInitialized(true); 
+        }
       }
     }, 20000); // 20 second emergency timeout
 
@@ -684,8 +691,9 @@ export function AuthProvider({ children }) {
       if(authStateChangeError) {
         console.error("🔧 AuthContext: Error during onAuthStateChange setup", authStateChangeError);
       }
-    };
-  }, [deepMergeStates, isDemoMode]);
+    }; // This is the end of the main useEffect's callback function body
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepMergeStates, isDemoMode]); // Dependencies for the main useEffect
 
   const clearLocalData = async () => {
     try {
@@ -953,7 +961,6 @@ export function AuthProvider({ children }) {
   const signOut = async (options = { saveBeforeSignOut: true }) => {
     const { saveBeforeSignOut } = options;
     console.log(`🔧 AuthContext: signOut called. Save before sign out: ${saveBeforeSignOut}`);
-    setIsLoggingOut(true);
     setLoading(true);
     setError(null);
     
@@ -974,7 +981,6 @@ export function AuthProvider({ children }) {
         userRef.current = null;
         setIsDemoMode(false);
         setLoading(false);
-        setIsLoggingOut(false);
         return { success: true };
       }
       
