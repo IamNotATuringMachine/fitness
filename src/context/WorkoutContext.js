@@ -180,6 +180,11 @@ const workoutReducer = (state, action) => {
           ? [...state.exercises, newExercise]
           : [newExercise],
       };
+    case 'SET_EXERCISES':
+      return {
+        ...state,
+        exercises: Array.isArray(action.payload) ? action.payload : [],
+      };
     case 'ADD_CALENDAR_EVENT':
       return {
         ...state,

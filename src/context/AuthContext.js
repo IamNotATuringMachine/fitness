@@ -118,9 +118,8 @@ export function AuthProvider({ children }) {
         // Process remote items (updates and new additions)
         for (const remoteItem of remoteItems) {
           if (!remoteItem.id) { // last_modified can be checked during comparison
-            console.warn(`Remote ${itemName} item missing id, attempting to keep local if exists or skip:`, remoteItem);
-            const existingLocal = localItems.find(li => li.id === remoteItem.id);
-            if (existingLocal) mergedItems.push(existingLocal);
+            console.warn(`Remote ${itemName} item missing id, skipping item:`, remoteItem);
+            // Skip items without IDs - they cannot be properly merged
             continue;
           }
           const localItem = localItems.find(li => li.id === remoteItem.id);

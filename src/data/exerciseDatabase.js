@@ -1125,7 +1125,7 @@ export const convertToFlatExerciseList = (detailedDatabase) => {
     detailedDatabase[muscleGroup].forEach(exercise => {
       // Hauptübung hinzufügen
       const mainExercise = {
-        id: generateId(),
+        id: generateId(exercise.übung_name),
         name: exercise.übung_name,
         muscleGroups: [muscleGroup],
         equipment: exercise.equipment || [],
@@ -1139,7 +1139,7 @@ export const convertToFlatExerciseList = (detailedDatabase) => {
       if (exercise.variationen) {
         exercise.variationen.forEach(variation => {
           const variationExercise = {
-            id: generateId(),
+            id: generateId(variation.name, true, exercise.übung_name),
             name: variation.name,
             muscleGroups: [muscleGroup],
             equipment: variation.equipment || [],
@@ -1158,7 +1158,21 @@ export const convertToFlatExerciseList = (detailedDatabase) => {
   return exercises;
 };
 
-// Hilfsfunktion zur ID-Generierung
-const generateId = () => {
-  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+// Hilfsfunktion zur ID-Generierung - deterministic based on exercise name
+const generateId = (exerciseName, isVariation = false, parentName = '') => {
+  // Create a deterministic ID based on the exercise name
+  // This ensures the same exercise always gets the same ID
+  const baseString = isVariation ? `${parentName}-${exerciseName}` : exerciseName;
+  
+  // Simple hash function to create consistent IDs
+  let hash = 0;
+  for (let i = 0; i < baseString.length; i++) {
+    const char = baseString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  
+  // Convert to a positive base36 string and ensure minimum length
+  const hashString = Math.abs(hash).toString(36);
+  return `ex_${hashString}_${baseString.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20)}`;
 }; 

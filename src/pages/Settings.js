@@ -59,7 +59,7 @@ const AdminLink = styled(Link)`
 
 const Settings = () => {
   const { userPreferences } = useTheme();
-  const { state: contextState } = useWorkout();
+  const { state: contextState, dispatch } = useWorkout();
   
   return (
     <div>
@@ -151,6 +151,44 @@ const Settings = () => {
               style={{ fontSize: '0.9rem' }}
             >
               🏗️ Muskelgruppen-Mapping
+            </Button>
+            
+            <Button 
+              variant="danger"
+              onClick={() => {
+                if (window.confirm('🔧 Diese Aktion entfernt doppelte Übungen aus der Datenbank.\n\nDadurch wird das Problem mit der steigenden Übungszahl behoben.\n\nFortfahren?')) {
+                  try {
+                    const originalCount = contextState.exercises.length;
+                    
+                    // Remove duplicates by exercise name, keeping the first occurrence
+                    const seen = new Set();
+                    const uniqueExercises = contextState.exercises.filter(exercise => {
+                      if (seen.has(exercise.name)) {
+                        return false; // Skip duplicate
+                      }
+                      seen.add(exercise.name);
+                      return true; // Keep unique
+                    });
+                    
+                    const removedCount = originalCount - uniqueExercises.length;
+                    
+                    if (removedCount > 0) {
+                      // Update the context with unique exercises
+                      dispatch({ type: 'SET_EXERCISES', payload: uniqueExercises });
+                      
+                      alert(`✅ Erfolgreich ${removedCount} doppelte Übungen entfernt!\n\nVorher: ${originalCount} Übungen\nJetzt: ${uniqueExercises.length} Übungen\n\nDas Dashboard sollte jetzt die korrekte Anzahl anzeigen.`);
+                    } else {
+                      alert('✨ Keine doppelten Übungen gefunden! Die Datenbank ist bereits sauber.');
+                    }
+                  } catch (error) {
+                    console.error('Fehler beim Entfernen von Duplikaten:', error);
+                    alert('❌ Fehler beim Entfernen von Duplikaten. Versuche einen vollständigen Reset.');
+                  }
+                }
+              }}
+              style={{ fontSize: '0.9rem' }}
+            >
+              🔧 Doppelte Übungen entfernen
             </Button>
           </div>
         </SettingSection>
