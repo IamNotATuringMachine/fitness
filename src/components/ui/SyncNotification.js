@@ -118,8 +118,8 @@ const SyncNotification = () => {
     const handleCloudDataUpdated = (event) => {
       const { updatedKeys, source } = event.detail;
       
-      if (updatedKeys && updatedKeys.length > 0 && source === 'real-time-sync') {
-        const displayMessage = `🌐 Real-time sync: ${updatedKeys.join(', ')} updated`;
+      if (updatedKeys && updatedKeys.length > 0 && source !== 'real-time-sync') {
+        const displayMessage = `🌐 Data updated via sync: ${updatedKeys.join(', ')} updated`;
         
         setNotification(displayMessage);
         setIsVisible(true);
