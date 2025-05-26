@@ -4,8 +4,9 @@ import safeSyncService from './SafeSyncService';
 class AutoSyncService {
   constructor() {
     this.debounceTimeout = null;
-    this.syncDelay = 2000; // 2 seconds debounce delay
+    this.syncDelay = 5000; // 5 seconds debounce delay to reduce sync conflicts
     this.isEnabled = false;
+    this.isPaused = false; // Add pause capability
     this.watchedKeys = [
       'workoutState',
       'userProfile', 
@@ -83,18 +84,44 @@ class AutoSyncService {
 
   // Trigger auto-sync with debouncing
   triggerAutoSync(changedKey) {
+    // Check if auto-sync is temporarily paused
+    if (this.isPaused) {
+      console.log(`⏸️ AutoSyncService: Auto-sync paused, queuing ${changedKey} for later`);
+      this.syncQueue.add(changedKey);
+      return;
+    }
+    
     // Add to sync queue
     this.syncQueue.add(changedKey);
     
     // Clear existing timeout
     this.clearDebounceTimeout();
     
-    // Set new debounced sync
+    // Set new debounced sync with longer delay to prevent conflicts
     this.debounceTimeout = setTimeout(() => {
       this.performAutoSync();
     }, this.syncDelay);
     
     console.log(`🔄 AutoSyncService: Queued auto-sync for key: ${changedKey}`);
+  }
+
+  // Temporarily pause auto-sync during critical operations
+  pauseAutoSync() {
+    this.isPaused = true;
+    this.clearDebounceTimeout();
+    console.log('⏸️ AutoSyncService: Auto-sync paused');
+  }
+
+  // Resume auto-sync and process queued changes
+  resumeAutoSync() {
+    this.isPaused = false;
+    console.log('▶️ AutoSyncService: Auto-sync resumed');
+    
+    // Process any queued changes
+    if (this.syncQueue.size > 0) {
+      console.log(`🔄 AutoSyncService: Processing ${this.syncQueue.size} queued changes`);
+      this.triggerAutoSync('queued-changes');
+    }
   }
 
   // Perform the actual sync
@@ -206,6 +233,7 @@ class AutoSyncService {
   getStatus() {
     return {
       isEnabled: this.isEnabled,
+      isPaused: this.isPaused,
       queueSize: this.syncQueue.size,
       queuedKeys: Array.from(this.syncQueue),
       lastSyncTime: this.lastSyncTime,

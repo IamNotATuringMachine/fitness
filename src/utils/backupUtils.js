@@ -497,7 +497,7 @@ const mergeGamificationData = (current, backup) => {
 };
 
 /**
- * Merges two arrays by ID, preferring backup items for conflicts
+ * Merges two arrays by ID, keeping newer items based on timestamps
  * @param {Array} current - Current array
  * @param {Array} backup - Backup array
  * @returns {Array} Merged array
@@ -508,12 +508,23 @@ const mergeArraysById = (current, backup) => {
   
   backup.forEach(backupItem => {
     if (!currentIds.has(backupItem.id)) {
+      // New item from backup, add it
       merged.push(backupItem);
     } else {
-      // Replace existing item with backup version
-      const index = merged.findIndex(item => item.id === backupItem.id);
-      if (index !== -1) {
-        merged[index] = backupItem;
+      // Item exists in both, check which is newer
+      const currentItem = merged.find(item => item.id === backupItem.id);
+      if (currentItem) {
+        const currentTime = new Date(currentItem.lastModified || currentItem.createdAt || currentItem.date || 0).getTime();
+        const backupTime = new Date(backupItem.lastModified || backupItem.createdAt || backupItem.date || 0).getTime();
+        
+        // Only replace if backup item is newer
+        if (backupTime > currentTime) {
+          const index = merged.findIndex(item => item.id === backupItem.id);
+          if (index !== -1) {
+            merged[index] = backupItem;
+          }
+        }
+        // If current item is newer or equal, keep it (don't replace)
       }
     }
   });

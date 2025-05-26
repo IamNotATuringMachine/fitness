@@ -66,6 +66,36 @@ const getSmartInitialState = () => {
 // Use smart initial state
 export const initialState = getSmartInitialState();
 
+// Helper function to merge arrays by ID, keeping newer items
+const mergeArraysByIdSmart = (currentArray, newArray) => {
+  const merged = [...currentArray];
+  const currentMap = new Map(currentArray.map(item => [item.id, item]));
+  
+  newArray.forEach(newItem => {
+    const currentItem = currentMap.get(newItem.id);
+    
+    if (!currentItem) {
+      // New item, add it
+      merged.push(newItem);
+    } else {
+      // Item exists, check which is newer
+      const currentTime = new Date(currentItem.lastModified || currentItem.createdAt || currentItem.date || 0).getTime();
+      const newTime = new Date(newItem.lastModified || newItem.createdAt || newItem.date || 0).getTime();
+      
+      if (newTime > currentTime || !currentItem.lastModified) {
+        // New item is newer, replace it
+        const index = merged.findIndex(item => item.id === newItem.id);
+        if (index !== -1) {
+          merged[index] = newItem;
+        }
+      }
+      // If current item is newer or equal, keep it (don't replace)
+    }
+  });
+  
+  return merged;
+};
+
 // Utility to ensure deep copy of complex objects
 export const deepCloneWithSafeChecks = (obj) => {
   if (!obj) return obj;
@@ -104,7 +134,9 @@ const workoutReducer = (state, action) => {
       console.log('ADD_WORKOUT_PLAN payload:', action.payload);
       const newPlan = {
         ...action.payload,
-        days: Array.isArray(action.payload.days) ? deepCloneWithSafeChecks(action.payload.days) : [] // Ensure days are safely and deeply copied
+        days: Array.isArray(action.payload.days) ? deepCloneWithSafeChecks(action.payload.days) : [], // Ensure days are safely and deeply copied
+        createdAt: action.payload.createdAt || new Date().toISOString(),
+        lastModified: new Date().toISOString()
       };
       console.log('Processed newPlan:', newPlan);
       return {
@@ -117,7 +149,8 @@ const workoutReducer = (state, action) => {
       console.log('UPDATE_WORKOUT_PLAN payload:', action.payload);
       const updatedPlan = {
         ...action.payload,
-        days: Array.isArray(action.payload.days) ? deepCloneWithSafeChecks(action.payload.days) : [] // Ensure days are safely and deeply copied
+        days: Array.isArray(action.payload.days) ? deepCloneWithSafeChecks(action.payload.days) : [], // Ensure days are safely and deeply copied
+        lastModified: new Date().toISOString()
       };
       console.log('Processed updatedPlan:', updatedPlan);
       return {
@@ -136,11 +169,16 @@ const workoutReducer = (state, action) => {
           : [],
       };
     case 'ADD_EXERCISE':
+      const newExercise = {
+        ...action.payload,
+        createdAt: action.payload.createdAt || new Date().toISOString(),
+        lastModified: new Date().toISOString()
+      };
       return {
         ...state,
         exercises: Array.isArray(state.exercises) 
-          ? [...state.exercises, action.payload]
-          : [action.payload],
+          ? [...state.exercises, newExercise]
+          : [newExercise],
       };
     case 'ADD_CALENDAR_EVENT':
       return {
@@ -313,11 +351,49 @@ const workoutReducer = (state, action) => {
         )
       };
     case 'RELOAD_FROM_STORAGE':
-      console.log('🔄 WorkoutContext: Reloading state from storage after sync');
-      return {
-        ...action.payload,
+      console.log('🔄 WorkoutContext: Smart merging state from storage after sync');
+      // Instead of completely replacing state, merge intelligently to preserve unsaved changes
+      const currentState = state;
+      const newStateFromStorage = action.payload;
+      
+      // Smart merge each data type
+      const smartMergedState = {
+        ...currentState,
+        ...newStateFromStorage,
         isInitialized: true
       };
+      
+      // Merge arrays by ID, keeping items with newer timestamps
+      if (newStateFromStorage.workoutPlans) {
+        smartMergedState.workoutPlans = mergeArraysByIdSmart(
+          currentState.workoutPlans || [], 
+          newStateFromStorage.workoutPlans || []
+        );
+      }
+      
+      if (newStateFromStorage.exercises) {
+        smartMergedState.exercises = mergeArraysByIdSmart(
+          currentState.exercises || [], 
+          newStateFromStorage.exercises || []
+        );
+      }
+      
+      if (newStateFromStorage.workoutHistory) {
+        smartMergedState.workoutHistory = mergeArraysByIdSmart(
+          currentState.workoutHistory || [], 
+          newStateFromStorage.workoutHistory || []
+        );
+      }
+      
+      if (newStateFromStorage.bodyMeasurements) {
+        smartMergedState.bodyMeasurements = mergeArraysByIdSmart(
+          currentState.bodyMeasurements || [], 
+          newStateFromStorage.bodyMeasurements || []
+        );
+      }
+      
+      console.log('✅ WorkoutContext: Smart merge completed');
+      return smartMergedState;
     default:
       return state;
   }

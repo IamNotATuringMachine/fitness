@@ -380,15 +380,102 @@ class CloudSyncService {
     for (const change of changes) {
       if (change.type === 'update') {
         const currentState = secureStorage.get('workoutState') || {};
-        const updatedState = {
-          ...currentState,
-          ...change.data
-        };
         
-        secureStorage.set('workoutState', updatedState);
-        secureStorage.set('dataLastModified', new Date().toISOString());
+        // Instead of completely overwriting, merge carefully
+        const updatedState = this.mergeStatesCarefully(currentState, change.data);
+        
+        // Only update if there are actual changes
+        if (JSON.stringify(updatedState) !== JSON.stringify(currentState)) {
+          console.log('🔄 CloudSyncService: Applying carefully merged local changes');
+          secureStorage.set('workoutState', updatedState);
+          secureStorage.set('dataLastModified', new Date().toISOString());
+        } else {
+          console.log('🔄 CloudSyncService: No changes to apply');
+        }
       }
     }
+  }
+
+  // Carefully merge states to preserve all data
+  mergeStatesCarefully(currentState, newData) {
+    const merged = { ...currentState };
+    
+    // Merge arrays by combining and deduplicating by ID
+    if (newData.workoutPlans && Array.isArray(newData.workoutPlans)) {
+      merged.workoutPlans = this.mergeArraysByIdWithTimestamp(
+        currentState.workoutPlans || [], 
+        newData.workoutPlans
+      );
+    }
+    
+    if (newData.exercises && Array.isArray(newData.exercises)) {
+      merged.exercises = this.mergeArraysByIdWithTimestamp(
+        currentState.exercises || [], 
+        newData.exercises
+      );
+    }
+    
+    if (newData.workoutHistory && Array.isArray(newData.workoutHistory)) {
+      merged.workoutHistory = this.mergeArraysByIdWithTimestamp(
+        currentState.workoutHistory || [], 
+        newData.workoutHistory
+      );
+    }
+    
+    if (newData.bodyMeasurements && Array.isArray(newData.bodyMeasurements)) {
+      merged.bodyMeasurements = this.mergeArraysByIdWithTimestamp(
+        currentState.bodyMeasurements || [], 
+        newData.bodyMeasurements
+      );
+    }
+    
+    // Merge user profile carefully
+    if (newData.userProfile) {
+      merged.userProfile = { ...currentState.userProfile, ...newData.userProfile };
+    }
+    
+    // Keep other properties that might exist
+    Object.keys(newData).forEach(key => {
+      if (!['workoutPlans', 'exercises', 'workoutHistory', 'bodyMeasurements', 'userProfile'].includes(key)) {
+        merged[key] = newData[key];
+      }
+    });
+    
+    return merged;
+  }
+  
+  // Merge arrays by ID, keeping newer items based on timestamp
+  mergeArraysByIdWithTimestamp(currentArray, newArray) {
+    const currentMap = new Map(currentArray.map(item => [item.id, item]));
+    const newMap = new Map(newArray.map(item => [item.id, item]));
+    
+    // Start with current array
+    const merged = [...currentArray];
+    
+    // Add or update items from new array
+    newArray.forEach(newItem => {
+      const currentItem = currentMap.get(newItem.id);
+      
+      if (!currentItem) {
+        // New item, add it
+        merged.push(newItem);
+      } else {
+        // Item exists, check which is newer
+        const currentTime = new Date(currentItem.lastModified || currentItem.createdAt || currentItem.date || 0).getTime();
+        const newTime = new Date(newItem.lastModified || newItem.createdAt || newItem.date || 0).getTime();
+        
+        if (newTime > currentTime || !currentItem.lastModified) {
+          // New item is newer, replace it
+          const index = merged.findIndex(item => item.id === newItem.id);
+          if (index !== -1) {
+            merged[index] = newItem;
+          }
+        }
+        // If current item is newer or equal, keep it (don't replace)
+      }
+    });
+    
+    return merged;
   }
 
   async pushToRemote(changes) {
