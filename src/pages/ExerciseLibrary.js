@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { useWorkout } from '../context/WorkoutContext';
 
 import { exerciseDatabase } from '../data/exerciseDatabase';
 import { v4 as uuidv4 } from 'uuid';
@@ -278,13 +279,13 @@ const ResultsCounter = styled.div`
 `;
 
 const ExerciseLibrary = () => {
+  const { state } = useWorkout(); // Use exercises from context instead of local state
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [editingExercise, setEditingExercise] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [exercises, setExercises] = useState([]);
   const [newExercise, setNewExercise] = useState({
     name: '',
     category: 'Brust',
@@ -296,51 +297,18 @@ const ExerciseLibrary = () => {
     parentExercise: ''
   });
 
-  // Convert the detailed exercise database to a flat list
-  useEffect(() => {
-    const flatExercises = [];
-    Object.entries(exerciseDatabase).forEach(([category, categoryExercises]) => {
-      categoryExercises.forEach(exercise => {
-        // Add main exercise
-        flatExercises.push({
-          id: uuidv4(),
-          name: exercise.übung_name,
-          category: category,
-          type: exercise.übungstyp,
-          muscleInvolvement: exercise.gewichtete_muskelbeteiligung_pro_satz,
-          equipment: exercise.equipment,
-          description: exercise.beschreibung,
-          variations: exercise.variationen || []
-        });
-
-        // Add variations as separate exercises
-        if (exercise.variationen) {
-          exercise.variationen.forEach(variation => {
-            flatExercises.push({
-              id: uuidv4(),
-              name: variation.name,
-              category: category,
-              type: variation.übungstyp,
-              muscleInvolvement: variation.gewichtete_muskelbeteiligung_pro_satz,
-              equipment: variation.equipment,
-              description: variation.beschreibung,
-              isVariation: true,
-              parentExercise: exercise.übung_name
-            });
-          });
-        }
-      });
-    });
-    setExercises(flatExercises);
-  }, []);
+  // Use exercises from context instead of creating local state
+  const exercises = state.exercises || [];
 
   // Filter and sort exercises
   const filteredAndSortedExercises = React.useMemo(() => {
     let filtered = exercises.filter(exercise => {
       const matchesSearch = searchTerm === '' || 
         exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        exercise.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        Object.keys(exercise.muscleInvolvement || {}).some(muscle => 
+        (exercise.muscleGroups || []).some(mg => 
+          mg.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        Object.keys(exercise.gewichtete_muskelbeteiligung_pro_satz || {}).some(muscle => 
           muscle.toLowerCase().includes(searchTerm.toLowerCase())
         ) ||
         (exercise.equipment || []).some(eq => 
@@ -360,17 +328,17 @@ const ExerciseLibrary = () => {
           bValue = b.name.toLowerCase();
           break;
         case 'category':
-          aValue = a.category.toLowerCase();
-          bValue = b.category.toLowerCase();
+          aValue = (a.muscleGroups?.[0] || '').toLowerCase();
+          bValue = (b.muscleGroups?.[0] || '').toLowerCase();
           break;
         case 'type':
-          aValue = a.type.toLowerCase();
-          bValue = b.type.toLowerCase();
+          aValue = (a.übungstyp || '').toLowerCase();
+          bValue = (b.übungstyp || '').toLowerCase();
           break;
         case 'primaryMuscle':
-          const aPrimary = Object.entries(a.muscleInvolvement || {})
+          const aPrimary = Object.entries(a.gewichtete_muskelbeteiligung_pro_satz || {})
             .reduce((max, [muscle, weight]) => weight > max.weight ? { muscle, weight } : max, { muscle: '', weight: 0 });
-          const bPrimary = Object.entries(b.muscleInvolvement || {})
+          const bPrimary = Object.entries(b.gewichtete_muskelbeteiligung_pro_satz || {})
             .reduce((max, [muscle, weight]) => weight > max.weight ? { muscle, weight } : max, { muscle: '', weight: 0 });
           aValue = aPrimary.muscle.toLowerCase();
           bValue = bPrimary.muscle.toLowerCase();
@@ -396,10 +364,8 @@ const ExerciseLibrary = () => {
   const handleSaveExercise = () => {
     if (!editingExercise) return;
 
-    // Update exercises array
-    setExercises(prev => prev.map(ex => 
-      ex.id === editingExercise.id ? editingExercise : ex
-    ));
+    // Note: Exercise editing is currently read-only since exercises come from context
+    // To enable editing, we would need to dispatch an UPDATE_EXERCISE action to the context
 
     setShowEditModal(false);
     setEditingExercise(null);
@@ -475,7 +441,8 @@ const ExerciseLibrary = () => {
       variations: newExercise.isVariation ? undefined : []
     };
 
-    setExercises(prev => [...prev, exercise]);
+    // Note: Exercise creation is currently disabled since exercises come from context
+    // To enable creation, we would need to dispatch an ADD_EXERCISE action to the context
     
     // Reset form
     setNewExercise({
@@ -607,19 +574,19 @@ const ExerciseLibrary = () => {
                 </Card.Header>
                 <Card.Body>
                   <div style={{ marginBottom: '1rem' }}>
-                    <strong>Kategorie:</strong> {exercise.category}
+                    <strong>Muskelgruppen:</strong> {(exercise.muscleGroups || []).join(', ')}
                   </div>
 
                   <div style={{ marginBottom: '1rem' }}>
                     <strong>Übungstyp:</strong>
                     <div style={{ marginTop: '0.5rem' }}>
-                      <ExerciseType>{exercise.type}</ExerciseType>
+                      <ExerciseType>{exercise.übungstyp || 'Unbekannt'}</ExerciseType>
                     </div>
                   </div>
 
                   <MuscleInvolvementSection>
                     <strong>Muskelbeteiligung pro Satz:</strong>
-                    {Object.entries(exercise.muscleInvolvement || {}).map(([muscle, weight]) => (
+                    {Object.entries(exercise.gewichtete_muskelbeteiligung_pro_satz || {}).map(([muscle, weight]) => (
                       <MuscleInvolvementItem key={muscle}>
                         <span>{muscle}</span>
                         <MuscleWeight weight={weight}>
@@ -640,8 +607,8 @@ const ExerciseLibrary = () => {
                     </EquipmentSection>
                   )}
 
-                  {exercise.description && (
-                    <Description>{exercise.description}</Description>
+                  {exercise.beschreibung && (
+                    <Description>{exercise.beschreibung}</Description>
                   )}
 
                   {exercise.variations && exercise.variations.length > 0 && (

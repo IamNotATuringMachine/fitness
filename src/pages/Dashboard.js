@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { format } from 'date-fns';
+import { exerciseDatabase } from '../data/exerciseDatabase';
 
 const DashboardContainer = styled.div`
   display: grid;
@@ -347,9 +348,22 @@ const Dashboard = () => {
   
   // Ensure all properties exist with defaults
   const workoutPlans = state?.workoutPlans || [];
-  const exercises = state?.exercises || [];
   const calendarEvents = state?.calendarEvents || [];
   const workoutHistory = state?.workoutHistory || [];
+  
+  // Calculate the actual exercise count that matches ExerciseLibrary
+  const actualExerciseCount = useMemo(() => {
+    let count = 0;
+    Object.entries(exerciseDatabase).forEach(([category, categoryExercises]) => {
+      categoryExercises.forEach(exercise => {
+        count++; // Main exercise
+        if (exercise.variationen) {
+          count += exercise.variationen.length; // Variations
+        }
+      });
+    });
+    return count;
+  }, []);
   
   // Get recent workouts
   const recentWorkouts = [...workoutHistory].sort((a, b) => {
@@ -394,7 +408,7 @@ const Dashboard = () => {
                 <StatLabel>Trainingspläne</StatLabel>
               </StatItem>
               <StatItem as={Link} to="/exercise-library">
-                <StatValue>{exercises.length}</StatValue>
+                <StatValue>{actualExerciseCount}</StatValue>
                 <StatLabel>Übungen</StatLabel>
               </StatItem>
               <StatItem as={Link} to="/calendar">
