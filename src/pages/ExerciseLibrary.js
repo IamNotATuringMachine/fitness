@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useWorkout } from '../context/WorkoutContext';
 
-import { exerciseDatabase } from '../data/exerciseDatabase';
 import { v4 as uuidv4 } from 'uuid';
 
 const PageHeader = styled.div`
@@ -298,7 +297,7 @@ const ExerciseLibrary = () => {
   });
 
   // Use exercises from context instead of creating local state
-  const exercises = state.exercises || [];
+  const exercises = React.useMemo(() => state.exercises || [], [state.exercises]);
 
   // Filter and sort exercises
   const filteredAndSortedExercises = React.useMemo(() => {
@@ -428,6 +427,9 @@ const ExerciseLibrary = () => {
       return;
     }
 
+    // Note: Exercise creation is currently disabled since exercises come from context
+    // To enable creation, we would need to dispatch an ADD_EXERCISE action to the context
+    /*
     const exercise = {
       id: uuidv4(),
       name: newExercise.name.trim(),
@@ -440,9 +442,7 @@ const ExerciseLibrary = () => {
       parentExercise: newExercise.isVariation ? newExercise.parentExercise : undefined,
       variations: newExercise.isVariation ? undefined : []
     };
-
-    // Note: Exercise creation is currently disabled since exercises come from context
-    // To enable creation, we would need to dispatch an ADD_EXERCISE action to the context
+    */
     
     // Reset form
     setNewExercise({
