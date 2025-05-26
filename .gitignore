@@ -25,4 +25,7 @@ yarn-error.log*
 .idea/
 .vscode/
 *.sublime-project
-*.sublime-workspace 
+*.sublime-workspace
+
+# Version tracking (auto-generated)
+public/version.json 

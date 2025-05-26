@@ -38,16 +38,11 @@ jobs:
         echo "Setting up environment variables for build..."
         echo "✅ Using Supabase configuration"
       
-    - name: Increment version
-      run: npm run increment-version
-      
-    - name: Commit version update
+    - name: Increment version (build-time only)
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add public/version.json
-        git diff --staged --quiet || git commit -m "Auto-increment version [skip ci]"
-        git push origin HEAD:${{ github.ref_name }}
+        echo "🔄 Incrementing version for build (no commit)..."
+        npm run increment-version
+        echo "✅ Version incremented for this build"
       
     - name: Build
       run: npm run build
