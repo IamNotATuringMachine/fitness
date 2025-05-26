@@ -2,50 +2,66 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import autoSyncService from '../../services/AutoSyncService';
 
-const AutoSyncIndicator = () => {
+const ManualSyncNotification = () => {
   const { user, isDemoMode } = useAuth();
   const [syncStatus, setSyncStatus] = useState('idle');
   const [isVisible, setIsVisible] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
 
   useEffect(() => {
-    // Only show indicator for authenticated users (not demo mode)
+    // Only listen for manual sync events for authenticated users (not demo mode)
     if (user && !isDemoMode) {
-      setIsVisible(true);
       
-      // Listen for auto-sync events
-      const handleAutoSyncCompleted = (event) => {
+      // Listen for manual sync events only
+      const handleManualSyncCompleted = (event) => {
         setSyncStatus('synced');
         setLastSyncTime(new Date());
+        setIsVisible(true);
         
         // Auto-hide after 3 seconds
         setTimeout(() => {
           setSyncStatus('idle');
+          setIsVisible(false);
         }, 3000);
       };
       
-      const handleAutoSyncError = (event) => {
+      const handleManualSyncError = (event) => {
         setSyncStatus('error');
+        setIsVisible(true);
         
         // Auto-hide after 5 seconds
         setTimeout(() => {
           setSyncStatus('idle');
+          setIsVisible(false);
         }, 5000);
       };
+
+      const handleManualLoadCompleted = (event) => {
+        setSyncStatus('loaded');
+        setLastSyncTime(new Date());
+        setIsVisible(true);
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          setSyncStatus('idle');
+          setIsVisible(false);
+        }, 3000);
+      };
       
-      window.addEventListener('autoSyncCompleted', handleAutoSyncCompleted);
-      window.addEventListener('autoSyncError', handleAutoSyncError);
+      // Listen for manual sync/load events (not auto-sync)
+      window.addEventListener('manualSyncCompleted', handleManualSyncCompleted);
+      window.addEventListener('manualSyncError', handleManualSyncError);
+      window.addEventListener('manualLoadCompleted', handleManualLoadCompleted);
       
       return () => {
-        window.removeEventListener('autoSyncCompleted', handleAutoSyncCompleted);
-        window.removeEventListener('autoSyncError', handleAutoSyncError);
+        window.removeEventListener('manualSyncCompleted', handleManualSyncCompleted);
+        window.removeEventListener('manualSyncError', handleManualSyncError);
+        window.removeEventListener('manualLoadCompleted', handleManualLoadCompleted);
       };
-    } else {
-      setIsVisible(false);
     }
   }, [user, isDemoMode]);
 
-  // Only show when there's a result (synced or error), not during idle
+  // Only show when there's a result and it's visible
   if (!isVisible || syncStatus === 'idle') return null;
 
   const getStatusConfig = () => {
@@ -53,9 +69,16 @@ const AutoSyncIndicator = () => {
       case 'synced':
         return {
           icon: '✅',
-          text: 'Auto-synced',
+          text: 'Manually synced',
           color: '#2ed573',
           bgColor: 'rgba(46, 213, 115, 0.1)'
+        };
+      case 'loaded':
+        return {
+          icon: '📥',
+          text: 'Data loaded',
+          color: '#3498db',
+          bgColor: 'rgba(52, 152, 219, 0.1)'
         };
       case 'error':
         return {
@@ -96,9 +119,9 @@ const AutoSyncIndicator = () => {
         userSelect: 'none'
       }}
       onClick={() => {
-        // Show auto-sync status in console when clicked
+        // Show manual sync status in console when clicked
         const status = autoSyncService.getStatus();
-        console.log('📊 Auto-sync status:', status);
+        console.log('📊 Manual sync status:', status);
         
         // Show a brief tooltip
         const tooltip = document.createElement('div');
@@ -131,4 +154,4 @@ const AutoSyncIndicator = () => {
   );
 };
 
-export default AutoSyncIndicator; 
+export default ManualSyncNotification; 

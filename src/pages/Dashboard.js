@@ -58,6 +58,14 @@ const StatItem = styled.div`
   border-radius: ${props => props.theme.borderRadius.small};
   padding: ${props => props.theme.spacing.md};
   text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.white};
+    transform: translateY(-2px);
+  }
   
   @media (max-width: ${props => props.theme.breakpoints.tablet}) {
     padding: ${props => props.theme.spacing.mobile.md};
@@ -381,19 +389,19 @@ const Dashboard = () => {
           <Card.Body>
                         <h2>Professionelles Fitness Management System</h2>            <p>              Entwerfen und verwalten Sie umfassende Trainingsprogramme, überwachen Sie Leistungsmetriken und erreichen Sie Ihre Fitnessziele mit Präzision.            </p>
             <StatsContainer>
-              <StatItem>
+              <StatItem as={Link} to="/plans">
                 <StatValue>{workoutPlans.length}</StatValue>
                 <StatLabel>Trainingspläne</StatLabel>
               </StatItem>
-              <StatItem>
+              <StatItem as={Link} to="/exercise-library">
                 <StatValue>{exercises.length}</StatValue>
                 <StatLabel>Übungen</StatLabel>
               </StatItem>
-              <StatItem>
+              <StatItem as={Link} to="/calendar">
                 <StatValue>{calendarEvents.length}</StatValue>
                 <StatLabel>Geplante Einheiten</StatLabel>
               </StatItem>
-              <StatItem>
+              <StatItem as={Link} to="/workout-history">
                 <StatValue>{workoutHistory.length}</StatValue>
                 <StatLabel>Abgeschlossene Workouts</StatLabel>
               </StatItem>

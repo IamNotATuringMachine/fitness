@@ -210,11 +210,14 @@ const OptionItem = styled.div`
   cursor: pointer;
   
   &:hover {
-    background-color: ${props => props.theme.colors?.hoverBackground || '#f0f0f0'};
+    background-color: ${props => props.theme.name === 'dark' 
+      ? props.theme.colors.grayLight 
+      : props.theme.colors.grayLight};
+    color: ${props => props.theme.colors.text};
   }
   
   &.selected {
-    background-color: ${props => props.theme.colors?.primaryLight || '#e3f2fd'};
+    background-color: ${props => props.theme.colors.primaryLight || '#e3f2fd'};
   }
 `;
 
@@ -500,18 +503,16 @@ const CreatePlan = () => {
     
     const newDay = {
       id: uuidv4(),
-      name: currentDay.name,
+      name: currentDay.name.trim(),
       exercises: [],
-      advancedMethods: []
+      advancedMethods: [],
+      notes: ''
     };
     
-    // Explizit neuen Tag am Ende hinzufügen
-    const updatedDays = [...plan.days, newDay];
-    console.log(`Neuer Trainingstag "${newDay.name}" hinzugefügt. Position: ${updatedDays.length} von ${updatedDays.length}`);
-    
+    // Add the new day at the end of the array (bottom)
     setPlan({
       ...plan,
-      days: updatedDays
+      days: [...plan.days, newDay]
     });
     
     setCurrentDay({
@@ -521,18 +522,9 @@ const CreatePlan = () => {
     });
     
     setShowDayForm(false);
-    
-    // Nach kurzem Delay zum neuen Tag scrollen
-    setTimeout(() => {
-      const dayCards = document.querySelectorAll('[data-day-card]');
-      if (dayCards.length > 0) {
-        const lastCard = dayCards[dayCards.length - 1];
-        lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
   };
   
-    const handleDeleteDay = (dayId) => {    setPlan({      ...plan,      days: plan.days.filter(day => day.id !== dayId)    });  };  const moveDayUp = (dayIndex) => {    if (dayIndex > 0) {      const newDays = [...plan.days];      [newDays[dayIndex - 1], newDays[dayIndex]] = [newDays[dayIndex], newDays[dayIndex - 1]];      setPlan({        ...plan,        days: newDays      });    }  };  const moveDayDown = (dayIndex) => {    if (dayIndex < plan.days.length - 1) {      const newDays = [...plan.days];      [newDays[dayIndex], newDays[dayIndex + 1]] = [newDays[dayIndex + 1], newDays[dayIndex]];      setPlan({        ...plan,        days: newDays      });    }  };
+  const handleDeleteDay = (dayId) => {    setPlan({      ...plan,      days: plan.days.filter(day => day.id !== dayId)    });  };  const moveDayUp = (dayIndex) => {    if (dayIndex > 0) {      const newDays = [...plan.days];      [newDays[dayIndex - 1], newDays[dayIndex]] = [newDays[dayIndex], newDays[dayIndex - 1]];      setPlan({        ...plan,        days: newDays      });    }  };  const moveDayDown = (dayIndex) => {    if (dayIndex < plan.days.length - 1) {      const newDays = [...plan.days];      [newDays[dayIndex], newDays[dayIndex + 1]] = [newDays[dayIndex + 1], newDays[dayIndex]];      setPlan({        ...plan,        days: newDays      });    }  };
   
   const handleExerciseParamChange = (e) => {
     setExerciseParams({
@@ -762,9 +754,7 @@ const CreatePlan = () => {
           <h2>Trainingstage</h2>
           
           {!showDayForm ? (
-            <AddDayButton onClick={() => setShowDayForm(true)}>
-              + Trainingstag hinzufügen
-            </AddDayButton>
+            <></>
           ) : (
             <Card>
               <Card.Body>
@@ -942,12 +932,19 @@ const CreatePlan = () => {
                                 const options = document.getElementById('exerciseOptions');
                                 if (options) {
                                   options.style.display = options.style.display === 'block' ? 'none' : 'block';
+                                  // Focus the search input when opening
+                                  if (options.style.display === 'block') {
+                                    setTimeout(() => {
+                                      const searchInput = options.querySelector('input');
+                                      if (searchInput) searchInput.focus();
+                                    }, 100);
+                                  }
                                 }
                               }}
                             >
                               {selectedExerciseId 
-                                ? contextState.exercises.find(ex => ex.id === selectedExerciseId)?.name || 'Übung auswählen...'
-                                : 'Übung auswählen...'
+                                ? contextState.exercises.find(ex => ex.id === selectedExerciseId)?.name || 'Übung wählen... (Mit Suchfunktion)'
+                                : 'Übung wählen... (Mit Suchfunktion)'
                               }
                             </CustomSelect>
                             <SelectOptions id="exerciseOptions" style={{display: 'none'}}>

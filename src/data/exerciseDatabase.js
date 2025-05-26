@@ -24,28 +24,6 @@ export const exerciseDatabase = {
           "beschreibung": "Erlaubt größeren Bewegungsumfang, etwas weniger Trizeps-Dominanz im Lockout durch freiere Bewegung."
         },
         {
-          "name": "Schrägbankdrücken (Langhantel/Kurzhantel)",
-          "übungstyp": "Verbundübung",
-          "gewichtete_muskelbeteiligung_pro_satz": {
-            "Obere Brust": 1.0,
-            "Vordere Schulter": 0.6,
-            "Trizeps": 0.4
-          },
-          "equipment": ["Langhantel oder Kurzhanteln", "Schrägbank"],
-          "beschreibung": "Fokus auf obere Brust."
-        },
-        {
-          "name": "Negativbankdrücken (Langhantel/Kurzhantel)",
-          "übungstyp": "Verbundübung",
-          "gewichtete_muskelbeteiligung_pro_satz": {
-            "Untere Brust": 1.0,
-            "Vordere Schulter": 0.3,
-            "Trizeps": 0.5
-          },
-          "equipment": ["Langhantel oder Kurzhanteln", "Negativbank"],
-          "beschreibung": "Fokus auf untere Brust."
-        },
-        {
           "name": "Enges Bankdrücken (Langhantel)",
           "übungstyp": "Verbundübung",
           "gewichtete_muskelbeteiligung_pro_satz": {
@@ -68,28 +46,6 @@ export const exerciseDatabase = {
           "beschreibung": "Geführte Bewegung, weniger Stabilisierungsarbeit."
         },
         {
-          "name": "Multipresse Schrägbankdrücken",
-          "übungstyp": "Verbundübung",
-          "gewichtete_muskelbeteiligung_pro_satz": {
-            "Obere Brust": 1.0,
-            "Vordere Schulter": 0.5,
-            "Trizeps": 0.3
-          },
-          "equipment": ["Multipresse", "Schrägbank"],
-          "beschreibung": "Wie Schrägbankdrücken, aber geführt."
-        },
-        {
-          "name": "Multipresse Negativbankdrücken",
-          "übungstyp": "Verbundübung",
-          "gewichtete_muskelbeteiligung_pro_satz": {
-            "Untere Brust": 1.0,
-            "Vordere Schulter": 0.2,
-            "Trizeps": 0.4
-          },
-          "equipment": ["Multipresse", "Negativbank"],
-          "beschreibung": "Wie Negativbankdrücken, aber geführt."
-        },
-        {
           "name": "Bodenpressen",
           "übungstyp": "Verbundübung",
           "gewichtete_muskelbeteiligung_pro_satz": {
@@ -101,6 +57,83 @@ export const exerciseDatabase = {
           "beschreibung": "Reduzierter Bewegungsumfang, Fokus auf Lockout und Trizeps."
         }
       ]
+    },
+    {
+      "übung_name": "Schrägbankdrücken (Langhantel)",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Obere Brust": 1.0,
+        "Vordere Schulter": 0.6,
+        "Trizeps": 0.4
+      },
+      "equipment": ["Langhantel", "Schrägbank"],
+      "beschreibung": "Fokus auf obere Brust."
+    },
+    {
+      "übung_name": "Schrägbankdrücken (Kurzhantel)",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Obere Brust": 1.0,
+        "Vordere Schulter": 0.6,
+        "Trizeps": 0.4
+      },
+      "equipment": ["Kurzhanteln", "Schrägbank"],
+      "beschreibung": "Fokus auf obere Brust mit größerem Bewegungsumfang."
+    },
+    {
+      "übung_name": "Negativbankdrücken (Langhantel)",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Untere Brust": 1.0,
+        "Vordere Schulter": 0.3,
+        "Trizeps": 0.5
+      },
+      "equipment": ["Langhantel", "Negativbank"],
+      "beschreibung": "Fokus auf untere Brust."
+    },
+    {
+      "übung_name": "Negativbankdrücken (Kurzhantel)",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Untere Brust": 1.0,
+        "Vordere Schulter": 0.3,
+        "Trizeps": 0.5
+      },
+      "equipment": ["Kurzhanteln", "Negativbank"],
+      "beschreibung": "Fokus auf untere Brust mit größerem Bewegungsumfang."
+    },
+    {
+      "übung_name": "Brustpresse (Maschine)",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Brust": 1.0,
+        "Vordere Schulter": 0.4,
+        "Trizeps": 0.4
+      },
+      "equipment": ["Brustpresse-Maschine"],
+      "beschreibung": "Geführte Druckbewegung für die Brustmuskulatur. Ideal für Anfänger oder als sichere Alternative zum freien Bankdrücken."
+    },
+    {
+      "übung_name": "Multipresse Schrägbankdrücken",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Obere Brust": 1.0,
+        "Vordere Schulter": 0.5,
+        "Trizeps": 0.3
+      },
+      "equipment": ["Multipresse", "Schrägbank"],
+      "beschreibung": "Geführte Schrägbankdrücken-Bewegung für die obere Brust."
+    },
+    {
+      "übung_name": "Multipresse Negativbankdrücken",
+      "übungstyp": "Verbundübung",
+      "gewichtete_muskelbeteiligung_pro_satz": {
+        "Untere Brust": 1.0,
+        "Vordere Schulter": 0.2,
+        "Trizeps": 0.4
+      },
+      "equipment": ["Multipresse", "Negativbank"],
+      "beschreibung": "Geführte Negativbankdrücken-Bewegung für die untere Brust."
     },
     {
       "übung_name": "Fliegende (Kurzhantel)",

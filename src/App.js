@@ -36,7 +36,7 @@ import AdvancedAnalytics from './pages/AdvancedAnalytics';
 import SocialFeatures from './pages/SocialFeatures';
 import AuthCallback from './pages/AuthCallback';
 import VersionCounter from './components/ui/VersionCounter';
-import AutoSyncIndicator from './components/ui/AutoSyncIndicator';
+import ManualSyncNotification from './components/ui/AutoSyncIndicator';
 import SyncNotification from './components/ui/SyncNotification';
 
 const AppContainer = styled.div`
@@ -101,7 +101,7 @@ function ProtectedAppLayout({ children }) {
         </ContentContainer>
       </MainContainer>
       <VersionCounter />
-      <AutoSyncIndicator />
+              <ManualSyncNotification />
       <SyncNotification />
     </AppContainer>
   );
