@@ -45,6 +45,7 @@ const AutoSyncIndicator = () => {
     }
   }, [user, isDemoMode]);
 
+  // Only show when there's a result (synced or error), not during idle
   if (!isVisible || syncStatus === 'idle') return null;
 
   const getStatusConfig = () => {
@@ -64,22 +65,18 @@ const AutoSyncIndicator = () => {
           bgColor: 'rgba(255, 56, 56, 0.1)'
         };
       default:
-        return {
-          icon: '🔄',
-          text: 'Auto-sync active',
-          color: '#5a9fd4',
-          bgColor: 'rgba(90, 159, 212, 0.1)'
-        };
+        return null;
     }
   };
 
   const config = getStatusConfig();
+  if (!config) return null;
 
   return (
     <div
       style={{
         position: 'fixed',
-        bottom: '20px',
+        bottom: '60px',
         right: '20px',
         padding: '8px 12px',
         borderRadius: '20px',
@@ -108,7 +105,7 @@ const AutoSyncIndicator = () => {
         tooltip.textContent = `Last sync: ${lastSyncTime ? lastSyncTime.toLocaleTimeString() : 'Never'}`;
         tooltip.style.cssText = `
           position: fixed;
-          bottom: 60px;
+          bottom: 100px;
           right: 20px;
           padding: 6px 10px;
           background: rgba(0, 0, 0, 0.8);
