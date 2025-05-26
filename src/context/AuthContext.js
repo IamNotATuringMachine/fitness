@@ -290,31 +290,64 @@ export function AuthProvider({ children }) {
             
             // Perform immediate safe sync (pull data immediately, never overwrite cloud with defaults)
             const performImmediateSync = async () => {
-              try {
-                console.log('🔄 AuthContext: Starting immediate safe sync...');
-                const syncResult = await safeSyncService.performLoginSync(session.user);
-                
-                if (syncResult.success) {
-                  console.log('✅ AuthContext: Immediate sync completed successfully');
-                  if (syncResult.hasUpdates) {
-                    console.log('📥 AuthContext: Data updated from cloud:', syncResult.updatedKeys);
-                    // Show notification that data was updated
-                    window.dispatchEvent(new CustomEvent('loginDataSynced', {
+              let retryCount = 0;
+              const maxRetries = 3;
+              const retryDelay = 2000; // 2 seconds
+              
+              while (retryCount < maxRetries) {
+                try {
+                  console.log(`🔄 AuthContext: Starting immediate safe sync (attempt ${retryCount + 1}/${maxRetries})...`);
+                  const syncResult = await safeSyncService.performLoginSync(session.user);
+                  
+                  if (syncResult.success) {
+                    console.log('✅ AuthContext: Immediate sync completed successfully');
+                    if (syncResult.hasUpdates) {
+                      console.log('📥 AuthContext: Data updated from cloud:', syncResult.updatedKeys);
+                      // Show notification that data was updated
+                      window.dispatchEvent(new CustomEvent('loginDataSynced', {
+                        detail: {
+                          message: 'Your data has been synced from the cloud',
+                          updatedKeys: syncResult.updatedKeys
+                        }
+                      }));
+                    }
+                    if (syncResult.pushedToCloud) {
+                      console.log('📤 AuthContext: Local data pushed to cloud');
+                    }
+                    return; // Success, exit retry loop
+                  } else {
+                    console.warn(`⚠️ AuthContext: Immediate sync failed (attempt ${retryCount + 1}):`, syncResult.error);
+                    if (retryCount === maxRetries - 1) {
+                      // Last attempt failed
+                      console.error('❌ AuthContext: All immediate sync attempts failed, user will need to manually sync');
+                      // Show a notification about sync failure
+                      window.dispatchEvent(new CustomEvent('loginSyncFailed', {
+                        detail: {
+                          message: 'Cloud sync failed - please manually sync your data',
+                          error: syncResult.error
+                        }
+                      }));
+                    }
+                  }
+                } catch (syncError) {
+                  console.error(`❌ AuthContext: Immediate sync error (attempt ${retryCount + 1}):`, syncError);
+                  if (retryCount === maxRetries - 1) {
+                    // Last attempt failed
+                    console.error('❌ AuthContext: All immediate sync attempts failed due to errors');
+                    window.dispatchEvent(new CustomEvent('loginSyncFailed', {
                       detail: {
-                        message: 'Your data has been synced from the cloud',
-                        updatedKeys: syncResult.updatedKeys
+                        message: 'Cloud sync failed - please manually sync your data',
+                        error: syncError.message
                       }
                     }));
                   }
-                  if (syncResult.pushedToCloud) {
-                    console.log('📤 AuthContext: Local data pushed to cloud');
-                  }
-                } else {
-                  console.warn('⚠️ AuthContext: Immediate sync failed (non-critical):', syncResult.error);
                 }
-              } catch (syncError) {
-                console.error('❌ AuthContext: Immediate sync failed (non-critical):', syncError);
-                // Don't block signin for sync errors - just log them
+                
+                retryCount++;
+                if (retryCount < maxRetries) {
+                  console.log(`⏳ AuthContext: Retrying immediate sync in ${retryDelay/1000} seconds...`);
+                  await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
               }
             };
             
@@ -871,11 +904,32 @@ export function AuthProvider({ children }) {
         console.log('📊 Safe-sync status:', safeStatus);
         return { autoSync: autoStatus, safeSync: safeStatus };
       };
+      
+      // Configure real-time sync
+      window.configureRealTimeSync = (intervalSeconds = 10) => {
+        const intervalMs = Math.max(5, intervalSeconds) * 1000; // Minimum 5 seconds
+        autoSyncService.updateConfig({ cloudCheckInterval: intervalMs });
+        console.log(`⚙️ Real-time sync interval set to ${intervalMs/1000} seconds`);
+        return autoSyncService.getStatus();
+      };
+      
+      // Manually trigger cloud check
+      window.checkCloudNow = async () => {
+        console.log('🔍 Manually triggering cloud check...');
+        try {
+          await autoSyncService.checkForCloudChanges();
+          console.log('✅ Manual cloud check completed');
+        } catch (error) {
+          console.error('❌ Manual cloud check failed:', error);
+        }
+      };
     } else {
       // Remove debug functions when user is not authenticated
       window.forceSyncNow = null;
       window.forceSafeSync = null;
       window.getAutoSyncStatus = null;
+      window.configureRealTimeSync = null;
+      window.checkCloudNow = null;
     }
     
     // Always expose auth debug function for troubleshooting
@@ -900,6 +954,12 @@ export function AuthProvider({ children }) {
       }
       if (window.getAutoSyncStatus) {
         window.getAutoSyncStatus = null;
+      }
+      if (window.configureRealTimeSync) {
+        window.configureRealTimeSync = null;
+      }
+      if (window.checkCloudNow) {
+        window.checkCloudNow = null;
       }
       if (window.clearAuthData) {
         window.clearAuthData = null;

@@ -345,6 +345,69 @@ class SafeSyncService {
     }
   }
 
+  // Check for cloud changes without syncing
+  async checkForCloudChanges() {
+    if (!this.isAuthenticated || !this.userId) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    try {
+      // Get remote data to check timestamps
+      const { data: remoteData, error } = await dataService.getUserData(this.userId);
+      
+      if (error) {
+        return { success: false, error };
+      }
+
+      if (!remoteData) {
+        return { success: true, hasChanges: false };
+      }
+
+      // Get local data timestamps
+      const localWorkoutData = secureStorage.get('workoutState') || {};
+      const localUserProfile = secureStorage.get('userProfile') || {};
+      const localGamificationData = secureStorage.get('gamificationState') || {};
+      const localNutritionData = secureStorage.get('nutritionState') || {};
+
+      const localData = {
+        workoutState: localWorkoutData,
+        userProfile: localUserProfile,
+        gamificationState: localGamificationData,
+        nutritionState: localNutritionData
+      };
+
+      // Check if any remote data is newer than local
+      let hasChanges = false;
+      const changedKeys = [];
+
+      Object.entries(remoteData).forEach(([key, remoteValue]) => {
+        const localValue = localData[key];
+        
+        if (remoteValue && typeof remoteValue === 'object') {
+          const localFreshness = this.getDataFreshness(localValue);
+          const remoteFreshness = this.getDataFreshness(remoteValue);
+          
+          // Check if remote is newer and not default data
+          if (remoteFreshness.timestamp > localFreshness.timestamp && 
+              !this.isDefaultData(remoteValue, key)) {
+            hasChanges = true;
+            changedKeys.push(key);
+          }
+        }
+      });
+
+      return { 
+        success: true, 
+        hasChanges,
+        changedKeys,
+        remoteDataTimestamp: remoteData.lastModified
+      };
+    } catch (error) {
+      console.error('❌ SafeSync: Check for cloud changes failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Get sync status
   getStatus() {
     return {

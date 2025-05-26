@@ -238,10 +238,10 @@ export default function UserProfile() {
         console.log('✅ UserProfile: Manual load from cloud successful');
         
         // Show success feedback and reload
-        alert('✅ Daten erfolgreich aus der Cloud geladen! Die App wird neu geladen...');
+        console.log('✅ UserProfile: Data loaded from cloud successfully, reloading app...');
         setTimeout(() => {
           window.location.reload();
-        }, 1000);
+        }, 500);
       } else {
         setSyncStatus('error');
         console.error('❌ UserProfile: Manual load from cloud failed:', result.error);

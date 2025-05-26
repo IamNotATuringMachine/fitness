@@ -98,12 +98,52 @@ const SyncNotification = () => {
       }
     };
 
+    const handleLoginSyncFailed = (event) => {
+      const { message } = event.detail;
+      
+      const displayMessage = message || '⚠️ Cloud sync failed - please manually sync your data';
+      
+      setNotification(displayMessage);
+      setIsVisible(true);
+      
+      // Keep visible longer for error messages (6 seconds)
+      setTimeout(() => {
+        setIsVisible(false);
+        setTimeout(() => {
+          setNotification(null);
+        }, 300);
+      }, 6000);
+    };
+
+    const handleCloudDataUpdated = (event) => {
+      const { updatedKeys, source } = event.detail;
+      
+      if (updatedKeys && updatedKeys.length > 0 && source === 'real-time-sync') {
+        const displayMessage = `🌐 Real-time sync: ${updatedKeys.join(', ')} updated`;
+        
+        setNotification(displayMessage);
+        setIsVisible(true);
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          setIsVisible(false);
+          setTimeout(() => {
+            setNotification(null);
+          }, 300);
+        }, 3000);
+      }
+    };
+
     window.addEventListener('loginDataSynced', handleLoginDataSynced);
     window.addEventListener('safeDataSynced', handleSafeDataSynced);
+    window.addEventListener('loginSyncFailed', handleLoginSyncFailed);
+    window.addEventListener('cloudDataUpdated', handleCloudDataUpdated);
 
     return () => {
       window.removeEventListener('loginDataSynced', handleLoginDataSynced);
       window.removeEventListener('safeDataSynced', handleSafeDataSynced);
+      window.removeEventListener('loginSyncFailed', handleLoginSyncFailed);
+      window.removeEventListener('cloudDataUpdated', handleCloudDataUpdated);
     };
   }, []);
 
