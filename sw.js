@@ -157,6 +157,12 @@ async function handleApiRequest(request) {
     headers: Object.fromEntries(request.headers.entries())
   });
 
+  // Never cache authentication-related requests
+  const url = new URL(request.url);
+  const isAuthRequest = url.pathname.includes('/auth/') || 
+                       url.pathname.includes('/token') || 
+                       url.hostname.includes('supabase');
+
   try {
     // Always try network first for API requests
     const networkResponse = await fetch(request);
@@ -167,8 +173,8 @@ async function handleApiRequest(request) {
       url: request.url
     });
     
-    // Only cache successful GET requests
-    if (networkResponse.ok && request.method === 'GET') {
+    // Only cache successful GET requests that are NOT auth-related
+    if (networkResponse.ok && request.method === 'GET' && !isAuthRequest) {
       try {
         const cache = await caches.open(API_CACHE);
         // Clone the response before caching
@@ -178,6 +184,8 @@ async function handleApiRequest(request) {
       } catch (cacheError) {
         console.warn('🔧 SW: Failed to cache request (non-critical):', cacheError);
       }
+    } else if (isAuthRequest) {
+      console.log('🔧 SW: Skipping cache for auth request:', request.url);
     }
     
     return networkResponse;
