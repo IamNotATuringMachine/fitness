@@ -45,7 +45,7 @@ const AutoSyncIndicator = () => {
     }
   }, [user, isDemoMode]);
 
-  if (!isVisible) return null;
+  if (!isVisible || syncStatus === 'idle') return null;
 
   const getStatusConfig = () => {
     switch (syncStatus) {

@@ -3,26 +3,25 @@ import styled from 'styled-components';
 
 const VersionContainer = styled.div`
   position: fixed;
-  bottom: 16px;
-  left: 16px;
+  bottom: 8px;
+  left: 8px;
   background-color: ${props => props.theme.colors.background};
   color: ${props => props.theme.colors.textSecondary};
-  border: 1px solid ${props => props.theme.colors.border};
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 12px;
   font-family: monospace;
   z-index: 1000;
-  opacity: 0.7;
+  opacity: 0.5;
   transition: opacity 0.2s ease;
   
   &:hover {
-    opacity: 1;
+    opacity: 0.8;
   }
   
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    bottom: 80px; /* Above mobile navigation */
-    left: 12px;
+    bottom: 8px;
+    left: 8px;
   }
 `;
 
