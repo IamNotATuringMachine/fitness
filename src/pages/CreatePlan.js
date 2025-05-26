@@ -505,11 +505,11 @@ const CreatePlan = () => {
       notes: ''
     };
     
-    // Add the new day at the end of the array (bottom)
-    setPlan({
-      ...plan,
-      days: [...plan.days, newDay]
-    });
+    // Always add the new day at the end of the array (bottom)
+    setPlan(prevPlan => ({
+      ...prevPlan,
+      days: [...prevPlan.days, newDay] // Ensure new day is always added at the end
+    }));
     
     setCurrentDay({
       name: '',
@@ -932,8 +932,11 @@ const CreatePlan = () => {
                                   if (options.style.display === 'block') {
                                     setTimeout(() => {
                                       const searchInput = options.querySelector('input');
-                                      if (searchInput) searchInput.focus();
-                                    }, 100);
+                                      if (searchInput) {
+                                        searchInput.focus();
+                                        searchInput.select(); // Select existing text for better UX
+                                      }
+                                    }, 10); // Reduced timeout for faster response
                                   }
                                 }
                               }}
@@ -949,6 +952,7 @@ const CreatePlan = () => {
                                 value={exerciseSearchTerm}
                                 onChange={(e) => setExerciseSearchTerm(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
+                                onFocus={(e) => e.stopPropagation()}
                                 autoFocus
                               />
                               <div style={{ padding: '5px', color: '#666', fontSize: '0.8rem' }}>
