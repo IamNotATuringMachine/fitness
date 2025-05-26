@@ -51,29 +51,319 @@ const clearCacheAndReload = () => {
 
 export function AuthProvider({ children }) {
   // Force rebuild with new hash - fix for auth loop v2.0
+  const [appRebuildHash, setAppRebuildHash] = useState(Math.random().toString(36).substring(7));
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  
-  // Use refs to track state without causing re-renders
-  const userRef = useRef(null);
-  const loadingRef = useRef(true);
-  const isInitializedRef = useRef(false);
-  
-  // Anti-loop protection
-  const initializationAttemptsRef = useRef(0);
-  const lastInitializationTimeRef = useRef(Date.now());
-  
-  // Update refs when state changes
-  userRef.current = user;
-  loadingRef.current = loading;
-  isInitializedRef.current = isInitialized;
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const userRef = useRef(user);
+  const isSyncing = useRef(false);
+  const supabaseSubscription = useRef(null);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  const deepMergeStates = useCallback(async (remoteDataPayload) => {
+    if (isSyncing.current && remoteDataPayload.eventType !== 'INITIAL_SYNC') { // Allow initial sync to proceed, but not concurrent real-time events if one is processing
+      console.log('🔄 AuthContext: Sync already in progress, skipping merge for this real-time event.');
+      return;
+    }
+    isSyncing.current = true;
+    console.log('🔄 AuthContext: Starting deep merge with remote data. Event Type:', remoteDataPayload.eventType, 'Payload:', remoteDataPayload);
+
+    try {
+      const currentUser = userRef.current;
+      if (!currentUser && !isDemoMode) {
+        console.log('🔄 AuthContext: No user for deep merge, skipping.');
+        isSyncing.current = false;
+        return;
+      }
+
+      const remoteEventData = remoteDataPayload.new; // data from the 'new' field in Supabase payload
+      if (!remoteEventData || !remoteEventData.data) {
+        console.log('🔄 AuthContext: No remote data in payload (payload.new.data is missing), skipping merge.');
+        isSyncing.current = false;
+        return;
+      }
+      const remoteMasterData = remoteEventData.data; // This is the full JSONB 'data' field from Supabase
+
+      // Get current local states - deep clone to avoid modifying a shared object if secureStorage returns one
+      let localWorkoutState = secureStorage.get('workoutState');
+      localWorkoutState = localWorkoutState ? JSON.parse(JSON.stringify(localWorkoutState)) : JSON.parse(JSON.stringify(safeSyncService.defaultPatterns.workoutState));
+      
+      let localUserProfile = secureStorage.get('userProfile');
+      localUserProfile = localUserProfile ? JSON.parse(JSON.stringify(localUserProfile)) : {};
+      
+      let localGamificationState = secureStorage.get('gamificationState');
+      localGamificationState = localGamificationState ? JSON.parse(JSON.stringify(localGamificationState)) : JSON.parse(JSON.stringify(safeSyncService.defaultPatterns.gamificationState));
+      
+      let localNutritionState = secureStorage.get('nutritionState');
+      localNutritionState = localNutritionState ? JSON.parse(JSON.stringify(localNutritionState)) : JSON.parse(JSON.stringify(safeSyncService.defaultPatterns.nutritionState));
+      
+      const changedKeys = [];
+      let needsLocalUpdate = false;
+
+      // --- Helper for merging arrays of objects with 'id' and 'last_modified' ---
+      const mergeItemArray = (localItemsParam, remoteItemsParam, itemName) => {
+        const localItems = Array.isArray(localItemsParam) ? localItemsParam : [];
+        const remoteItems = Array.isArray(remoteItemsParam) ? remoteItemsParam : [];
+
+        const localMap = new Map(localItems.map(item => [item.id, item]));
+        const mergedItems = [];
+        let arrayChanged = false;
+
+        // Process remote items (updates and new additions)
+        for (const remoteItem of remoteItems) {
+          if (!remoteItem.id) { // last_modified can be checked during comparison
+            console.warn(`Remote ${itemName} item missing id, attempting to keep local if exists or skip:`, remoteItem);
+            const existingLocal = localItems.find(li => li.id === remoteItem.id);
+            if (existingLocal) mergedItems.push(existingLocal);
+            continue;
+          }
+          const localItem = localItems.find(li => li.id === remoteItem.id);
+          
+          if (localItem) { // Item exists locally
+            const localTS = new Date(localItem.last_modified || 0).getTime();
+            const remoteTS = new Date(remoteItem.last_modified || 0).getTime();
+
+            if (remoteTS > localTS) {
+              mergedItems.push(remoteItem); // Remote is newer
+              arrayChanged = true;
+              console.log(`🔄 Merged ${itemName} (ID: ${remoteItem.id}): Updated from remote (remote newer).`);
+            } else if (remoteTS < localTS) {
+              mergedItems.push(localItem); // Local is newer, keep local
+              // If local is strictly newer, this indicates a local change not yet pushed.
+              // `arrayChanged` might be true if this differs from original local item list order or content, handled by final check.
+            } else { // Timestamps are equal (or both invalid and defaulted to 0)
+              if (JSON.stringify(localItem) !== JSON.stringify(remoteItem)) {
+                mergedItems.push(remoteItem); // Timestamps equal, content differs, take remote for consistency
+                arrayChanged = true;
+                console.log(`🔄 Merged ${itemName} (ID: ${remoteItem.id}): Timestamps equal, content differed, took remote.`);
+              } else {
+                mergedItems.push(localItem); // Timestamps and content equal
+              }
+            }
+            localMap.delete(remoteItem.id); // Mark as processed
+          } else { // Item is new from remote
+            mergedItems.push(remoteItem);
+            arrayChanged = true;
+            console.log(`🔄 Merged ${itemName} (ID: ${remoteItem.id}): Added new from remote.`);
+          }
+        }
+
+        // Items remaining in localMap were present locally but not in remote list, so they are effectively deleted.
+        if (localMap.size > 0) {
+            arrayChanged = true; 
+            localMap.forEach(deletedItem => {
+                 console.log(`🔄 Merged ${itemName} (ID: ${deletedItem.id}): Removed (was local, not in remote).`);
+            });
+        }
+        
+        // Final check: if arrayChanged is true, but the actual content and order of IDs is the same, reset arrayChanged.
+        // This avoids flagging a change if items were just reordered by the merge but content is identical.
+        if (arrayChanged) {
+            if (localItems.length === mergedItems.length) {
+                let contentAndOrderIdentical = true;
+                for (let i = 0; i < localItems.length; i++) {
+                    if (localItems[i].id !== mergedItems[i].id || JSON.stringify(localItems[i]) !== JSON.stringify(mergedItems[i])) {
+                        contentAndOrderIdentical = false;
+                        break;
+                    }
+                }
+                if (contentAndOrderIdentical) arrayChanged = false;
+            }
+        }
+        
+        return arrayChanged ? mergedItems : localItems; // Return original localItems if no effective change
+      };
+
+      // --- Deep merge workoutState ---
+      if (remoteMasterData.workoutState) {
+        const remoteWorkoutState = remoteMasterData.workoutState;
+        let currentWorkoutStateChanged = false; // Shadowing outer scope variable
+
+        const mergedExercises = mergeItemArray(
+          localWorkoutState.exercises, 
+          remoteWorkoutState.exercises, 
+          'exercises'
+        );
+        if (mergedExercises !== localWorkoutState.exercises) { // Check for reference change
+            localWorkoutState.exercises = mergedExercises;
+            currentWorkoutStateChanged = true;
+        }
+
+        const mergedWorkoutPlans = mergeItemArray(
+          localWorkoutState.workoutPlans, 
+          remoteWorkoutState.workoutPlans, 
+          'workoutPlans'
+        );
+        if (mergedWorkoutPlans !== localWorkoutState.workoutPlans) {
+            localWorkoutState.workoutPlans = mergedWorkoutPlans;
+            currentWorkoutStateChanged = true;
+        }
+        
+        const mergedWorkoutHistory = mergeItemArray(
+          localWorkoutState.workoutHistory, 
+          remoteWorkoutState.workoutHistory, 
+          'workoutHistory'
+        );
+         if (mergedWorkoutHistory !== localWorkoutState.workoutHistory) {
+            localWorkoutState.workoutHistory = mergedWorkoutHistory;
+            currentWorkoutStateChanged = true;
+        }
+        
+        // Example for customExercises, add if you have it.
+        // const mergedCustomExercises = mergeItemArray(localWorkoutState.customExercises, remoteWorkoutState.customExercises, 'customExercises');
+        // if (mergedCustomExercises !== localWorkoutState.customExercises) {
+        //     localWorkoutState.customExercises = mergedCustomExercises;
+        //     currentWorkoutStateChanged = true;
+        // }
+
+
+        // Merge other direct properties of workoutState
+        // Example for currentWorkout (object, not array)
+        if (remoteWorkoutState.currentWorkout) {
+          if (!localWorkoutState.currentWorkout || 
+              new Date(remoteWorkoutState.currentWorkout.last_modified || 0) > new Date(localWorkoutState.currentWorkout.last_modified || 0)) {
+            if(JSON.stringify(localWorkoutState.currentWorkout) !== JSON.stringify(remoteWorkoutState.currentWorkout)){
+                localWorkoutState.currentWorkout = remoteWorkoutState.currentWorkout;
+                currentWorkoutStateChanged = true;
+                console.log('🔄 Merged workoutState: Updated currentWorkout from remote.');
+            }
+          }
+        } else if (localWorkoutState.currentWorkout) { // Remote cleared it
+            localWorkoutState.currentWorkout = null; // Or appropriate default
+            currentWorkoutStateChanged = true;
+            console.log('🔄 Merged workoutState: Cleared currentWorkout as it was null in remote.');
+        }
+        
+        // Update root lastModified for workoutState if any of its contents changed or if remote is newer
+        if (currentWorkoutStateChanged || (remoteWorkoutState.lastModified && new Date(remoteWorkoutState.lastModified) > new Date(localWorkoutState.lastModified || 0))) {
+          localWorkoutState.lastModified = remoteWorkoutState.lastModified || new Date().toISOString();
+          secureStorage.set('workoutState', localWorkoutState);
+          changedKeys.push('workoutState');
+          needsLocalUpdate = true;
+          console.log('🔄 AuthContext: workoutState updated after deep merge.');
+        }
+      }
+
+      // --- Deep merge userProfile ---
+      if (remoteMasterData.userProfile) {
+        const remoteUserProfile = remoteMasterData.userProfile;
+        // User profile is usually simpler, often a "remote wins if newer" or field-by-field if complex
+        if (new Date(remoteUserProfile.lastModified || 0) > new Date(localUserProfile.lastModified || 0)) {
+           if(JSON.stringify(localUserProfile) !== JSON.stringify(remoteUserProfile)){
+                secureStorage.set('userProfile', remoteUserProfile);
+                localUserProfile = remoteUserProfile; 
+                changedKeys.push('userProfile');
+                needsLocalUpdate = true;
+                console.log('🔄 AuthContext: userProfile updated from remote (remote was newer and different).');
+           }
+        }
+      }
+      
+      // --- Deep merge gamificationState ---
+      if (remoteMasterData.gamificationState) {
+        const remoteGamificationState = remoteMasterData.gamificationState;
+        let currentGamificationStateChanged = false;
+
+        const mergedBadges = mergeItemArray(localGamificationState.badges, remoteGamificationState.badges, 'badges');
+        if (mergedBadges !== localGamificationState.badges) {
+            localGamificationState.badges = mergedBadges;
+            currentGamificationStateChanged = true;
+        }
+
+        const mergedChallenges = mergeItemArray(localGamificationState.challenges, remoteGamificationState.challenges, 'challenges');
+        if (mergedChallenges !== localGamificationState.challenges) {
+            localGamificationState.challenges = mergedChallenges;
+            currentGamificationStateChanged = true;
+        }
+        
+        // For simple properties like userLevel, userPoints, streaks - usually remote wins if object is newer
+        // or if specific fields are different and remote is generally newer
+        if (new Date(remoteGamificationState.lastModified || 0) > new Date(localGamificationState.lastModified || 0)) {
+            if (localGamificationState.userLevel !== remoteGamificationState.userLevel) {
+                localGamificationState.userLevel = remoteGamificationState.userLevel;
+                currentGamificationStateChanged = true;
+            }
+            if (localGamificationState.userPoints !== remoteGamificationState.userPoints) {
+                localGamificationState.userPoints = remoteGamificationState.userPoints;
+                currentGamificationStateChanged = true;
+            }
+            if (JSON.stringify(localGamificationState.streaks) !== JSON.stringify(remoteGamificationState.streaks)) {
+                localGamificationState.streaks = remoteGamificationState.streaks;
+                currentGamificationStateChanged = true;
+            }
+        }
+
+        if (currentGamificationStateChanged || (remoteGamificationState.lastModified && new Date(remoteGamificationState.lastModified) > new Date(localGamificationState.lastModified || 0))) {
+          localGamificationState.lastModified = remoteGamificationState.lastModified || new Date().toISOString();
+          secureStorage.set('gamificationState', localGamificationState);
+          changedKeys.push('gamificationState');
+          needsLocalUpdate = true;
+          console.log('🔄 AuthContext: gamificationState updated after deep merge.');
+        }
+      }
+
+      // --- Deep merge nutritionState ---
+      if (remoteMasterData.nutritionState) {
+        const remoteNutritionState = remoteMasterData.nutritionState;
+        let currentNutritionStateChanged = false;
+        
+        const mergedFoodItems = mergeItemArray(localNutritionState.foodItems, remoteNutritionState.foodItems, 'foodItems');
+        if (mergedFoodItems !== localNutritionState.foodItems) {
+            localNutritionState.foodItems = mergedFoodItems;
+            currentNutritionStateChanged = true;
+        }
+
+        const mergedMealHistory = mergeItemArray(localNutritionState.mealHistory, remoteNutritionState.mealHistory, 'mealHistory');
+        if (mergedMealHistory !== localNutritionState.mealHistory) {
+            localNutritionState.mealHistory = mergedMealHistory;
+            currentNutritionStateChanged = true;
+        }
+        
+        if (new Date(remoteNutritionState.lastModified || 0) > new Date(localNutritionState.lastModified || 0)) {
+            if (JSON.stringify(localNutritionState.waterIntake) !== JSON.stringify(remoteNutritionState.waterIntake)){ // Example
+                localNutritionState.waterIntake = remoteNutritionState.waterIntake;
+                currentNutritionStateChanged = true;
+            }
+             // Add other simple fields from nutritionState here
+        }
+
+        if (currentNutritionStateChanged || (remoteNutritionState.lastModified && new Date(remoteNutritionState.lastModified) > new Date(localNutritionState.lastModified || 0))) {
+          localNutritionState.lastModified = remoteNutritionState.lastModified || new Date().toISOString();
+          secureStorage.set('nutritionState', localNutritionState);
+          changedKeys.push('nutritionState');
+          needsLocalUpdate = true;
+          console.log('🔄 AuthContext: nutritionState updated after deep merge.');
+        }
+      }
+
+      if (needsLocalUpdate) {
+        console.log('🔄 AuthContext: Local data updated from remote. Changed keys:', changedKeys);
+        window.dispatchEvent(new CustomEvent('userDataSynced', { detail: { source: 'realtime', changedKeys } }));
+      } else {
+        console.log('🔄 AuthContext: Deep merge complete. No local data changes were made based on remote.');
+      }
+
+    } catch (error) {
+      console.error('❌ AuthContext: Error during deep merge:', error);
+      // Potentially dispatch an error event or set an error state
+    } finally {
+      isSyncing.current = false;
+      console.log('🔄 AuthContext: Deep merge finished.');
+    }
+  }, [isDemoMode]); // userRef is accessed directly. isDemoMode is used.
 
   useEffect(() => {
     let mounted = true;
     let initComplete = false;
+    const initializationAttemptsRef = { current: 0 };
+    const lastInitializationTimeRef = { current: Date.now() };
 
     const initializeAuth = async () => {
       try {
@@ -228,7 +518,7 @@ export function AuthProvider({ children }) {
     initializeAuth();
 
     // Listen for auth changes
-    const authStateChangeResult = authService.onAuthStateChange(
+    const { data: authStateChangeResult, error: authStateChangeError } = authService.onAuthStateChange(
       async (event, session) => {
         console.log('🔧 AuthContext: Auth state changed:', {
           event,
@@ -241,7 +531,6 @@ export function AuthProvider({ children }) {
           timestamp: new Date().toISOString()
         });
         
-        // Check for invalid session in auth state changes too
         if (session && (!session.user || (session.expires_at && Math.floor(Date.now() / 1000) > session.expires_at))) {
           console.warn('🔧 AuthContext: Invalid session detected in auth state change, treating as signed out');
           event = 'SIGNED_OUT';
@@ -249,133 +538,112 @@ export function AuthProvider({ children }) {
         }
         
         if (mounted) {
-          // Handle different auth events
           if (event === 'SIGNED_OUT') {
-            console.log('🔧 AuthContext: Processing SIGNED_OUT event - START');
-            try {
-              // Disable auto-sync immediately
-              autoSyncService.disable();
-              console.log('🔧 AuthContext: Auto-sync disabled on sign out');
-              
-              setUser(null);
-              await clearLocalData(); // Ensure local data is cleared before UI might try to access it
-              setError(null);
-              setLoading(false); // Explicitly set loading to false here
-              setIsInitialized(true); // Ensure initialization is marked complete
-              console.log('🔧 AuthContext: Processing SIGNED_OUT event - END. User null, loading false, initialized true.');
-            } catch (error) {
-              console.error('🔧 AuthContext: Error during SIGNED_OUT processing:', error);
-              setUser(null);
-              setError(null);
-              setLoading(false);
-              setIsInitialized(true); // Ensure initialization is marked complete even on error
+            console.log('🔧 AuthContext: Auth state changed to SIGNED_OUT. Clearing user and local data.');
+            if (supabaseSubscription.current && typeof supabaseSubscription.current.unsubscribe === 'function') {
+              console.log('🔧 AuthContext: Unsubscribing from real-time updates (on SIGNED_OUT).');
+              supabaseSubscription.current.unsubscribe();
+              supabaseSubscription.current = null;
             }
-            return; 
-          }
-          
-          if (event === 'SIGNED_IN' && session?.user) {
+            setUser(null);
+            userRef.current = null;
+            await clearLocalData();
+            setIsDemoMode(false);
+            setLoading(false);
+            setIsInitialized(true);
+            setAppRebuildHash(Math.random().toString(36).substring(7));
+            setIsLoggingOut(false);
+
+          } else if (event === 'SIGNED_IN' && session?.user) {
             console.log('🔧 AuthContext: Processing SIGNED_IN event - START');
-            
-            // Set user state immediately to prevent UI blocking
             setUser(session.user);
+            userRef.current = session.user;
             setError(null);
             setLoading(false);
             setIsInitialized(true);
-            
-            // Enable auto-sync for authenticated users (not demo mode)
+            setIsDemoMode(false);
+            setIsLoggingOut(false);
+
             if (!isDemoMode) {
               autoSyncService.enable();
               console.log('🔧 AuthContext: Auto-sync enabled for authenticated user');
-            }
-            
-            // Perform immediate safe sync (pull data immediately, never overwrite cloud with defaults)
-            const performImmediateSync = async () => {
-              let retryCount = 0;
-              const maxRetries = 3;
-              const retryDelay = 2000; // 2 seconds
-              
-              while (retryCount < maxRetries) {
-                try {
-                  console.log(`🔄 AuthContext: Starting immediate safe sync (attempt ${retryCount + 1}/${maxRetries})...`);
-                  const syncResult = await safeSyncService.performLoginSync(session.user);
-                  
-                  if (syncResult.success) {
-                    console.log('✅ AuthContext: Immediate sync completed successfully');
-                    if (syncResult.hasUpdates) {
-                      console.log('📥 AuthContext: Data updated from cloud:', syncResult.updatedKeys);
-                      // Show notification that data was updated
-                      window.dispatchEvent(new CustomEvent('loginDataSynced', {
-                        detail: {
-                          message: 'Your data has been synced from the cloud',
-                          updatedKeys: syncResult.updatedKeys
-                        }
-                      }));
-                    }
-                    if (syncResult.pushedToCloud) {
-                      console.log('📤 AuthContext: Local data pushed to cloud');
-                    }
-                    return; // Success, exit retry loop
-                  } else {
-                    console.warn(`⚠️ AuthContext: Immediate sync failed (attempt ${retryCount + 1}):`, syncResult.error);
-                    if (retryCount === maxRetries - 1) {
-                      // Last attempt failed
-                      console.error('❌ AuthContext: All immediate sync attempts failed, user will need to manually sync');
-                      // Show a notification about sync failure
-                      window.dispatchEvent(new CustomEvent('loginSyncFailed', {
-                        detail: {
-                          message: 'Cloud sync failed - please manually sync your data',
-                          error: syncResult.error
-                        }
-                      }));
-                    }
+
+              // Perform initial safe sync FIRST
+              console.log('🔧 AuthContext: Starting initial safe sync for user:', session.user.email);
+              safeSyncService.performLoginSync(session.user)
+                .then(syncResult => {
+                  console.log('🔧 AuthContext: Initial login sync completed.', syncResult);
+                  if (syncResult.success && syncResult.hasUpdates) {
+                     window.dispatchEvent(new CustomEvent('userDataSynced', { detail: { source: 'initial', updatedKeys: syncResult.updatedKeys } }));
                   }
-                } catch (syncError) {
-                  console.error(`❌ AuthContext: Immediate sync error (attempt ${retryCount + 1}):`, syncError);
-                  if (retryCount === maxRetries - 1) {
-                    // Last attempt failed
-                    console.error('❌ AuthContext: All immediate sync attempts failed due to errors');
-                    window.dispatchEvent(new CustomEvent('loginSyncFailed', {
-                      detail: {
-                        message: 'Cloud sync failed - please manually sync your data',
-                        error: syncError.message
+                  // After initial sync, (re)set up real-time subscription
+                  // Ensure we are subscribing for the currently confirmed user
+                  if (userRef.current && userRef.current.id === session.user.id) {
+                    if (supabaseSubscription.current && typeof supabaseSubscription.current.unsubscribe === 'function') {
+                      console.log('🔧 AuthContext: Unsubscribing existing real-time subscription before new setup.');
+                      supabaseSubscription.current.unsubscribe();
+                      supabaseSubscription.current = null;
+                    }
+                    if (dataService && typeof dataService.subscribeToUserData === 'function') {
+                      console.log('🔧 AuthContext: Setting up real-time subscription for user ID:', session.user.id);
+                      supabaseSubscription.current = dataService.subscribeToUserData(session.user.id, (payload) => {
+                        console.log('🔔 AuthContext: Real-time data received. Payload:', payload);
+                        if (payload.new?.user_id === userRef.current?.id) {
+                           if (payload.eventType === 'UPDATE' && payload.old?.data && payload.new?.data && JSON.stringify(payload.old.data) === JSON.stringify(payload.new.data)) {
+                                console.log('🔄 AuthContext: Real-time update received, but data is identical to old data. Skipping merge.');
+                                return;
+                           }
+                           console.log('🔄 AuthContext: Forwarding real-time payload to deepMergeStates.');
+                           deepMergeStates(payload);
+                        } else {
+                          console.log('🔄 AuthContext: Received real-time update for a different/old user or irrelevant. Ignoring.', {
+                            payloadUserId: payload.new?.user_id,
+                            currentUserRefId: userRef.current?.id
+                          });
+                        }
+                      });
+                      if (supabaseSubscription.current) {
+                         console.log('🔧 AuthContext: Real-time subscription successfully established.');
+                      } else {
+                         console.warn('🔧 AuthContext: Failed to establish real-time subscription (subscribeToUserData returned null/undefined).');
                       }
-                    }));
+                    } else {
+                      console.warn('🔧 AuthContext: dataService.subscribeToUserData is not available. Real-time sync disabled.');
+                    }
+                  } else {
+                     console.warn('🔧 AuthContext: User changed during/after initial sync or no userRef.current.id; skipping real-time subscription setup for this event.');
                   }
-                }
-                
-                retryCount++;
-                if (retryCount < maxRetries) {
-                  console.log(`⏳ AuthContext: Retrying immediate sync in ${retryDelay/1000} seconds...`);
-                  await new Promise(resolve => setTimeout(resolve, retryDelay));
-                }
-              }
-            };
-            
-            // Start immediate sync but don't await it to avoid blocking UI
-            performImmediateSync();
-            
+                })
+                .catch(err => {
+                  console.error('❌ AuthContext: Error during initial login sync or subscription setup:', err);
+                   window.dispatchEvent(new CustomEvent('loginSyncFailed', {
+                    detail: {
+                      message: 'Initial cloud sync failed. Please try manually or refresh.',
+                      error: err.message
+                    }
+                  }));
+                });
+            }
             console.log('🔧 AuthContext: Processing SIGNED_IN event - END. User set, loading false, initialized true.');
             return; 
           }
           
           // Handle other events (TOKEN_REFRESHED, USER_UPDATED) or initial session check
           const newUser = session?.user ?? null;
-          const currentUserId = userRef.current?.id; // Use ref for current user ID
+          const currentUserId = userRef.current?.id;
           const newUserId = newUser?.id;
 
           if (currentUserId !== newUserId) {
             console.log('🔧 AuthContext: User changed (e.g., token refresh with same user, or different user), updating state.');
-            setUser(newUser); // This will update userRef automatically due to component re-render
+            setUser(newUser);
           }
           
-          // Ensure loading is false if it's still true and we have a session or no session (initial load)
-          // This also covers the case where initializeAuth might not have set loading to false
-          if (loadingRef.current) { // Use ref for current loading state
+          if (loadingRef.current) {
              console.log('🔧 AuthContext: Auth state change (other event), setting loading to false.');
              setLoading(false);
           }
 
-          if (!isInitializedRef.current) { // Use ref for current initialized state
+          if (!isInitializedRef.current) {
             console.log('🔧 AuthContext: Auth state change (other event), setting isInitialized to true.');
             setIsInitialized(true);
           }
@@ -395,19 +663,29 @@ export function AuthProvider({ children }) {
       mounted = false;
       clearTimeout(emergencyTimer);
       
-      // Cleanup auto-sync service
       autoSyncService.destroy();
       console.log('🔧 AuthContext: Auto-sync service cleaned up');
       
-      // Handle both real and mock subscriptions
-      if (authStateChangeResult?.data?.subscription?.unsubscribe) {
+      if (supabaseSubscription.current && typeof supabaseSubscription.current.unsubscribe === 'function') {
+        console.log('🔧 AuthContext: Unsubscribing from real-time updates on component unmount.');
+        supabaseSubscription.current.unsubscribe();
+        supabaseSubscription.current = null;
+      }
+      
+      if (authStateChangeResult?.subscription?.unsubscribe) {
+        console.log('🔧 AuthContext: Unsubscribing from auth state changes.');
+        authStateChangeResult.subscription.unsubscribe();
+      } else if (authStateChangeResult?.data?.subscription?.unsubscribe) {
+         console.log('🔧 AuthContext: Unsubscribing from auth state changes (fallback path).');
         authStateChangeResult.data.subscription.unsubscribe();
       } else {
-        console.log('🔧 AuthContext: No subscription to unsubscribe (likely mock)');
+        console.log('🔧 AuthContext: No auth state subscription to unsubscribe or structure changed.');
+      }
+      if(authStateChangeError) {
+        console.error("🔧 AuthContext: Error during onAuthStateChange setup", authStateChangeError);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Keep empty dependency array to prevent re-initialization
+  }, [deepMergeStates, isDemoMode]);
 
   const clearLocalData = async () => {
     try {
@@ -470,16 +748,19 @@ export function AuthProvider({ children }) {
     }
   }, [isDemoMode]);
 
-
-
   const saveUserDataToCloud = useCallback(async () => {
-    if (!user) {
+    if (isSyncing.current) {
+      console.log('🔧 AuthContext: Cloud save skipped, sync already in progress.');
+      return { success: false, error: 'Sync in progress' };
+    }
+    if (!userRef.current && !isDemoMode) {
       console.log('🔧 AuthContext: No user available for cloud save');
       return { success: false, error: 'No user authenticated' };
     }
     
-    console.log('🔧 AuthContext: Starting cloud save for user:', user.email);
-    
+    console.log('🔧 AuthContext: Starting cloud save for user:', userRef.current?.email || 'Demo User');
+    isSyncing.current = true;
+
     try {
       const workoutData = secureStorage.get('workoutState') || {};
       const userProfile = secureStorage.get('userProfile') || {};
@@ -491,11 +772,12 @@ export function AuthProvider({ children }) {
         userProfile: userProfile,
         gamificationState: gamificationData,
         nutritionState: nutritionData,
-        lastModified: new Date().toISOString()
+        // Ensure lastModified is updated at the root for SafeSyncService compatibility
+        lastModified: new Date().toISOString() 
       };
       
       console.log('🔧 AuthContext: Prepared data for cloud save:', {
-        userId: user.id,
+        userId: userRef.current?.id,
         dataKeys: Object.keys(dataToSave),
         sizes: {
           workoutState: Object.keys(workoutData).length,
@@ -505,22 +787,24 @@ export function AuthProvider({ children }) {
         }
       });
       
-      const { error } = await dataService.saveUserData(user.id, dataToSave);
+      const { error } = await dataService.saveUserData(userRef.current.id, dataToSave);
       
       if (error) {
         console.error('🔧 AuthContext: Error saving user data to cloud:', error);
+        isSyncing.current = false;
         return { success: false, error };
       }
       
       secureStorage.set('lastSyncTime', new Date().toISOString());
       console.log('🔧 AuthContext: User data saved to cloud successfully');
-      
+      isSyncing.current = false;
       return { success: true };
     } catch (error) {
       console.error('🔧 AuthContext: Error saving user data to cloud:', error);
+      isSyncing.current = false;
       return { success: false, error };
     }
-  }, [user]);
+  }, [isDemoMode]);
 
   // Demo mode login functions
   const signInDemo = async () => {
@@ -666,25 +950,35 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const signOut = async () => {
-    console.log('🔧 AuthContext: Starting sign out process...');
-    
-    // Set loading state to prevent UI issues during logout
+  const signOut = async (options = { saveBeforeSignOut: true }) => {
+    const { saveBeforeSignOut } = options;
+    console.log(`🔧 AuthContext: signOut called. Save before sign out: ${saveBeforeSignOut}`);
+    setIsLoggingOut(true);
     setLoading(true);
     setError(null);
     
     try {
-      // In demo mode, just clear local data and set user to null
+      // Unsubscribe from real-time updates early in the sign-out process for authenticated users
+      if (userRef.current && !isDemoMode) {
+        if (supabaseSubscription.current && typeof supabaseSubscription.current.unsubscribe === 'function') {
+          console.log('🔧 AuthContext: Unsubscribing from real-time updates during sign out.');
+          supabaseSubscription.current.unsubscribe();
+          supabaseSubscription.current = null;
+        }
+      }
+
       if (isDemoMode) {
         console.log('🔧 AuthContext: Demo mode - performing local logout');
         await clearLocalData();
         setUser(null);
+        userRef.current = null;
+        setIsDemoMode(false);
         setLoading(false);
+        setIsLoggingOut(false);
         return { success: true };
       }
       
-      // Save current data to cloud before signing out, but don't let it block logout if it fails
-      if (userRef.current) {
+      if (userRef.current && saveBeforeSignOut) {
         try {
           console.log('🔧 AuthContext: Attempting to save data to cloud before logout...');
           await Promise.race([
@@ -694,7 +988,6 @@ export function AuthProvider({ children }) {
           console.log('🔧 AuthContext: Data saved to cloud successfully');
         } catch (error) {
           console.warn('🔧 AuthContext: Failed to save data to cloud before logout, continuing anyway:', error);
-          // Don't block logout if cloud save fails
         }
       }
       
@@ -707,6 +1000,9 @@ export function AuthProvider({ children }) {
         setLoading(false);
         return { success: false, error: signOutError };
       }
+      
+      // Clear local data (moved here to ensure it happens after potential save)
+      await clearLocalData();
       
       console.log('🔧 AuthContext: authService.signOut() successful. Waiting for auth state change...');
       // The onAuthStateChange event for SIGNED_OUT will handle the rest:
@@ -761,14 +1057,23 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loadUserDataFromCloud = async () => {
-    if (!user) return;
-    
+  const loadUserDataFromCloud = async (userIdToLoad) => {
+    const targetUserId = userIdToLoad || (userRef.current && userRef.current.id);
+
+    if (!targetUserId && !isDemoMode) {
+      console.warn('🔧 AuthContext: No user ID available for loading data from cloud.');
+      return { success: false, error: 'No user ID available for loading data from cloud' };
+    }
+
+    console.log('🔧 AuthContext: Attempting to load user data from cloud for user:', targetUserId);
+    isSyncing.current = true;
+
     try {
-      const { data: remoteData, error } = await dataService.getUserData(user.id);
+      const { data: remoteData, error } = await dataService.getUserData(targetUserId);
       
       if (error) {
         console.error('Error loading user data from cloud:', error);
+        isSyncing.current = false;
         return { success: false, error };
       }
       
@@ -790,12 +1095,15 @@ export function AuthProvider({ children }) {
         secureStorage.set('lastSyncTime', new Date().toISOString());
         console.log('User data loaded from cloud successfully');
         
+        isSyncing.current = false;
         return { success: true, data: remoteData };
       }
       
+      isSyncing.current = false;
       return { success: true, data: {} };
     } catch (error) {
       console.error('Error loading user data from cloud:', error);
+      isSyncing.current = false;
       return { success: false, error };
     }
   };
@@ -867,7 +1175,8 @@ export function AuthProvider({ children }) {
     createBackup,
     getBackups,
     clearAllAuthData,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
+    appRebuildHash
   };
 
   // Set up debug functions for console access
