@@ -9,7 +9,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.5,
         "Trizeps": 0.5
       },
-      "equipment": ["Langhantel", "Flachbank"],
+      "equipment": [
+        "Langhantel",
+        "Flachbank"
+      ],
       "beschreibung": "Grundübung für die Brustmuskulatur.",
       "variationen": [
         {
@@ -20,7 +23,10 @@ export const exerciseDatabase = {
             "Vordere Schulter": 0.5,
             "Trizeps": 0.4
           },
-          "equipment": ["Kurzhanteln", "Flachbank"],
+          "equipment": [
+            "Kurzhanteln",
+            "Flachbank"
+          ],
           "beschreibung": "Erlaubt größeren Bewegungsumfang, etwas weniger Trizeps-Dominanz im Lockout durch freiere Bewegung."
         },
         {
@@ -31,7 +37,10 @@ export const exerciseDatabase = {
             "Brust (innere Anteile)": 0.6,
             "Vordere Schulter": 0.3
           },
-          "equipment": ["Langhantel", "Flachbank"],
+          "equipment": [
+            "Langhantel",
+            "Flachbank"
+          ],
           "beschreibung": "Stärkerer Fokus auf Trizeps und innere Brust."
         },
         {
@@ -42,7 +51,10 @@ export const exerciseDatabase = {
             "Vordere Schulter": 0.4,
             "Trizeps": 0.4
           },
-          "equipment": ["Multipresse", "Flachbank"],
+          "equipment": [
+            "Multipresse",
+            "Flachbank"
+          ],
           "beschreibung": "Geführte Bewegung, weniger Stabilisierungsarbeit."
         },
         {
@@ -53,7 +65,10 @@ export const exerciseDatabase = {
             "Trizeps": 0.7,
             "Vordere Schulter": 0.4
           },
-          "equipment": ["Langhantel oder Kurzhanteln", "Boden"],
+          "equipment": [
+            "Langhantel oder Kurzhanteln",
+            "Boden"
+          ],
           "beschreibung": "Reduzierter Bewegungsumfang, Fokus auf Lockout und Trizeps."
         }
       ]
@@ -66,7 +81,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.6,
         "Trizeps": 0.4
       },
-      "equipment": ["Langhantel", "Schrägbank"],
+      "equipment": [
+        "Langhantel",
+        "Schrägbank"
+      ],
       "beschreibung": "Fokus auf obere Brust."
     },
     {
@@ -77,7 +95,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.6,
         "Trizeps": 0.4
       },
-      "equipment": ["Kurzhanteln", "Schrägbank"],
+      "equipment": [
+        "Kurzhanteln",
+        "Schrägbank"
+      ],
       "beschreibung": "Fokus auf obere Brust mit größerem Bewegungsumfang."
     },
     {
@@ -88,7 +109,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.3,
         "Trizeps": 0.5
       },
-      "equipment": ["Langhantel", "Negativbank"],
+      "equipment": [
+        "Langhantel",
+        "Negativbank"
+      ],
       "beschreibung": "Fokus auf untere Brust."
     },
     {
@@ -99,7 +123,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.3,
         "Trizeps": 0.5
       },
-      "equipment": ["Kurzhanteln", "Negativbank"],
+      "equipment": [
+        "Kurzhanteln",
+        "Negativbank"
+      ],
       "beschreibung": "Fokus auf untere Brust mit größerem Bewegungsumfang."
     },
     {
@@ -110,7 +137,9 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.4,
         "Trizeps": 0.4
       },
-      "equipment": ["Brustpresse-Maschine"],
+      "equipment": [
+        "Brustpresse-Maschine"
+      ],
       "beschreibung": "Geführte Druckbewegung für die Brustmuskulatur. Ideal für Anfänger oder als sichere Alternative zum freien Bankdrücken."
     },
     {
@@ -121,7 +150,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.5,
         "Trizeps": 0.3
       },
-      "equipment": ["Multipresse", "Schrägbank"],
+      "equipment": [
+        "Multipresse",
+        "Schrägbank"
+      ],
       "beschreibung": "Geführte Schrägbankdrücken-Bewegung für die obere Brust."
     },
     {
@@ -132,7 +164,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.2,
         "Trizeps": 0.4
       },
-      "equipment": ["Multipresse", "Negativbank"],
+      "equipment": [
+        "Multipresse",
+        "Negativbank"
+      ],
       "beschreibung": "Geführte Negativbankdrücken-Bewegung für die untere Brust."
     },
     {
@@ -142,7 +177,10 @@ export const exerciseDatabase = {
         "Brust": 1.0,
         "Vordere Schulter": 0.2
       },
-      "equipment": ["Kurzhanteln", "Flach-, Schräg- oder Negativbank"],
+      "equipment": [
+        "Kurzhanteln",
+        "Flach-, Schräg- oder Negativbank"
+      ],
       "beschreibung": "Isolationsübung für die Brust, Vordere Schulter synergistisch, aber nicht primär.",
       "variationen": [
         {
@@ -152,7 +190,9 @@ export const exerciseDatabase = {
             "Brust": 1.0,
             "Vordere Schulter": 0.2
           },
-          "equipment": ["Kabelzugturm"],
+          "equipment": [
+            "Kabelzugturm"
+          ],
           "beschreibung": "Konstanter Widerstand über den gesamten Bewegungsumfang."
         },
         {
@@ -162,7 +202,9 @@ export const exerciseDatabase = {
             "Brust": 1.0,
             "Vordere Schulter": 0.1
           },
-          "equipment": ["Butterfly-Maschine"],
+          "equipment": [
+            "Butterfly-Maschine"
+          ],
           "beschreibung": "Geführte Bewegung."
         },
         {
@@ -172,7 +214,10 @@ export const exerciseDatabase = {
             "Obere Brust": 1.0,
             "Vordere Schulter": 0.3
           },
-          "equipment": ["Kurzhanteln oder Kabelzug", "Schrägbank"],
+          "equipment": [
+            "Kurzhanteln oder Kabelzug",
+            "Schrägbank"
+          ],
           "beschreibung": "Fokus auf obere Brust."
         },
         {
@@ -182,7 +227,10 @@ export const exerciseDatabase = {
             "Untere Brust": 1.0,
             "Vordere Schulter": 0.1
           },
-          "equipment": ["Kurzhanteln oder Kabelzug", "Negativbank"],
+          "equipment": [
+            "Kurzhanteln oder Kabelzug",
+            "Negativbank"
+          ],
           "beschreibung": "Fokus auf untere Brust."
         }
       ]
@@ -196,7 +244,9 @@ export const exerciseDatabase = {
         "Trizeps": 0.5,
         "Rumpf": 0.2
       },
-      "equipment": ["Eigengewicht"],
+      "equipment": [
+        "Eigengewicht"
+      ],
       "beschreibung": "Grundlegende Körpergewichtsübung. Rumpf stabilisierend, geringer direkter Hypertrophie-Reiz im Vgl. zu direkten Rumpfübungen.",
       "variationen": [
         {
@@ -207,7 +257,9 @@ export const exerciseDatabase = {
             "Vordere Schulter": 0.4,
             "Trizeps": 0.3
           },
-          "equipment": ["Eigengewicht"],
+          "equipment": [
+            "Eigengewicht"
+          ],
           "beschreibung": "Fokus auf Brust."
         },
         {
@@ -218,7 +270,9 @@ export const exerciseDatabase = {
             "Brust (innere Anteile)": 0.6,
             "Vordere Schulter": 0.3
           },
-          "equipment": ["Eigengewicht"],
+          "equipment": [
+            "Eigengewicht"
+          ],
           "beschreibung": "Fokus auf Trizeps."
         },
         {
@@ -229,7 +283,10 @@ export const exerciseDatabase = {
             "Vordere Schulter": 0.6,
             "Trizeps": 0.4
           },
-          "equipment": ["Eigengewicht", "Erhöhung für Füße"],
+          "equipment": [
+            "Eigengewicht",
+            "Erhöhung für Füße"
+          ],
           "beschreibung": "Fokus auf obere Brust."
         },
         {
@@ -240,7 +297,10 @@ export const exerciseDatabase = {
             "Vordere Schulter": 0.4,
             "Trizeps": 0.4
           },
-          "equipment": ["Eigengewicht", "Erhöhung für Hände"],
+          "equipment": [
+            "Eigengewicht",
+            "Erhöhung für Hände"
+          ],
           "beschreibung": "Erleichterte Variante."
         }
       ]
@@ -253,16 +313,27 @@ export const exerciseDatabase = {
         "Trizeps": 0.6,
         "Vordere Schulter": 0.4
       },
-      "equipment": ["Dip-Barren"],
+      "equipment": [
+        "Dip-Barren"
+      ],
       "beschreibung": "Oberkörper vorgebeugt für stärkeren Brustfokus."
     },
     {
       "übung_name": "Überzüge",
       "übungstyp": "Je nach Fokus Verbund- oder Isolationsübung",
       "gewichtete_muskelbeteiligung_pro_satz": {
-         "Allgemein": 0.6, "Brust":0.6, "Latissimus":0.4, "Serratus":0.3, "Trizeps":0.2 
+        "Allgemein": 0.6,
+        "Brust": 0.6,
+        "Latissimus": 0.4,
+        "Serratus": 0.3,
+        "Trizeps": 0.2
       },
-      "equipment": ["Kurzhantel", "Langhantel", "SZ-Stange", "Bank"],
+      "equipment": [
+        "Kurzhantel",
+        "Langhantel",
+        "SZ-Stange",
+        "Bank"
+      ],
       "beschreibung": "Trainiert Brust und Latissimus, abhängig von der Ausführung.",
       "variationen": [
         {
@@ -274,7 +345,12 @@ export const exerciseDatabase = {
             "Latissimus dorsi": 0.3,
             "Trizeps (langer Kopf, Dehnung)": 0.2
           },
-          "equipment": ["Kurzhantel", "Langhantel", "SZ-Stange", "Bank"],
+          "equipment": [
+            "Kurzhantel",
+            "Langhantel",
+            "SZ-Stange",
+            "Bank"
+          ],
           "beschreibung": "Ellenbogen leicht gebeugt, Fokus auf Brustdehnung."
         },
         {
@@ -286,7 +362,12 @@ export const exerciseDatabase = {
             "Serratus anterior": 0.4,
             "Trizeps (langer Kopf)": 0.3
           },
-          "equipment": ["Kurzhantel", "Langhantel", "SZ-Stange", "Bank"],
+          "equipment": [
+            "Kurzhantel",
+            "Langhantel",
+            "SZ-Stange",
+            "Bank"
+          ],
           "beschreibung": "Arme gestreckter, Fokus auf Latissimus."
         }
       ]
@@ -303,7 +384,9 @@ export const exerciseDatabase = {
         "Bizeps/Brachialis": 0.4,
         "Unterarme (Griffkraft)": 0.3
       },
-      "equipment": ["Klimmzugstange"],
+      "equipment": [
+        "Klimmzugstange"
+      ],
       "beschreibung": "Grundübung für den oberen Rücken, hier als Obergriff-Variante gewichtet.",
       "variationen": [
         {
@@ -316,7 +399,9 @@ export const exerciseDatabase = {
             "Bizeps/Brachialis": 0.4,
             "Unterarme (Griffkraft)": 0.3
           },
-          "equipment": ["Klimmzugstange"],
+          "equipment": [
+            "Klimmzugstange"
+          ],
           "beschreibung": "Meist schulterbreit oder weiter. Fokus auf Latissimus."
         },
         {
@@ -329,7 +414,9 @@ export const exerciseDatabase = {
             "Rhomboiden": 0.3,
             "Unterarme": 0.3
           },
-          "equipment": ["Klimmzugstange"],
+          "equipment": [
+            "Klimmzugstange"
+          ],
           "beschreibung": "Enger Griff, Handflächen zum Körper. Stärkerer Fokus auf Bizeps und unteren Latissimus."
         }
       ]
@@ -345,7 +432,9 @@ export const exerciseDatabase = {
         "Bizeps/Brachialis": 0.3,
         "Rückenstrecker (isometrisch)": 0.3
       },
-      "equipment": ["Langhantel"],
+      "equipment": [
+        "Langhantel"
+      ],
       "beschreibung": "Grundübung für die Rückendicke, hier als Obergriff-Variante.",
       "variationen": [
         {
@@ -358,7 +447,10 @@ export const exerciseDatabase = {
             "Bizeps/Brachialis": 0.4,
             "Rumpf (Anti-Rotation)": 0.3
           },
-          "equipment": ["Kurzhantel", "Bank"],
+          "equipment": [
+            "Kurzhantel",
+            "Bank"
+          ],
           "beschreibung": "Ermöglicht größeren Bewegungsumfang und unilaterales Training."
         },
         {
@@ -371,33 +463,40 @@ export const exerciseDatabase = {
             "Bizeps/Brachialis": 0.5,
             "Hintere Schulter": 0.3
           },
-          "equipment": ["Kabelzugturm", "Enger Griff"],
+          "equipment": [
+            "Kabelzugturm",
+            "Enger Griff"
+          ],
           "beschreibung": "Fokus auf die inneren und unteren Bereiche des Latissimus."
         },
         {
           "name": "T-Stangen-Rudern",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
+          "gewichtete_muskelbeteiligung_pro_satz": {
             "Latissimus dorsi": 1.0,
             "Trapezmuskel (mittlere/obere)": 0.8,
             "Rhomboiden": 0.7,
             "Hintere Schulter": 0.4,
             "Bizeps/Brachialis": 0.4
           },
-          "equipment": ["T-Stange Vorrichtung oder Maschine"],
+          "equipment": [
+            "T-Stange Vorrichtung oder Maschine"
+          ],
           "beschreibung": "Kann mit verschiedenen Griffen ausgeführt werden."
         },
         {
           "name": "Multipresse Rudern vorgebeugt",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
+          "gewichtete_muskelbeteiligung_pro_satz": {
             "Latissimus dorsi": 1.0,
             "Trapezmuskel": 0.6,
             "Rhomboiden": 0.6,
             "Hintere Schulter": 0.4,
             "Bizeps/Brachialis": 0.3
           },
-          "equipment": ["Multipresse"],
+          "equipment": [
+            "Multipresse"
+          ],
           "beschreibung": "Geführte Bewegung, weniger Stabilisation nötig."
         }
       ]
@@ -411,7 +510,10 @@ export const exerciseDatabase = {
         "Rhomboiden": 0.4,
         "Bizeps/Brachialis": 0.4
       },
-      "equipment": ["Latzugmaschine", "Breiter Latzuggriff"],
+      "equipment": [
+        "Latzugmaschine",
+        "Breiter Latzuggriff"
+      ],
       "beschreibung": "Alternative zu Klimmzügen, um die Rückenbreite zu trainieren."
     },
     {
@@ -424,7 +526,9 @@ export const exerciseDatabase = {
         "Hintere Schulter": 0.5,
         "Bizeps/Brachialis": 0.4
       },
-      "equipment": ["Rudergerät mit Bruststütze"],
+      "equipment": [
+        "Rudergerät mit Bruststütze"
+      ],
       "beschreibung": "Stabilisierte Ruderübung für optimale Rückendicke. Die Bruststütze eliminiert Schwung und ermöglicht perfekte Isolation der Rückenmuskulatur."
     },
     {
@@ -439,7 +543,9 @@ export const exerciseDatabase = {
         "Latissimus dorsi (stabilisierend)": 0.4,
         "Unterarme (Griffkraft)": 0.5
       },
-      "equipment": ["Langhantel"],
+      "equipment": [
+        "Langhantel"
+      ],
       "beschreibung": "Ganzkörperübung mit starkem Fokus auf die gesamte hintere Kette und den Rückenstrecker.",
       "variationen": [
         {
@@ -450,20 +556,25 @@ export const exerciseDatabase = {
             "Gesäß": 0.8,
             "Rückenstrecker (isometrisch/dynamisch)": 0.7
           },
-          "equipment": ["Langhantel", "Kurzhanteln"],
+          "equipment": [
+            "Langhantel",
+            "Kurzhanteln"
+          ],
           "beschreibung": "Fokus auf Beinbeuger und Gesäß, Knie nur leicht gebeugt."
         },
         {
           "name": "Sumo-Kreuzheben",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
+          "gewichtete_muskelbeteiligung_pro_satz": {
             "Gesäß": 1.0,
             "Quadrizeps": 0.8,
             "Adduktoren": 0.7,
             "Rückenstrecker": 0.7,
             "Beinbeuger": 0.5
           },
-          "equipment": ["Langhantel"],
+          "equipment": [
+            "Langhantel"
+          ],
           "beschreibung": "Breiterer Stand, stärkerer Fokus auf Gesäß und Adduktoren."
         }
       ]
@@ -476,7 +587,9 @@ export const exerciseDatabase = {
         "Gesäß": 0.3,
         "Beinbeuger": 0.2
       },
-      "equipment": ["Rückenstrecker-Bank (45° oder horizontal)"],
+      "equipment": [
+        "Rückenstrecker-Bank (45° oder horizontal)"
+      ],
       "beschreibung": "Fokus auf den unteren Rücken (Rückenstrecker).",
       "variationen": [
         {
@@ -487,7 +600,9 @@ export const exerciseDatabase = {
             "Rückenstrecker": 0.4,
             "Beinbeuger": 0.3
           },
-          "equipment": ["Rückenstrecker-Bank (45° oder horizontal)"],
+          "equipment": [
+            "Rückenstrecker-Bank (45° oder horizontal)"
+          ],
           "beschreibung": "Durch Abrunden des oberen Rückens wird der Fokus auf das Gesäß verlagert."
         }
       ]
@@ -500,7 +615,9 @@ export const exerciseDatabase = {
         "Rückenstrecker": 0.8,
         "Gesäß": 0.7
       },
-      "equipment": ["Langhantel"],
+      "equipment": [
+        "Langhantel"
+      ],
       "beschreibung": "Assistierende Übung mit starkem Fokus auf die hintere Kette."
     }
   ],
@@ -515,7 +632,9 @@ export const exerciseDatabase = {
         "Oberer Trapezmuskel": 0.3,
         "Serratus anterior": 0.3
       },
-      "equipment": ["Langhantel"],
+      "equipment": [
+        "Langhantel"
+      ],
       "beschreibung": "Grundübung für die Schultermuskulatur.",
       "variationen": [
         {
@@ -528,30 +647,36 @@ export const exerciseDatabase = {
             "Oberer Trapezmuskel": 0.3,
             "Serratus anterior": 0.4
           },
-          "equipment": ["Kurzhanteln"],
+          "equipment": [
+            "Kurzhanteln"
+          ],
           "beschreibung": "Ermöglicht natürlichere Bewegung und mehr Stabilisation."
         },
         {
           "name": "Arnold Press",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
+          "gewichtete_muskelbeteiligung_pro_satz": {
             "Vordere Schulter": 1.0,
             "Seitliche Schulter": 0.8,
             "Hintere Schulter (durch Rotation)": 0.3,
             "Trizeps": 0.5
           },
-          "equipment": ["Kurzhanteln"],
+          "equipment": [
+            "Kurzhanteln"
+          ],
           "beschreibung": "Mit Rotation für Beanspruchung aller Schulteranteile."
         },
         {
           "name": "Multipresse Überkopfdrücken",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
+          "gewichtete_muskelbeteiligung_pro_satz": {
             "Vordere Schulter": 1.0,
             "Seitliche Schulter": 0.5,
             "Trizeps": 0.6
           },
-          "equipment": ["Multipresse"],
+          "equipment": [
+            "Multipresse"
+          ],
           "beschreibung": "Geführte Bewegung."
         }
       ]
@@ -562,7 +687,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Seitliche Schulter": 1.0
       },
-      "equipment": ["Kurzhanteln"],
+      "equipment": [
+        "Kurzhanteln"
+      ],
       "beschreibung": "Isolationsübung für die seitliche Schulter. Andere Muskeln minimal oder nur stabilisierend.",
       "variationen": [
         {
@@ -571,7 +698,10 @@ export const exerciseDatabase = {
           "gewichtete_muskelbeteiligung_pro_satz": {
             "Seitliche Schulter": 1.0
           },
-          "equipment": ["Kabelzugturm", "Einzelgriff"],
+          "equipment": [
+            "Kabelzugturm",
+            "Einzelgriff"
+          ],
           "beschreibung": "Konstanter Widerstand."
         }
       ]
@@ -583,7 +713,11 @@ export const exerciseDatabase = {
         "Vordere Schulter": 1.0,
         "Obere Brust": 0.2
       },
-      "equipment": ["Kurzhanteln", "Langhantelscheibe", "Kabelzug"],
+      "equipment": [
+        "Kurzhanteln",
+        "Langhantelscheibe",
+        "Kabelzug"
+      ],
       "beschreibung": "Isolationsübung für die vordere Schulter."
     },
     {
@@ -594,16 +728,27 @@ export const exerciseDatabase = {
         "Trapezmuskel (mittlere Anteile)": 0.4,
         "Rhomboiden": 0.3
       },
-      "equipment": ["Kurzhanteln", "Kabelzug", "Butterfly-Reverse-Maschine"],
+      "equipment": [
+        "Kurzhanteln",
+        "Kabelzug",
+        "Butterfly-Reverse-Maschine"
+      ],
       "beschreibung": "Isolationsübung für die hintere Schulter."
     },
     {
       "übung_name": "Aufrechtes Rudern",
       "übungstyp": "Verbundübung",
       "gewichtete_muskelbeteiligung_pro_satz": {
-        "Seitliche Schulter": 0.8, "Oberer Trapezmuskel": 0.5, "Bizeps": 0.2
+        "Seitliche Schulter": 0.8,
+        "Oberer Trapezmuskel": 0.5,
+        "Bizeps": 0.2
       },
-      "equipment": ["Langhantel", "SZ-Stange", "Kurzhanteln", "Kabelzug"],
+      "equipment": [
+        "Langhantel",
+        "SZ-Stange",
+        "Kurzhanteln",
+        "Kabelzug"
+      ],
       "beschreibung": "Mit Isolationscharakter für seitliche Schulter/Trapez, hier mit breitem Griff für Schulterfokus.",
       "variationen": [
         {
@@ -614,7 +759,12 @@ export const exerciseDatabase = {
             "Seitliche Schulter": 0.4,
             "Bizeps": 0.3
           },
-          "equipment": ["Langhantel", "SZ-Stange", "Kurzhanteln", "Kabelzug"],
+          "equipment": [
+            "Langhantel",
+            "SZ-Stange",
+            "Kurzhanteln",
+            "Kabelzug"
+          ],
           "beschreibung": "Enger Griff für stärkeren Fokus auf den Trapezmuskel."
         }
       ]
@@ -628,7 +778,9 @@ export const exerciseDatabase = {
         "Rhomboiden": 0.6,
         "Rotatorenmanschette (Außenrotatoren)": 0.5
       },
-      "equipment": ["Kabelzug mit Seilgriff oder Band"],
+      "equipment": [
+        "Kabelzug mit Seilgriff oder Band"
+      ],
       "beschreibung": "Fokussiert auf hintere Schulter und Rotatorenmanschette, wichtig für Schultergesundheit."
     },
     {
@@ -637,7 +789,12 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Oberer Trapezmuskel": 1.0
       },
-      "equipment": ["Langhantel", "Kurzhanteln", "Multipresse", "Trap-Bar"],
+      "equipment": [
+        "Langhantel",
+        "Kurzhanteln",
+        "Multipresse",
+        "Trap-Bar"
+      ],
       "beschreibung": "Isolationsübung für den oberen Trapezmuskel."
     }
   ],
@@ -650,7 +807,10 @@ export const exerciseDatabase = {
         "Brachialis": 0.6,
         "Brachioradialis": 0.3
       },
-      "equipment": ["Langhantel", "SZ-Stange"],
+      "equipment": [
+        "Langhantel",
+        "SZ-Stange"
+      ],
       "beschreibung": "Grundübung für den Bizepsaufbau."
     },
     {
@@ -661,7 +821,9 @@ export const exerciseDatabase = {
         "Brachialis": 0.5,
         "Brachioradialis": 0.2
       },
-      "equipment": ["Kurzhanteln"],
+      "equipment": [
+        "Kurzhanteln"
+      ],
       "beschreibung": "Mit Auswärtsdrehung (Supination) für volle Bizepsstimulation.",
       "variationen": [
         {
@@ -672,25 +834,35 @@ export const exerciseDatabase = {
             "Brachioradialis": 0.7,
             "Bizeps (langer Kopf)": 0.5
           },
-          "equipment": ["Kurzhanteln"],
+          "equipment": [
+            "Kurzhanteln"
+          ],
           "beschreibung": "Neutralgriff, Fokus auf Brachialis und Brachioradialis."
         },
         {
           "name": "Konzentrationscurls",
           "übungstyp": "Isolationsübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
-            "Bizeps": 1.0, "Brachialis": 0.4
+          "gewichtete_muskelbeteiligung_pro_satz": {
+            "Bizeps": 1.0,
+            "Brachialis": 0.4
           },
-          "equipment": ["Kurzhantel", "Bank"],
+          "equipment": [
+            "Kurzhantel",
+            "Bank"
+          ],
           "beschreibung": "Sitzend, Arm am Oberschenkel abgestützt, für maximale Isolation."
         },
         {
           "name": "Schrägbank-Kurzhantelcurls",
           "übungstyp": "Isolationsübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
-            "Bizeps (langer Kopf)": 1.0, "Brachialis": 0.5
+          "gewichtete_muskelbeteiligung_pro_satz": {
+            "Bizeps (langer Kopf)": 1.0,
+            "Brachialis": 0.5
           },
-          "equipment": ["Kurzhanteln", "Schrägbank"],
+          "equipment": [
+            "Kurzhanteln",
+            "Schrägbank"
+          ],
           "beschreibung": "Für maximale Dehnung und Stimulation des langen Bizepskopfes."
         }
       ]
@@ -702,7 +874,11 @@ export const exerciseDatabase = {
         "Bizeps (kurzer Kopf)": 1.0,
         "Brachialis": 0.7
       },
-      "equipment": ["Scottcurl-Bank", "SZ-Stange", "Kurzhanteln"],
+      "equipment": [
+        "Scottcurl-Bank",
+        "SZ-Stange",
+        "Kurzhanteln"
+      ],
       "beschreibung": "Isoliert den Bizeps, besonders den kurzen Kopf."
     },
     {
@@ -712,7 +888,10 @@ export const exerciseDatabase = {
         "Bizeps": 1.0,
         "Brachialis": 0.5
       },
-      "equipment": ["Kabelzugturm", "Stange, Seilgriff oder Einzelgriffe"],
+      "equipment": [
+        "Kabelzugturm",
+        "Stange, Seilgriff oder Einzelgriffe"
+      ],
       "beschreibung": "Konstanter Widerstand durch den Kabelzug."
     }
   ],
@@ -725,7 +904,11 @@ export const exerciseDatabase = {
         "Brust (innere Anteile)": 0.6,
         "Vordere Schulter": 0.3
       },
-      "equipment": ["Langhantel", "Flachbank", "Multipresse"],
+      "equipment": [
+        "Langhantel",
+        "Flachbank",
+        "Multipresse"
+      ],
       "beschreibung": "Grundübung für den Trizeps, assistierend für Brust und Schulter."
     },
     {
@@ -736,7 +919,10 @@ export const exerciseDatabase = {
         "Vordere Schulter": 0.4,
         "Brust (untere Anteile)": 0.4
       },
-      "equipment": ["Dip-Barren", "Bank (für Bank-Dips)"],
+      "equipment": [
+        "Dip-Barren",
+        "Bank (für Bank-Dips)"
+      ],
       "beschreibung": "Oberkörper aufrecht für stärkeren Trizepsfokus."
     },
     {
@@ -746,7 +932,10 @@ export const exerciseDatabase = {
         "Trizeps (lateraler & medialer Kopf)": 1.0,
         "Trizeps (langer Kopf)": 0.3
       },
-      "equipment": ["Kabelzugturm", "Stange oder V-Griff"],
+      "equipment": [
+        "Kabelzugturm",
+        "Stange oder V-Griff"
+      ],
       "beschreibung": "Isoliert den lateralen und medialen Kopf des Trizeps.",
       "variationen": [
         {
@@ -757,7 +946,10 @@ export const exerciseDatabase = {
             "Trizeps (medialer Kopf)": 0.8,
             "Trizeps (langer Kopf)": 0.4
           },
-          "equipment": ["Kabelzugturm", "Seilgriff"],
+          "equipment": [
+            "Kabelzugturm",
+            "Seilgriff"
+          ],
           "beschreibung": "Stärkerer Fokus auf den lateralen Kopf und erlaubt mehr Ellenbogenbewegung."
         }
       ]
@@ -769,7 +961,12 @@ export const exerciseDatabase = {
         "Trizeps (langer & medialer Kopf)": 1.0,
         "Trizeps (lateraler Kopf)": 0.7
       },
-      "equipment": ["Langhantel", "SZ-Stange", "Kurzhanteln", "Bank"],
+      "equipment": [
+        "Langhantel",
+        "SZ-Stange",
+        "Kurzhanteln",
+        "Bank"
+      ],
       "beschreibung": "Effektive Übung für alle Trizepsköpfe, besonders den langen und medialen.",
       "variationen": [
         {
@@ -779,7 +976,11 @@ export const exerciseDatabase = {
             "Trizeps (langer Kopf)": 1.0,
             "Trizeps (medialer/lateraler Kopf)": 0.6
           },
-          "equipment": ["Kurzhantel", "SZ-Stange", "Kabelzug"],
+          "equipment": [
+            "Kurzhantel",
+            "SZ-Stange",
+            "Kabelzug"
+          ],
           "beschreibung": "Starker Fokus auf den langen Trizepskopf durch die Überkopfposition."
         }
       ]
@@ -790,7 +991,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Trizeps (lateraler Kopf)": 1.0
       },
-      "equipment": ["Kurzhanteln"],
+      "equipment": [
+        "Kurzhanteln"
+      ],
       "beschreibung": "Isoliert den lateralen Kopf des Trizeps. Andere Köpfe weniger stark beteiligt."
     }
   ],
@@ -805,7 +1008,10 @@ export const exerciseDatabase = {
         "Rückenstrecker (isometrisch)": 0.3,
         "Beinbeuger (synergistisch)": 0.2
       },
-      "equipment": ["Langhantel", "Kniebeugenständer"],
+      "equipment": [
+        "Langhantel",
+        "Kniebeugenständer"
+      ],
       "beschreibung": "Grundübung für die Beine, Fokus auf Quadrizeps.",
       "variationen": [
         {
@@ -818,7 +1024,10 @@ export const exerciseDatabase = {
             "Adduktoren": 0.4,
             "Rückenstrecker (isometrisch)": 0.4
           },
-          "equipment": ["Langhantel", "Kniebeugenständer"],
+          "equipment": [
+            "Langhantel",
+            "Kniebeugenständer"
+          ],
           "beschreibung": "Stärkerer Fokus auf die hintere Kette (Gesäß, Beinbeuger)."
         },
         {
@@ -830,25 +1039,36 @@ export const exerciseDatabase = {
             "Oberer Rücken/Rumpf (Anti-Flexion)": 0.4,
             "Adduktoren": 0.3
           },
-          "equipment": ["Langhantel", "Kniebeugenständer"],
+          "equipment": [
+            "Langhantel",
+            "Kniebeugenständer"
+          ],
           "beschreibung": "Starker Fokus auf Quadrizeps und Rumpfstabilität."
         },
         {
           "name": "Bulgarische Split-Kniebeugen",
           "übungstyp": "Verbundübung (unilateral)",
-           "gewichtete_muskelbeteiligung_pro_satz": {
-            "Quadrizeps (Standbein)": 1.0, "Gesäß (Standbein)": 0.9, "Adduktoren": 0.4
+          "gewichtete_muskelbeteiligung_pro_satz": {
+            "Quadrizeps (Standbein)": 1.0,
+            "Gesäß (Standbein)": 0.9,
+            "Adduktoren": 0.4
           },
-          "equipment": ["Kurzhanteln oder Langhantel", "Bank"],
+          "equipment": [
+            "Kurzhanteln oder Langhantel",
+            "Bank"
+          ],
           "beschreibung": "Unilaterale Übung, stark für Quadrizeps und Gesäß des Standbeins."
         },
         {
           "name": "Multipresse Kniebeugen",
           "übungstyp": "Verbundübung",
-           "gewichtete_muskelbeteiligung_pro_satz": {
-            "Quadrizeps": 1.0, "Gesäß": 0.6
+          "gewichtete_muskelbeteiligung_pro_satz": {
+            "Quadrizeps": 1.0,
+            "Gesäß": 0.6
           },
-          "equipment": ["Multipresse"],
+          "equipment": [
+            "Multipresse"
+          ],
           "beschreibung": "Geführte Bewegung, verschiedene Fußpositionen möglich."
         }
       ]
@@ -862,7 +1082,9 @@ export const exerciseDatabase = {
         "Adduktoren": 0.3,
         "Beinbeuger": 0.2
       },
-      "equipment": ["Beinpresse-Maschine"],
+      "equipment": [
+        "Beinpresse-Maschine"
+      ],
       "beschreibung": "Grundübung für die Beine an der Maschine, hier mit mittlerer Fußstellung.",
       "variationen": [
         {
@@ -874,7 +1096,9 @@ export const exerciseDatabase = {
             "Adduktoren": 0.5,
             "Quadrizeps": 0.5
           },
-          "equipment": ["Beinpresse-Maschine"],
+          "equipment": [
+            "Beinpresse-Maschine"
+          ],
           "beschreibung": "Stärkerer Fokus auf Gesäß und Beinbeuger."
         }
       ]
@@ -885,7 +1109,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Quadrizeps": 1.0
       },
-      "equipment": ["Beinstrecker-Maschine"],
+      "equipment": [
+        "Beinstrecker-Maschine"
+      ],
       "beschreibung": "Isolationsübung für den Quadrizeps."
     },
     {
@@ -897,7 +1123,11 @@ export const exerciseDatabase = {
         "Beinbeuger (synergistisch)": 0.3,
         "Adduktoren (Stabilisation)": 0.3
       },
-      "equipment": ["Eigengewicht", "Kurzhanteln", "Langhantel"],
+      "equipment": [
+        "Eigengewicht",
+        "Kurzhanteln",
+        "Langhantel"
+      ],
       "beschreibung": "Unilaterale Übung für die gesamte Beinmuskulatur."
     },
     {
@@ -908,7 +1138,11 @@ export const exerciseDatabase = {
         "Gesäß": 0.8,
         "Rückenstrecker (isometrisch/dynamisch)": 0.7
       },
-      "equipment": ["Langhantel", "Kurzhanteln", "Multipresse"],
+      "equipment": [
+        "Langhantel",
+        "Kurzhanteln",
+        "Multipresse"
+      ],
       "beschreibung": "Fokus auf die hintere Oberschenkelmuskulatur und das Gesäß."
     },
     {
@@ -919,7 +1153,10 @@ export const exerciseDatabase = {
         "Gesäß (obere Anteile)": 0.5,
         "Rückenstrecker": 0.6
       },
-      "equipment": ["Langhantel", "Kurzhanteln"],
+      "equipment": [
+        "Langhantel",
+        "Kurzhanteln"
+      ],
       "beschreibung": "Starker Fokus auf Dehnung der Beinbeuger."
     },
     {
@@ -928,7 +1165,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Beinbeuger": 1.0
       },
-      "equipment": ["Beinbeuger-Maschine"],
+      "equipment": [
+        "Beinbeuger-Maschine"
+      ],
       "beschreibung": "Isolationsübung für die Beinbeuger.",
       "variationen": [
         {
@@ -939,7 +1178,9 @@ export const exerciseDatabase = {
             "Gesäß": 0.4,
             "Rückenstrecker": 0.3
           },
-          "equipment": ["GHR-Maschine oder Fixierung für Füße"],
+          "equipment": [
+            "GHR-Maschine oder Fixierung für Füße"
+          ],
           "beschreibung": "Sehr anspruchsvolle Körpergewichtsübung für die Beinbeuger."
         }
       ]
@@ -952,7 +1193,11 @@ export const exerciseDatabase = {
         "Beinbeuger": 0.4,
         "Rückenstrecker (stabilisierend)": 0.2
       },
-      "equipment": ["Eigengewicht", "Langhantel", "Bank"],
+      "equipment": [
+        "Eigengewicht",
+        "Langhantel",
+        "Bank"
+      ],
       "beschreibung": "Fokussierte Übung für das Gesäß."
     },
     {
@@ -964,7 +1209,9 @@ export const exerciseDatabase = {
         "Rückenstrecker": 0.6,
         "Rumpf (Anti-Flexion)": 0.5
       },
-      "equipment": ["Kettlebell"],
+      "equipment": [
+        "Kettlebell"
+      ],
       "beschreibung": "Explosive Ganzkörperübung mit Fokus auf die Hüftextension."
     },
     {
@@ -973,7 +1220,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Gesäß (Medius/Minimus)": 1.0
       },
-      "equipment": ["Abduktorenmaschine"],
+      "equipment": [
+        "Abduktorenmaschine"
+      ],
       "beschreibung": "Isoliert die äußere Hüftmuskulatur."
     },
     {
@@ -982,7 +1231,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Adduktoren": 1.0
       },
-      "equipment": ["Adduktorenmaschine"],
+      "equipment": [
+        "Adduktorenmaschine"
+      ],
       "beschreibung": "Isoliert die innere Oberschenkelmuskulatur."
     },
     {
@@ -992,7 +1243,11 @@ export const exerciseDatabase = {
         "Gastrocnemius": 1.0,
         "Soleus": 0.2
       },
-      "equipment": ["Wadenhebe-Maschine stehend", "Multipresse", "Langhantel"],
+      "equipment": [
+        "Wadenhebe-Maschine stehend",
+        "Multipresse",
+        "Langhantel"
+      ],
       "beschreibung": "Isoliert den zweiköpfigen Wadenmuskel."
     },
     {
@@ -1001,7 +1256,9 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Soleus": 1.0
       },
-      "equipment": ["Wadenhebe-Maschine sitzend"],
+      "equipment": [
+        "Wadenhebe-Maschine sitzend"
+      ],
       "beschreibung": "Isoliert den Schollenmuskel."
     }
   ],
@@ -1012,7 +1269,10 @@ export const exerciseDatabase = {
       "gewichtete_muskelbeteiligung_pro_satz": {
         "Gerade Bauchmuskulatur (obere Anteile)": 1.0
       },
-      "equipment": ["Eigengewicht", "Matte"],
+      "equipment": [
+        "Eigengewicht",
+        "Matte"
+      ],
       "beschreibung": "Grundübung für die oberen Bauchmuskeln."
     },
     {
@@ -1023,16 +1283,23 @@ export const exerciseDatabase = {
         "Hüftbeuger": 0.7,
         "Schräge Bauchmuskeln (stabilisierend)": 0.2
       },
-      "equipment": ["Eigengewicht", "Matte"],
+      "equipment": [
+        "Eigengewicht",
+        "Matte"
+      ],
       "beschreibung": "Fokus auf untere Bauchmuskeln, Hüftbeuger oft stark beteiligt.",
       "variationen": [
         {
           "name": "Hängendes Beinheben",
           "übungstyp": "Isolationsübung",
           "gewichtete_muskelbeteiligung_pro_satz": {
-             "Gerade Bauchmuskulatur (untere Anteile)": 1.0, "Hüftbeuger": 0.6
+            "Gerade Bauchmuskulatur (untere Anteile)": 1.0,
+            "Hüftbeuger": 0.6
           },
-          "equipment": ["Klimmzugstange", "Beinhebe-Station"],
+          "equipment": [
+            "Klimmzugstange",
+            "Beinhebe-Station"
+          ],
           "beschreibung": "Anspruchsvollere Variante für die unteren Bauchmuskeln."
         },
         {
@@ -1043,7 +1310,9 @@ export const exerciseDatabase = {
             "Hüftbeuger": 0.5,
             "Latissimus (exzentrisch)": 0.4
           },
-          "equipment": ["Stabile Bank oder Fixierung"],
+          "equipment": [
+            "Stabile Bank oder Fixierung"
+          ],
           "beschreibung": "Sehr anspruchsvolle Ganzkörper-Rumpfübung."
         }
       ]
@@ -1057,7 +1326,10 @@ export const exerciseDatabase = {
         "Rückenstrecker": 0.3,
         "Schräge Bauchmuskeln": 0.3
       },
-      "equipment": ["Eigengewicht", "Matte"],
+      "equipment": [
+        "Eigengewicht",
+        "Matte"
+      ],
       "beschreibung": "Isometrische Übung für den gesamten Rumpf. Hypertrophie-Fokus gering, da isometrisch und oft lange Dauer. Quere Bauchmuskulatur für Stabilisation."
     },
     {
@@ -1067,7 +1339,11 @@ export const exerciseDatabase = {
         "Schräge Bauchmuskeln": 1.0,
         "Gerade Bauchmuskulatur": 0.4
       },
-      "equipment": ["Eigengewicht", "Medizinball", "Kurzhantel"],
+      "equipment": [
+        "Eigengewicht",
+        "Medizinball",
+        "Kurzhantel"
+      ],
       "beschreibung": "Fokus auf Rotation und schräge Bauchmuskeln."
     },
     {
@@ -1078,7 +1354,11 @@ export const exerciseDatabase = {
         "Quere Bauchmuskulatur": 0.5,
         "Gerade Bauchmuskulatur (stabilisierend)": 0.3
       },
-      "equipment": ["Kabelzug", "Medizinball", "Widerstandsband"],
+      "equipment": [
+        "Kabelzug",
+        "Medizinball",
+        "Widerstandsband"
+      ],
       "beschreibung": "Funktionale Übung für Rumpfrotation und -stabilität."
     },
     {
@@ -1090,7 +1370,9 @@ export const exerciseDatabase = {
         "Latissimus dorsi (exzentrisch)": 0.5,
         "Schultern (stabilisierend)": 0.3
       },
-      "equipment": ["Bauchroller (Ab Wheel)"],
+      "equipment": [
+        "Bauchroller (Ab Wheel)"
+      ],
       "beschreibung": "Sehr anspruchsvolle Übung für den gesamten vorderen Rumpf."
     },
     {
@@ -1101,7 +1383,9 @@ export const exerciseDatabase = {
         "Gerade Bauchmuskulatur (untere Anteile)": 0.8,
         "Hüftbeuger": 0.6
       },
-      "equipment": ["Klimmzugstange"],
+      "equipment": [
+        "Klimmzugstange"
+      ],
       "beschreibung": "Sehr anspruchsvolle Übung für schräge und untere Bauchmuskeln."
     },
     {
@@ -1111,7 +1395,10 @@ export const exerciseDatabase = {
         "Schräge Bauchmuskeln (ipsilateral)": 1.0,
         "Quadratus Lumborum (ipsilateral)": 0.7
       },
-      "equipment": ["Kurzhantel", "Kabelzug"],
+      "equipment": [
+        "Kurzhantel",
+        "Kabelzug"
+      ],
       "beschreibung": "Isoliert die seitliche Rumpfmuskulatur."
     }
   ]

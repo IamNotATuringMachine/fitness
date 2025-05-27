@@ -80,8 +80,10 @@ const SyncNotification = () => {
     };
 
     const handleSafeDataSynced = (event) => {
-      const { updatedKeys } = event.detail;
+      // const { updatedKeys } = event.detail; // Commented out as the whole block is disabled
       
+      // MODIFIED: Disable this notification entirely
+      /*
       if (updatedKeys && updatedKeys.length > 0) {
         const displayMessage = `📥 Data updated: ${updatedKeys.join(', ')}`;
         
@@ -96,6 +98,8 @@ const SyncNotification = () => {
           }, 300);
         }, 3000);
       }
+      */
+      // console.log('SyncNotification: 'safeDataSynced' event received, notification intentionally suppressed.', event.detail);
     };
 
     const handleLoginSyncFailed = (event) => {

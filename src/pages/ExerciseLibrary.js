@@ -354,7 +354,10 @@ const ExerciseLibrary = () => {
   }, [exercises, searchTerm, sortBy, sortOrder]);
 
   const handleExerciseClick = (exercise) => {
-    setEditingExercise({ ...exercise });
+    setEditingExercise({ 
+      ...exercise, 
+      muscleInvolvement: exercise.gewichtete_muskelbeteiligung_pro_satz || {}
+    });
     setShowEditModal(true);
   };
 
